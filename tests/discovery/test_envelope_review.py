@@ -23,7 +23,7 @@ META = REPO / "data_analysis" / "Nasa_data" / "meta"
 PARQUET = META / "inv_envelope_text.parquet"
 REVIEW_CSV = META / "inv_envelope_text_review.csv"
 REVIEW_MD = REPO / "docs" / "evidence" / "envelope_review.md"
-PY = "/home/halil/miniconda3/envs/nasa_hack/bin/python"
+PY = sys.executable          # never a machine-specific path (CI runs on another machine)
 
 REVIEW_COLUMNS = ["row", "psi_id", "field", "decision", "context", "corrected_field",
                   "corrected_value_text", "corrected_value_min_std", "corrected_value_max_std", "note"]

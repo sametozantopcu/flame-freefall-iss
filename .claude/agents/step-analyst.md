@@ -20,7 +20,8 @@ You are the independent analyst and test author for ONE step of the plans in `pl
 - Do NOT read or edit the implementation module(s) named in your task, and do NOT edit any file except your test file.
 - Never modify `data_analysis/Nasa_data/raw/` or `csv/`. Never print or read `.env`.
 - Missing values are never 0. Keep psi_id / source_file / source_row traceability in mind.
-- Python: `/home/halil/miniconda3/envs/nasa_hack/bin/python`; run tests with `-m pytest <file> -q -p no:cacheprovider` from the repo root.
+- Python for running commands YOURSELF (never inside test code): `/home/halil/miniconda3/envs/nasa_hack/bin/python`; run tests with `-m pytest <file> -q -p no:cacheprovider` from the repo root.
   Your tests are EXPECTED to fail if the feature is not implemented yet — that is fine; make sure they fail for the right reason
   (missing column / wrong value), not because of a bug in the test itself.
+- Tests must run on any machine (CI is Ubuntu): never hard-code local paths (no `/home/...`, no conda env path); use `sys.executable` for subprocesses and paths relative to the repo.
 - Write test docstrings/comments in English; your report in Turkish.

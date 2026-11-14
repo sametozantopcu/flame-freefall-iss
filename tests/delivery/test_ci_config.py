@@ -78,3 +78,15 @@ def test_first_green_run_is_recorded():
     assert re.search(r"https://github\.com/[\w.-]+/[\w.-]+/actions/runs/\d+", text)
     assert re.search(r"`[0-9a-f]{40}`", text)
     assert re.search(r"\d+ passed, \d+ skipped", text) and " failed" not in text
+
+
+def test_no_machine_specific_paths_in_code_or_tests():
+    """A hard-coded local path (e.g. a conda env python) passes locally and breaks CI; it happened once (8c6d006)."""
+    bad = re.compile(r"/home/[A-Za-z0-9_.-]+/|miniconda|/tmp/claude")
+    hits = []
+    for folder in ("src", "tests", "app"):
+        for f in (REPO / folder).rglob("*.py"):
+            for i, line in enumerate(f.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+                if bad.search(line) and "bad = re.compile" not in line:
+                    hits.append(f"{f.relative_to(REPO)}:{i}: {line.strip()[:80]}")
+    assert not hits, "machine-specific paths:\n" + "\n".join(hits)
