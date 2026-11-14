@@ -4,7 +4,17 @@
 
 A dark-themed web demo that explores NASA Physical Sciences Informatics (PSI) combustion experiments (24 investigations) for lunar and Martian habitat fire safety. It ranks investigations by habitat relevance, predicts FLEX droplet burning rate for known fuel/diluent combinations, and turns data findings into equipment insights. Visitors can also ask an LLM questions grounded in the site's cards. This is a prototype.
 
-Screens: Explore (M1), Scenario (M2), Equipment (M3), and the FlameSense concept (no device was built).
+Screens: Explore (M1), Scenario (M2, with a material risk index panel), Equipment (M3), and the FlameSense concept (no device was built).
+
+## Features
+
+- Habitat-relevance ranking of 24 PSI investigations with an explainable score.
+- FLEX burn-rate what-if (Ridge, GroupKFold) for known fuel/diluent combinations.
+- Material risk index on the Scenario screen: a relative 0-100 scale over 11 materials, with six components, each labelled data / literature / assumption / mixed and linked to its DOI, plus a separate "Flammable at this condition?" reading.
+- Equipment insight cards with DOI citations.
+- Live Q&A: the server builds a short context (cards, ranking, risk, FlameSense), retries once on timeout/429/503 and falls back to the static cards.
+
+Risk engine by sametozantopcu, ported from PR #7 onto the Feature Store.
 
 ## Quick start
 
@@ -26,6 +36,8 @@ The build script reads the cleaned tables in `data_analysis/Nasa_data/analysis/d
 python -m pytest tests -m "not needs_raw and not slow and not live" -q
 node scripts/smoke_explore_scenario.mjs
 node scripts/smoke_equipment.mjs
+node scripts/smoke_risk.mjs
+bash scripts/e2e_check.sh
 ```
 
 CI (`.github/workflows/tests.yml`) runs the same commands. Validation is always group-based (GroupKFold).
@@ -34,6 +46,7 @@ CI (`.github/workflows/tests.yml`) runs the same commands. Validation is always 
 
 - No partial-gravity (lunar/Mars g) data exists; only flight (microgravity) and ground (1 g). No partial-g prediction is claimed. Habitat relevance is based on atmosphere overlap (O2, pressure, flow), not gravity.
 - The model is valid only for fuel/diluent combinations present in FLEX (heptane/methanol with N2/CO2/He). Out-of-group GroupKFold scores: fuel x diluent R2 about 0.37 (6 groups, n=258), year R2 about 0.57 (3 groups). Small n, high variance.
+- The risk index is a relative scale (0 = 21 % O2 at 1 atm, 100 = 40 % O2), not an absolute probability of fire. Component weights and the 35/65 level thresholds are uncalibrated assumptions; only the PMMA limiting O2 comes from ISS/BASS-II data. Gravity and flow velocity are not inputs. The spread component is a very weak fit (R2 0.044, exponent 0.454, n=74; a Feature Store refit gives 0.319, n=66). An index of 0 does not mean "will not burn"; see the separate flammability reading.
 - The habitat score is a prioritization aid, not a safety certification.
 - Missing values are kept as null, never filled with 0.
 - FlameSense is a concept only.

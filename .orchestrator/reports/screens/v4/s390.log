@@ -1,0 +1,6 @@
+[669496:669496:1115/011323.750177:INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:247] No machine level policy manager exists.
+[669538:669538:1115/011323.790509:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.
+[669496:669496:1115/011324.111562:WARNING:components/dbus/xdg/portal.cc:161] Failed to register with org.freedesktop.host.portal.Registry
+442310 bytes written to file .orchestrator/reports/screens/v4/senaryo_390_full.png
+[669541:669562:1115/011325.580098:WARNING:net/extras/sqlite/sqlite_persistent_store_backend_base.cc:182] Failed to post task from FlushAndNotifyInBackground@net/extras/sqlite/sqlite_persistent_store_backend_base.cc:232 to client_task_runner_.
+[669541:669562:1115/011325.580252:WARNING:net/extras/sqlite/sqlite_persistent_store_backend_base.cc:182] Failed to post task from FlushAndNotifyInBackground@net/extras/sqlite/sqlite_persistent_store_backend_base.cc:232 to client_task_runner_.

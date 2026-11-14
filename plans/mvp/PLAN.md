@@ -5,11 +5,13 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 ## Durum
 
-- İlerleme: 9/9 (S1–S9 tamam)
-- Son güncelleme: 2026-11-14 (S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
+- İlerleme: 17/17 (S1–S9, L1, L2, R1–R6 tamam)
+- Son güncelleme: 2026-11-15 (R1 tamam: PR #7 risk motoru `src/risk/` altına Feature Store üzerinden taşındı; önceki: S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
 - Güncelleme (2026-11-14): `design/` v4 (FlameSense koyu render + render_top) uygulandı; Explore taşma/çakışma düzeltildi (liste kendi içinde kaydırılır); Explore (ölçülmüş noktalar, Feature Store) ve Scenario (FLEX tepki eğrisi) grafikleri gerçek veriyle geri geldi.
-- Sıradaki adım: yok (plan bitti)
-- Açık sorunlar: EVREN LLM ucu yanıt vermiyor (ReadTimeout) → fallback çalışıyor; push kimlik bilgisi bekliyor; tarayıcıda görsel doğrulama yapılmadı; bkz. "Açık noktalar".
+- Güncelleme (2026-11-15, L2): canlı soru-cevap varlık eşlemeli bağlam (4500 karakter), sentez istemi, LRU önbellek; açık: canlı yanıt süresi 10–100 s oynuyor (model gecikmesi).
+- Sıradaki adım: yok; `risk-engine` dalından `main`'e PR (insan incelemesi)
+- Açık sorunlar (R1): `Anchors.from_feature_store` yayılma (PSI-39) katsayısını gömülü değerle aynı üretemiyor — Feature Store `cfi` tablosu deney tablosunun 87 satırından 79'unu içerir; k_hot'lu satır 66 (gömülü n=74), üs 0.319 (gömülü 0.454, fark 0.135 > orijinal ±0.10 tolerans). Fark `tests/risk/test_engine.py::test_spread_embedded_vs_refit_difference_is_reported` ile ölçülüp raporlanır; karar (2026-11-15, orkestratör): indekste gömülü 0.454 değişmeden kullanılır; provenance kaydı ikisini de taşır. Diğerleri (yanma süresi n=175, tutuşma n=333, PMMA n=98/93) gömülü değerlerle aynı.
+- Açık sorunlar (R6, bilinen sınırlar): risk indeksi kalibre değil (ağırlıklar, 35/65 eşikleri, 0.35 basınç üssü varsayım); yalnız PMMA sınırı BASS-II verisinden; yayılma bileşeni R² 0.044 (gömülü 0.454, n=74; Feature Store 0.319, n=66); yerçekimi ve akış girdi değil; indeks 0 "yanmaz" demek değil; canlı LLM yanıtı ~26 s sürebilir (zaman aşımı 45 s, bir yeniden deneme), uç yanıt vermezse kartlara düşer; 390 px ekran görüntüsünde sohbet düğmesi sabit konumlu olduğundan tam boy görüntüde metnin üstüne biner (yalnız görüntü artefaktı); push/PR durumu için PR gövdesine bakın.
 
 ## Kritik yol ve paralellik
 
@@ -123,3 +125,62 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 4. Habitat skoru ağırlıkları (S3) ve aralıklar (O2 17–35 %, 56–101 kPa) planlayıcı varsayımıdır; kullanıcı bunları onaylamalı mı?
 5. Eski `plans/README.md` kural 9 ile CLAUDE.md çelişkisi S9'da otomatik commit lehine çözülür (karar 11).
 6. Resmi 2026 teslim kuralları doğrulanmadı; karar 12 uyarınca sonra sorulacak.
+
+## Faz 2 — LLM sağlamlaştırma ve risk motoru
+
+Onaylı plan: LLM soru-cevabını sağlamlaştır ve kapatılmış PR #7'deki (yazar: sametozantopcu) risk motorunu mevcut statik siteye, dayanakları etiketlenmiş biçimde ekle. Çalışma dalı `risk-engine`; mevcut dosyalarda yalnızca ekleme yapılır (FLEX modeli, sıralama, kartlar, FlameSense değişmez). PR #7'den alınmayanlar: `.gitignore` değişikliği, 19 dosyadaki docstring çevirileri, `csv/` doğrudan okuma. Sıra: L1 bağımsız; R1 → R2 → R3 → R4; R5, L1 ve R3'ten sonra; R6 en sonda.
+
+- [x] **L1 · LLM soru-cevabını sağlamlaştır**
+  ✔ 2026-11-15 · pytest tests/delivery/test_server.py -q; node --check app/ui/ask.js; bash scripts/e2e_check.sh; 3 canlı soru · 13 passed, E2E OK, 3/3 mode:llm
+  - Amaç: Bağlam üst sınırı 5000 → ~2000 karakter; zaman aşımı/429/503/bağlantı hatasında bir yeniden deneme; hata türü ve süre loglanır (anahtar/başlık asla); yanıta `reason` eklenir; sohbet kutusu fallback'te kısa durum notu gösterir.
+  - Dosyalar: `app/server.py`, `app/ui/ask.js`, `tests/delivery/test_server.py`.
+  - Kabul testi: `$PY -m pytest tests/delivery/test_server.py -q` (mock'lu: yeniden deneme, `reason`, anahtar sızmaması) + 3 ardışık canlı soru, en az 2/3 `mode: llm`.
+  - Bağımlılık: yok (R1 ile paralel).
+
+- [x] **R1 · Risk motorunu kurallara uygun taşı**
+  ✔ 2026-11-15 · `$PY -m pytest tests/risk -q && $PY -m pytest tests/data_layer/test_no_raw_access.py -q` · tests/risk 63 passed, 0 skipped; test_no_raw_access 39 passed; hızlı set 692 passed, 6 deselected
+  - Amaç: `app/core/risk_engine.py` (PR #7) formül, katsayı, profil, ağırlık ve eşikler DEĞİŞTİRİLMEDEN `src/risk/` altına taşınır; `Anchors.from_csv` yerine `Anchors.from_feature_store(con=None)` aynı yeniden uyumu Feature Store tabloları üzerinden yapar (`refreshed_fields` hangi katsayıların yenilendiğini söyler).
+  - Dosyalar: `src/risk/__init__.py`, `src/risk/engine.py`, `tests/risk/__init__.py`, `tests/risk/test_engine.py`.
+  - Kabul testi: `$PY -m pytest tests/risk -q` (skip yok) ve `$PY -m pytest tests/data_layer/test_no_raw_access.py -q`.
+  - Bağımlılık: yok.
+
+- [x] **R2 · Dayanak (provenance) katmanı**
+  ✔ 2026-11-15 · `$PY -m pytest tests/risk -q` · 76 passed, 0 skipped (13 yeni provenance testi); yayılma kaydı embedded (0.454, n=74, R²=0.044) + feature_store_refit (0.319, n=66, R²=0.030), refit_differs=true
+  - Amaç: Her bileşen için makinece okunur etiket `data`/`literature`/`assumption`, kaynak PSI kimliği + DOI (Metadata katmanı), n, R². Bilinenler: tutuşma olasılığı (veri, n=333), yanma süresi (veri, n=175, R²=0.40), yayılma (veri, n=74 gömülü / 66 Feature Store, R²≈0.04), tutuşma gecikmesi (literatür varsayımı), malzeme eşikleri (yalnız PMMA veri), ağırlıklar ve 35/65 eşikleri (varsayım, kalibre değil). Motor tutarsızlıkları için ek uyarı anahtarları (indeks formülüne dokunmadan): `above_threshold_low_index`, `clipped_below_reference`. `src/` metin üretmez: yalnız anahtar + sayı.
+  - Dosyalar: `src/risk/provenance.py`, `tests/risk/test_provenance.py`.
+  - Kabul testi: `$PY -m pytest tests/risk/test_provenance.py -q`.
+  - Bağımlılık: R1.
+
+- [x] **R3 · Veri köprüsüne risk dışa aktarımı**
+  ✔ 2026-11-15 · `$PY scripts/build_site_data.py && node --check app/data/site_data.js && $PY -m pytest tests/delivery/test_build_site_data.py -q` · 16 passed; smoke_explore_scenario, smoke_equipment, e2e_check OK; hızlı set 716 passed, 6 deselected; ızgara 51 O2 × 14 basınç × 11 malzeme = 7854 hücre, site_data.js 83.7 KB → 811.6 KB
+  - Amaç: `window.FF.site.risk`: malzeme listesi, eşikler/ağırlıklar, provenance tablosu ve ön hesaplanmış ızgara (O2 15–40 %, 0,5 adım × basınç 50–101,3 kPa, 5 kPa adım + 56,5 ve 70,3 kPa hazır ayarları × tüm malzemeler); hücre başına indeks, seviye, 6 bileşen, tutuşma olasılığı, yanma süresi, marj, uyarılar. Deterministik, NaN yok, eksikler `null`; mevcut `site` anahtarları değişmez.
+  - Dosyalar: `scripts/build_site_data.py`, `tests/delivery/test_build_site_data.py` (yalnız ekleme).
+  - Kabul testi: `$PY scripts/build_site_data.py && node --check app/data/site_data.js && $PY -m pytest tests/delivery/test_build_site_data.py -q`.
+  - Bağımlılık: R2.
+
+- [x] **R4 · Scenario ekranına risk paneli**
+  ✔ 2026-11-15 · `node scripts/smoke_risk.mjs && node scripts/smoke_explore_scenario.mjs && node scripts/smoke_equipment.mjs && bash scripts/e2e_check.sh && $PY -m pytest tests -m "not needs_raw and not slow and not live" -q` · smoke_risk 72 ok / ALL PASSED (ızgara hücresi == ekran, 11 malzeme × 4 basınç × 5 O2), E2E OK, hızlı set 721 passed; 1440/1024/390 ekran görüntüleri `.orchestrator/reports/screens/v3/`
+  - Amaç: FLEX bölümünün altında ayrı "Material risk index — relative, heuristic" bölümü: malzeme, O2 %, basınç girdileri; indeks + seviye; 6 bileşen çubuğu (data/literature/assumption rozetli); O2'ye göre risk eğrisi; uyarılar. Kalıcı dürüstlük notu (bağıl ölçek, kalibre edilmemiş ağırlıklar, yerçekimi/akış girdi değil, FLEX'ten bağımsız). `FF.site.risk` yoksa "data not built" mesajı.
+  - Dosyalar: `app/views/senaryo.js`, `app/i18n.js` (yalnız `risk.*` anahtarları), `scripts/smoke_risk.mjs`.
+  - Kabul testi: `node scripts/smoke_risk.mjs` (ızgara okuma, ISS taban ≈ 0/Low, PMMA 40 % → Critical, panel yokken çökme yok) + `node scripts/smoke_explore_scenario.mjs && node scripts/smoke_equipment.mjs`.
+  - Bağımlılık: R3.
+
+- [x] **R5 · Soru-cevap bağlamına risk**
+  ✔ 2026-11-15 · `$PY -m pytest tests/delivery/test_server.py -q` + canlı `/api/ask` "What is FlameSense?" · 18 passed, skip yok; canlı: mode=llm, 26 s, sources=[flamesense_concept]
+  - Amaç: Soru risk/malzeme içeriyorsa bağlama risk özetinden (provenance dahil) kısa bir parça eklenir; L1'in 2000 karakter sınırı içinde.
+  - Dosyalar: `app/server.py`, `tests/delivery/test_server.py`.
+  - Kabul testi: `$PY -m pytest tests/delivery/test_server.py -q` (risk sorusunda bağlamda risk parçası var, sınır aşılmıyor).
+  - Bağımlılık: L1, R3.
+
+- [x] **R6 · Doküman, uçtan uca, PR**
+  ✔ 2026-11-15 · `bash scripts/e2e_check.sh && $PY -m pytest tests -m "not needs_raw and not slow and not live" -q -rs` · E2E OK; 721 passed, 0 skipped, 6 deselected; build deterministik (`git status app/data` temiz); 3 smoke ALL PASSED; ekran görüntüleri `.orchestrator/reports/screens/v4/`, konsol hatası 0
+  - Amaç: `MVP_SPEC.md`, `Architecture.md`, `README.md` (Limits), `plans/mvp/PLAN.md`, `plans/README.md` risk modülü, dayanak tablosu, PR #7 ve yazarına atıfla güncellenir; `scripts/e2e_check.sh`'e risk smoke eklenir; dört ekranın ekran görüntüsü alınıp çakışma/konsol hatası kontrol edilir; `risk-engine` dalından `main`'e PR.
+  - Dosyalar: `MVP_SPEC.md`, `Architecture.md`, `README.md`, `plans/mvp/PLAN.md`, `plans/README.md`, `scripts/e2e_check.sh`.
+  - Kabul testi: `bash scripts/e2e_check.sh` (E2E OK) + `$PY -m pytest tests -m "not needs_raw and not slow and not live" -q`.
+  - Bağımlılık: R4, R5, L1.
+
+- [x] **L2 · Soru-cevap kalitesi: varlık eşleme, sentez istemi, önbellek**
+  ✔ 2026-11-15 · `$PY -m pytest tests/delivery -q; $PY -m pytest tests -m "not needs_raw and not slow and not live" -q; node --check app/ui/ask.js; 3 smoke; bash scripts/e2e_check.sh` · delivery 64 passed; hızlı set 740 passed, 0 skipped; smoke ALL PASSED; E2E OK; 6 canlı soru 6/6 mode:llm
+  - Amaç: Soruda adı/PSI kimliği geçen araştırmalar (yazım toleranslı, veriden türetilmiş) tam kayıtla (özet `qa_text`, koşul zarfı, skor, kart, seri) bağlama girer; risk/sıralama/FlameSense/model parçaları yalnız ilgiliyse; alt puan eşiği; bağlam 4500 karakter; sentez istemi (prototype cümlesi yok); `max_tokens` 500, `LLM_TIMEOUT` 60 sn, 64 kayıtlık LRU önbellek (yalnız `mode: llm`), ret/boş cevap loglanır.
+  - Dosyalar: `app/server.py`, `app/ui/ask.js` (yalnız iptal süresi 130 sn), `scripts/build_site_data.py` (+`qa_text` ≤1200, yalnız ekleme), `tests/delivery/test_server.py`, `tests/delivery/test_build_site_data.py`, `app/data/site_data.{js,json}`.
+  - Bağımlılık: L1, R5.

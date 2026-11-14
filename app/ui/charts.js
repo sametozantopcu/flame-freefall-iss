@@ -202,6 +202,34 @@
     return plate(svgOpen(F.W, F.H, o.aria) + out + '</svg>', F.W / F.H, true);
   }
 
+  /** Risk index against O2 at one pressure (grid row, no interpolation). o: {curve: [[o2, index], ...] (null index
+   *  skipped), xr: [lo, hi], cur: {x, y}, levels: [{y, label}], limit: {x, label} | null, xLabel, yLabel, aria}.
+   *  Level lines and the limiting-O2 line are dashed references; the lit element is the curve with its selected point. */
+  function riskCurve(o) {
+    var F = frame({ x0: o.xr[0], x1: o.xr[1], y0: 0, y1: 100 }, o.xLabel, o.yLabel), out = F.axes, segs = [], seg = [];
+    (o.levels || []).forEach(function (lv) {
+      out += line('guide', F.M.l, F.fy(lv.y), F.W - F.M.r, F.fy(lv.y))
+        + '<text class="end" x="' + (F.W - F.M.r - 4) + '" y="' + f(F.fy(lv.y) - 6) + '">' + esc(lv.label) + '</text>';
+    });
+    if (o.limit) {
+      var lx = F.fx(o.limit.x), right = lx < (F.M.l + F.W - F.M.r) / 2;
+      out += line('guide', lx, F.fy(100), lx, F.fy(0))
+        + '<text class="ink' + (right ? '' : ' end') + '" x="' + f(lx + (right ? 8 : -8)) + '" y="' + f(F.fy(100) + 16) + '">' + esc(o.limit.label) + '</text>';
+    }
+    o.curve.forEach(function (p) {
+      if (p[1] === null || p[1] === undefined) { if (seg.length) segs.push(seg); seg = []; } else seg.push(p);
+    });
+    if (seg.length) segs.push(seg);
+    var d = segs.map(function (sg) { return 'M' + sg.map(function (p) { return f(F.fx(p[0])) + ' ' + f(F.fy(p[1])); }).join(' L'); }).join(' ');
+    if (d) out += lit(function (st) { return '<path class="lit risk-curve" d="' + d + '" style="' + st + '"></path>'; }, 3, [[14, 0.05], [8, 0.1], [5, 0.18]]);
+    if (o.cur && o.cur.y !== null && o.cur.y !== undefined) {
+      var x = F.fx(o.cur.x), y = F.fy(o.cur.y);
+      out += line('guide', F.M.l, y, x, y) + line('guide', x, y, x, F.H - F.M.b)
+        + circle('pulse', x, y, 6) + litDot(x, y, 6, [[26, 0.05], [14, 0.12]]);
+    }
+    return plate(svgOpen(F.W, F.H, o.aria) + out + '</svg>', F.W / F.H, true);
+  }
+
   /** Ekipman: iki çizgi. Işıklı olan mikro yerçekimi; Dünya aynı ışığın ikinci hali (opacity-alt).
    *  İki sınır arasındaki fark taralı bir alanla ve altındaki parantezle gösterilir. */
   function limitLines(opts) {
@@ -259,5 +287,5 @@
   }
 
   FF.ui = FF.ui || {};
-  FF.ui.charts = { measured: measured, response: response, limitCurve: limitCurve, scenarioPoint: scenarioPoint, limitLines: limitLines, ring: ring };
+  FF.ui.charts = { measured: measured, response: response, riskCurve: riskCurve, limitCurve: limitCurve, scenarioPoint: scenarioPoint, limitLines: limitLines, ring: ring };
 })(window.FF = window.FF || {});

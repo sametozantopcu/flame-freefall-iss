@@ -91,7 +91,7 @@
   function ask(q) {
     if (location.protocol === 'file:' || typeof fetch !== 'function') return Promise.reject(new Error('no server'));
     var ctl = typeof AbortController === 'function' ? new AbortController() : null;
-    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 100000) : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 130000) : null;
     return fetch('/api/ask', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q }), signal: ctl ? ctl.signal : undefined
@@ -112,6 +112,7 @@
     try { sessionStorage.setItem(STORE, JSON.stringify(thread.filter(function (t) { return t.res; }).slice(-30))); } catch (e) { /* storage off: keep in memory only */ }
   }
 
+  // (server: LLM_TIMEOUT 60 s x 2 attempts + wait -> abort at 130 s)
   // The fallback answer is one long line ("LLM unavailable - ... a | b | c"); split it into readable paragraphs.
   function paragraphs(res) {
     var text = String(res.answer || '');
@@ -217,7 +218,8 @@
           links.forEach(function (l) { src.appendChild(l); });
           a.appendChild(src);
         }
-        a.appendChild(el('p', 'chat-tag', t.note || (t.res.mode === 'llm' ? NOTE_LLM : NOTE_FALLBACK)));
+        var fb = t.res.reason ? 'Live model unavailable (' + String(t.res.reason).slice(0, 24) + ') \u2014 showing matching cards. Prototype; not for safety decisions.' : NOTE_FALLBACK;
+        a.appendChild(el('p', 'chat-tag', t.note || (t.res.mode === 'llm' ? NOTE_LLM : fb)));
       }
       turn.appendChild(a);
       return turn;

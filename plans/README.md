@@ -6,7 +6,7 @@ Tek aktif plan: [mvp/PLAN.md](mvp/PLAN.md). Kapsam ve kabul ölçütleri: [../MV
 
 | Plan | Dosya | İlerleme |
 |---|---|---|
-| MVP | [mvp](mvp/PLAN.md) | PLAN.md **Durum** bölümüne bakın (9/9 tamam) |
+| MVP | [mvp](mvp/PLAN.md) | PLAN.md **Durum** bölümüne bakın (17/17 tamam; Faz 2: L1, L2, R1–R6 tamam, PR hazır) |
 
 ## Kurallar
 

@@ -1,0 +1,4 @@
+[668376:668376:1115/011255.880703:INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:247] No machine level policy manager exists.
+[668418:668418:1115/011255.907957:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.
+[668376:668376:1115/011256.176203:WARNING:components/dbus/xdg/portal.cc:161] Failed to register with org.freedesktop.host.portal.Registry
+181973 bytes written to file .orchestrator/reports/screens/v4/senaryo_1440.png

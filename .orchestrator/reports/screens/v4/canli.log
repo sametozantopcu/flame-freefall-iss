@@ -1,0 +1,4 @@
+[668952:668952:1115/011258.581738:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.
+[668909:668909:1115/011258.590937:INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:247] No machine level policy manager exists.
+[668909:668909:1115/011258.800435:WARNING:components/dbus/xdg/portal.cc:161] Failed to register with org.freedesktop.host.portal.Registry
+199433 bytes written to file .orchestrator/reports/screens/v4/canli_1440.png

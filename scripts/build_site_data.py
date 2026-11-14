@@ -17,6 +17,13 @@ Contract (consumed by S6/S7/S8):
   series           {psi_id: {table, x{col,label,unit}, y{...}, n_total, n_plotted, source_files[], points[[x,y,source_row,file_idx]],
                     reference|null}} measured points only (rows with x or y missing are omitted, not zero-filled)
   flamesense       {concept: true, built: false, dimensions_mm, mcu, sensors[], images[]}
+  risk             precomputed material risk grid (plan R3; engine: src/risk, PR #7 by sametozantopcu, embedded coefficients):
+                    {source{pr, author}, reference{o2_pct, pressure_kpa}, weights{}, level_thresholds{medium, critical},
+                    materials[{key,label,inert,threshold_o2_pct_ref,basis}], provenance[] (src.risk.provenance table),
+                    axes{o2_pct[], pressure_kpa[]}, presets[{key,o2_pct,pressure_kpa}], warning_keys[],
+                    fields[] (cell field names; component_keys give the 6 `components.<key>` entries),
+                    grid{<material_key>: [pressure_index][o2_index] -> [values in `fields` order]}}
+                    cell `warnings` = list of integer indexes into `warning_keys`. Missing = null, never 0.
 """
 from __future__ import annotations
 
@@ -36,9 +43,12 @@ from src.discovery import ranking  # noqa: E402
 from src.discovery.envelope import envelope_from_tables  # noqa: E402
 from src.insight.cards import load_cards  # noqa: E402
 from src.prediction.flex_model import fit_flex  # noqa: E402
+from src.risk import engine as risk_engine  # noqa: E402
+from src.risk import provenance as risk_prov  # noqa: E402
 
 OUT = REPO / "app" / "data"
 SUMMARY_CHARS = 420
+QA_TEXT_CHARS = 1200  # longer text used only by the live Q&A context (never shown on screens)
 
 FLAMESENSE = {
     "concept": True, "built": False, "dimensions_mm": [140, 90, 45], "mcu": "ESP32-S3",
@@ -107,6 +117,16 @@ def _summary(title, objective) -> str | None:
     return s if len(s) <= SUMMARY_CHARS else s[:SUMMARY_CHARS].rsplit(" ", 1)[0] + "..."
 
 
+def _qa_text(objective, approach) -> str | None:
+    """Objective + approach from the Metadata table, whitespace-normalised and cut at <= QA_TEXT_CHARS (Q&A only)."""
+    parts = [f"{lab}: {' '.join(v.split())}" for lab, v in (("Objective", objective), ("Approach", approach))
+             if isinstance(v, str) and v.strip()]
+    if not parts:
+        return None
+    s = " ".join(parts)
+    return s if len(s) <= QA_TEXT_CHARS else s[:QA_TEXT_CHARS - 3].rsplit(" ", 1)[0] + "..."
+
+
 # Measured (x, y) series for the Explore chart, read from the Feature Store only. One pair per investigation that has a
 # table with a meaningful pair; others get no chart. `clean_nonpos`: values <= 0 in that column are treated as missing
 # (same rule as flex_model._clean for p_atm). Rows where x or y is missing are left out (never filled with 0).
@@ -139,6 +159,52 @@ def _series() -> dict:
     return out
 
 
+RISK_O2_AXIS = [round(15.0 + 0.5 * i, 1) for i in range(51)]                      # 15.0 .. 40.0
+RISK_PRESSURE_AXIS = sorted({*(float(p) for p in range(50, 101, 5)), 56.5, 70.3, 101.3})
+RISK_PRESETS = [
+    {"key": "iss", "o2_pct": 21.0, "pressure_kpa": 101.3},
+    {"key": "exploration", "o2_pct": 34.0, "pressure_kpa": 56.5},
+    {"key": "iss_reduced", "o2_pct": 26.5, "pressure_kpa": 70.3},
+    {"key": "ceiling", "o2_pct": 40.0, "pressure_kpa": 101.3},
+]
+RISK_WARNING_KEYS = ["material_fallback", "outside_envelope", "pressure_outside_envelope", "below_threshold",
+                     "inert_material", "ignition_saturated", "above_threshold_low_index", "clipped_below_reference"]
+RISK_FIELDS = ["risk_index", "risk_level", *(f"components.{k}" for k in risk_engine.RISK_WEIGHTS),
+               "ignition_probability", "burn_time_s", "ignition_delay_s", "spread_coefficient_mm2_s", "pO2_atm",
+               "threshold_o2_pct", "margin_pct", "warnings"]
+
+
+def _risk_cell(a) -> list:
+    codes = [*a.warnings, *risk_prov.extra_warnings(a)]
+    return [a.risk_index, a.risk_level, *(a.components[k] for k in risk_engine.RISK_WEIGHTS),
+            a.ignition_probability, a.burn_time_s, a.ignition_delay_s, a.spread_coefficient_mm2_s, a.pO2_atm,
+            a.threshold_o2_pct, a.margin_pct, sorted(RISK_WARNING_KEYS.index(c) for c in codes)]
+
+
+def _risk() -> dict:
+    """Precomputed risk grid: the static site cannot run Python, so every slider position is a table lookup.
+    Engine runs with its embedded coefficients (Anchors.default()), default `extrapolate=True`."""
+    anchors = risk_engine.Anchors.default()
+    eng = risk_engine.RiskEngine(anchors)
+    for pr in RISK_PRESETS:   # presets must sit exactly on the axes (lookups, no interpolation)
+        assert pr["o2_pct"] in RISK_O2_AXIS and pr["pressure_kpa"] in RISK_PRESSURE_AXIS, pr
+    grid = {
+        key: [[_risk_cell(eng.assess(o2, p, key)) for o2 in RISK_O2_AXIS] for p in RISK_PRESSURE_AXIS]
+        for key in risk_engine.MATERIAL_PROFILES
+    }
+    return {
+        "source": {"pr": 7, "author": "sametozantopcu"},
+        "reference": {"o2_pct": risk_engine.REF_O2_PCT, "pressure_kpa": risk_engine.REF_PRESSURE_KPA},
+        "weights": dict(eng.weights), "level_thresholds": dict(eng.thresholds),
+        "materials": [{"key": k, "label": p.label, "inert": p.inert, "threshold_o2_pct_ref": p.threshold_o2_pct,
+                       "basis": risk_prov.material_basis(k)} for k, p in risk_engine.MATERIAL_PROFILES.items()],
+        "provenance": risk_prov.build_provenance(anchors, refit=True),
+        "axes": {"o2_pct": RISK_O2_AXIS, "pressure_kpa": RISK_PRESSURE_AXIS},
+        "presets": RISK_PRESETS, "warning_keys": RISK_WARNING_KEYS,
+        "component_keys": list(risk_engine.RISK_WEIGHTS), "fields": RISK_FIELDS, "grid": grid,
+    }
+
+
 def build() -> dict:
     inv = pd.read_parquet(metadata.META_DIR / "investigations.parquet")
     text = pd.read_parquet(metadata.META_DIR / "inv_envelope_text.parquet")
@@ -156,6 +222,7 @@ def build() -> dict:
             "components": {k: r[k] for k in ranking.COMPONENTS},
             "n_components_known": r["n_components_known"], "missing_components": list(r["missing_components"]),
             "rationale": r["rationale"], "summary": _summary(title, a["objective"]),
+            "qa_text": _qa_text(a["objective"], a["approach"]),
             "envelope": _envelope(r["psi_id"], env, text),
         })
     model = fit_flex()
@@ -174,6 +241,7 @@ def build() -> dict:
                       "Valid only for fuel/diluent combinations present in FLEX data."],
         },
         "investigations": rows, "model": model, "cards": cards, "flamesense": FLAMESENSE, "series": _series(),
+        "risk": _risk(),
     }
     return clean(site)
 
@@ -181,7 +249,12 @@ def build() -> dict:
 def main() -> None:
     site = build()
     OUT.mkdir(parents=True, exist_ok=True)
+    # The risk grid is ~8k small arrays: written compactly (indent=1 would put every number on its own line).
+    grid = site["risk"]["grid"]
+    site["risk"]["grid"] = "@@RISK_GRID@@"
     body = json.dumps(site, ensure_ascii=False, sort_keys=True, indent=1, allow_nan=False)
+    body = body.replace('"@@RISK_GRID@@"', json.dumps(grid, sort_keys=True, separators=(",", ":"), allow_nan=False))
+    site["risk"]["grid"] = grid
     (OUT / "site_data.json").write_text(body + "\n", encoding="utf-8")
     (OUT / "site_data.js").write_text(
         f"window.FF = window.FF || {{}};\nwindow.FF.site = {body};\nwindow.FF.siteData = window.FF.site;\n", encoding="utf-8")

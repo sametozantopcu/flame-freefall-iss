@@ -15,10 +15,15 @@ ham veri (raw/, csv/; git'te yok)
        -> src/discovery  zarflar ve açıklanabilir habitat-ilgi sıralaması (ranking.py)
        -> src/prediction FLEX Ridge modeli, GroupKFold doğrulama (flex_model.py)
        -> src/insight    sayı kaynaklı bulgu kartları (cards.py)
+       -> src/risk       malzeme risk indeksi (engine.py) ve dayanak tablosu (provenance.py)
   -> scripts/build_site_data.py -> app/data/site_data.json + site_data.js
   -> app/                statik site (tarayıcıda tahmin ve sıralama gösterimi)
   -> app/server.py       statik dosyalar + POST /api/ask (LLM; anahtar yoksa fallback)
 ```
+
+Risk akışı: `src/risk` -> `scripts/build_site_data.py` -> `site.risk` (malzemeler, ağırlıklar, eşikler, provenance, ön hesaplanmış ızgara) -> `app/views/senaryo.js` Scenario risk paneli. Panel hesap yapmaz, ızgaradan okur (en yakın hücre; interpolasyon yok).
+
+`/api/ask` bağlamı (`app/server.py`, en fazla 2000 karakter): en alakalı investigation ve kart öğeleri; soruya göre sıralama özeti, risk özeti (malzeme/indeks/dayanak) ve FlameSense konsept parçası; her zaman sınırlar satırı. LLM çağrısı çağrı başına `LLM_TIMEOUT` (varsayılan 45 s) ile yapılır; zaman aşımı, 429/503 veya bağlantı hatasında bir kez yeniden denenir; hata türü ve süre loglanır (anahtar asla), yanıtta `reason` döner. Başarısızlıkta statik kartlara düşülür.
 
 Modüller veriyi yalnızca Feature Store veya Metadata katmanından okur; veri okuyan tek ek yer build betiğidir. LLM anahtarı (`.env` içinde `API_KEY`) yalnızca sunucu tarafında okunur.
 
@@ -30,6 +35,7 @@ Modüller veriyi yalnızca Feature Store veya Metadata katmanından okur; veri o
 | `src/discovery/` | zarf çıkarımı, sıralama, LLM istemcisi |
 | `src/prediction/` | modelleme veri setleri, kartlar, FLEX modeli |
 | `src/insight/` | ekipman bulgu kartları |
+| `src/risk/` | malzeme risk motoru (PR #7'den taşındı) ve dayanak (provenance) tablosu |
 | `scripts/` | `build_site_data.py`, JS smoke testleri (`smoke_*.mjs`) |
 | `app/` | `index.html`, `app.js`, `i18n.js`, `core/`, `views/`, `ui/`, `data/`, `assets/`, `server.py` |
 | `tests/` | pytest (data_layer, discovery, prediction, insight, delivery) |
@@ -43,6 +49,7 @@ Modüller veriyi yalnızca Feature Store veya Metadata katmanından okur; veri o
 | M1 Explore | `app/views/kesif.js` | `src/discovery` sıralaması |
 | M2 Scenario | `app/views/senaryo.js` | `src/prediction` FLEX modeli (`app/core/physics.js` ile) |
 | M3 Equipment | `app/views/ekipman.js` | `src/insight` kartları |
+| Risk indeksi | `app/views/senaryo.js` (alt bölüm) | `src/risk` (`site.risk` ızgarası) |
 | FlameSense | `app/views/canli.js` | yalnızca konsept; cihaz yapılmadı |
 
 ## Değişmez kurallar
@@ -58,6 +65,7 @@ Modüller veriyi yalnızca Feature Store veya Metadata katmanından okur; veri o
 - Tahmin yalnızca FLEX'te bilinen yakıt/seyreltici kombinasyonları için geçerlidir. Grup-dışı (GroupKFold) skorlar: fuel×diluent R²≈0.37 (6 grup, n=258), year R²≈0.57 (3 grup); n küçük, varyans yüksek.
 - Habitat skoru önceliklendirme yardımcısıdır, güvenlik sertifikasyonu değildir.
 - LLM cevapları yalnızca verilen kartlara dayanır.
+- Risk indeksi bağıl bir ölçektir (0 = %21 O2 / 1 atm, 100 = %40 O2), mutlak olasılık değildir; ağırlıklar ve 35/65 eşikleri kalibre edilmemiş varsayımdır; yalnız PMMA sınırı BASS-II verisindendir; yerçekimi ve akış girdi değildir; yayılma bileşeni R² 0.044 (Feature Store yeniden uyumunda üs 0.319, n=66; gömülü 0.454, n=74). İndeks 0 "yanmaz" demek değildir. Ayrıntı: [MVP_SPEC.md](MVP_SPEC.md) bölüm 7.
 
 ## Atıf
 
