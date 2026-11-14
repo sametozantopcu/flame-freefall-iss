@@ -5,10 +5,11 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 ## Durum
 
-- İlerleme: 9/9 (S1–S9 tamam)
-- Son güncelleme: 2026-11-14 (S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
+- İlerleme: 10/16 (S1–S9 ve R1 tamam; Faz 2: L1, R2–R6 bekliyor)
+- Son güncelleme: 2026-11-15 (R1 tamam: PR #7 risk motoru `src/risk/` altına Feature Store üzerinden taşındı; önceki: S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
 - Güncelleme (2026-11-14): `design/` v4 (FlameSense koyu render + render_top) uygulandı; Explore taşma/çakışma düzeltildi (liste kendi içinde kaydırılır); Explore (ölçülmüş noktalar, Feature Store) ve Scenario (FLEX tepki eğrisi) grafikleri gerçek veriyle geri geldi.
-- Sıradaki adım: yok (plan bitti)
+- Sıradaki adım: Faz 2 — L1 (bağımsız) ve R2 (R1'e bağlı); sıra R2 → R3 → R4, R5 ve R6 sonda
+- Açık sorunlar (R1): `Anchors.from_feature_store` yayılma (PSI-39) katsayısını gömülü değerle aynı üretemiyor — Feature Store `cfi` tablosu deney tablosunun 87 satırından 79'unu içerir; k_hot'lu satır 66 (gömülü n=74), üs 0.319 (gömülü 0.454, fark 0.135 > orijinal ±0.10 tolerans). Fark `tests/risk/test_engine.py::test_spread_embedded_vs_refit_difference_is_reported` ile ölçülüp raporlanır; karar bekliyor. Diğerleri (yanma süresi n=175, tutuşma n=333, PMMA n=98/93) gömülü değerlerle aynı.
 - Açık sorunlar: EVREN LLM ucu yanıt vermiyor (ReadTimeout) → fallback çalışıyor; push kimlik bilgisi bekliyor; tarayıcıda görsel doğrulama yapılmadı; bkz. "Açık noktalar".
 
 ## Kritik yol ve paralellik
@@ -123,3 +124,50 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 4. Habitat skoru ağırlıkları (S3) ve aralıklar (O2 17–35 %, 56–101 kPa) planlayıcı varsayımıdır; kullanıcı bunları onaylamalı mı?
 5. Eski `plans/README.md` kural 9 ile CLAUDE.md çelişkisi S9'da otomatik commit lehine çözülür (karar 11).
 6. Resmi 2026 teslim kuralları doğrulanmadı; karar 12 uyarınca sonra sorulacak.
+
+## Faz 2 — LLM sağlamlaştırma ve risk motoru
+
+Onaylı plan: LLM soru-cevabını sağlamlaştır ve kapatılmış PR #7'deki (yazar: sametozantopcu) risk motorunu mevcut statik siteye, dayanakları etiketlenmiş biçimde ekle. Çalışma dalı `risk-engine`; mevcut dosyalarda yalnızca ekleme yapılır (FLEX modeli, sıralama, kartlar, FlameSense değişmez). PR #7'den alınmayanlar: `.gitignore` değişikliği, 19 dosyadaki docstring çevirileri, `csv/` doğrudan okuma. Sıra: L1 bağımsız; R1 → R2 → R3 → R4; R5, L1 ve R3'ten sonra; R6 en sonda.
+
+- [ ] **L1 · LLM soru-cevabını sağlamlaştır**
+  - Amaç: Bağlam üst sınırı 5000 → ~2000 karakter; zaman aşımı/429/503/bağlantı hatasında bir yeniden deneme; hata türü ve süre loglanır (anahtar/başlık asla); yanıta `reason` eklenir; sohbet kutusu fallback'te kısa durum notu gösterir.
+  - Dosyalar: `app/server.py`, `app/ui/ask.js`, `tests/delivery/test_server.py`.
+  - Kabul testi: `$PY -m pytest tests/delivery/test_server.py -q` (mock'lu: yeniden deneme, `reason`, anahtar sızmaması) + 3 ardışık canlı soru, en az 2/3 `mode: llm`.
+  - Bağımlılık: yok (R1 ile paralel).
+
+- [x] **R1 · Risk motorunu kurallara uygun taşı**
+  ✔ 2026-11-15 · `$PY -m pytest tests/risk -q && $PY -m pytest tests/data_layer/test_no_raw_access.py -q` · tests/risk 63 passed, 0 skipped; test_no_raw_access 39 passed; hızlı set 692 passed, 6 deselected
+  - Amaç: `app/core/risk_engine.py` (PR #7) formül, katsayı, profil, ağırlık ve eşikler DEĞİŞTİRİLMEDEN `src/risk/` altına taşınır; `Anchors.from_csv` yerine `Anchors.from_feature_store(con=None)` aynı yeniden uyumu Feature Store tabloları üzerinden yapar (`refreshed_fields` hangi katsayıların yenilendiğini söyler).
+  - Dosyalar: `src/risk/__init__.py`, `src/risk/engine.py`, `tests/risk/__init__.py`, `tests/risk/test_engine.py`.
+  - Kabul testi: `$PY -m pytest tests/risk -q` (skip yok) ve `$PY -m pytest tests/data_layer/test_no_raw_access.py -q`.
+  - Bağımlılık: yok.
+
+- [ ] **R2 · Dayanak (provenance) katmanı**
+  - Amaç: Her bileşen için makinece okunur etiket `data`/`literature`/`assumption`, kaynak PSI kimliği + DOI (Metadata katmanı), n, R². Bilinenler: tutuşma olasılığı (veri, n=333), yanma süresi (veri, n=175, R²=0.40), yayılma (veri, n=74 gömülü / 66 Feature Store, R²≈0.04), tutuşma gecikmesi (literatür varsayımı), malzeme eşikleri (yalnız PMMA veri), ağırlıklar ve 35/65 eşikleri (varsayım, kalibre değil). Motor tutarsızlıkları için ek uyarı anahtarları (indeks formülüne dokunmadan): `above_threshold_low_index`, `clipped_below_reference`. `src/` metin üretmez: yalnız anahtar + sayı.
+  - Dosyalar: `src/risk/provenance.py`, `tests/risk/test_provenance.py`.
+  - Kabul testi: `$PY -m pytest tests/risk/test_provenance.py -q`.
+  - Bağımlılık: R1.
+
+- [ ] **R3 · Veri köprüsüne risk dışa aktarımı**
+  - Amaç: `window.FF.site.risk`: malzeme listesi, eşikler/ağırlıklar, provenance tablosu ve ön hesaplanmış ızgara (O2 15–40 %, 0,5 adım × basınç 50–101,3 kPa, 5 kPa adım + 56,5 ve 70,3 kPa hazır ayarları × tüm malzemeler); hücre başına indeks, seviye, 6 bileşen, tutuşma olasılığı, yanma süresi, marj, uyarılar. Deterministik, NaN yok, eksikler `null`; mevcut `site` anahtarları değişmez.
+  - Dosyalar: `scripts/build_site_data.py`, `tests/delivery/test_build_site_data.py` (yalnız ekleme).
+  - Kabul testi: `$PY scripts/build_site_data.py && node --check app/data/site_data.js && $PY -m pytest tests/delivery/test_build_site_data.py -q`.
+  - Bağımlılık: R2.
+
+- [ ] **R4 · Scenario ekranına risk paneli**
+  - Amaç: FLEX bölümünün altında ayrı "Material risk index — relative, heuristic" bölümü: malzeme, O2 %, basınç girdileri; indeks + seviye; 6 bileşen çubuğu (data/literature/assumption rozetli); O2'ye göre risk eğrisi; uyarılar. Kalıcı dürüstlük notu (bağıl ölçek, kalibre edilmemiş ağırlıklar, yerçekimi/akış girdi değil, FLEX'ten bağımsız). `FF.site.risk` yoksa "data not built" mesajı.
+  - Dosyalar: `app/views/senaryo.js`, `app/i18n.js` (yalnız `risk.*` anahtarları), `scripts/smoke_risk.mjs`.
+  - Kabul testi: `node scripts/smoke_risk.mjs` (ızgara okuma, ISS taban ≈ 0/Low, PMMA 40 % → Critical, panel yokken çökme yok) + `node scripts/smoke_explore_scenario.mjs && node scripts/smoke_equipment.mjs`.
+  - Bağımlılık: R3.
+
+- [ ] **R5 · Soru-cevap bağlamına risk**
+  - Amaç: Soru risk/malzeme içeriyorsa bağlama risk özetinden (provenance dahil) kısa bir parça eklenir; L1'in 2000 karakter sınırı içinde.
+  - Dosyalar: `app/server.py`, `tests/delivery/test_server.py`.
+  - Kabul testi: `$PY -m pytest tests/delivery/test_server.py -q` (risk sorusunda bağlamda risk parçası var, sınır aşılmıyor).
+  - Bağımlılık: L1, R3.
+
+- [ ] **R6 · Doküman, uçtan uca, PR**
+  - Amaç: `MVP_SPEC.md`, `Architecture.md`, `README.md` (Limits), `plans/mvp/PLAN.md`, `plans/README.md` risk modülü, dayanak tablosu, PR #7 ve yazarına atıfla güncellenir; `scripts/e2e_check.sh`'e risk smoke eklenir; dört ekranın ekran görüntüsü alınıp çakışma/konsol hatası kontrol edilir; `risk-engine` dalından `main`'e PR.
+  - Dosyalar: `MVP_SPEC.md`, `Architecture.md`, `README.md`, `plans/mvp/PLAN.md`, `plans/README.md`, `scripts/e2e_check.sh`.
+  - Kabul testi: `bash scripts/e2e_check.sh` (E2E OK) + `$PY -m pytest tests -m "not needs_raw and not slow and not live" -q`.
+  - Bağımlılık: R4, R5, L1.
