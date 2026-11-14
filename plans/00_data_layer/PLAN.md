@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 7 / 27
+- **İlerleme:** 8 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** B4
+- **Sıradaki adım:** B4 (veya C1; B4 `csv/` ister)
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -55,13 +55,14 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Yap: `01_load_core.py` iki kez çalıştırılınca parquet dosyalarının içerik hash'i aynı kalmalı.
   - Test: `pytest tests/data_layer/test_idempotent.py -m needs_raw`
   - Kabul: Hash'ler eşit. (`csv/` yoksa test skip olur; kutu ancak `csv/` olan bir makinede geçince işaretlenir.)
-- [ ] **B5** Fizik sağlık testleri: EDA bulgularının regresyonu
+- [x] **B5** Fizik sağlık testleri: EDA bulgularının regresyonu
   - Yap: Şunları test et:
     - FLEX Completion d² eğiminin %95 GA'sı 2'yi içermeli.
     - BASS-II PMMA ΔCO2/ΔO2 ∈ [−0.95, −0.70] olmalı.
     - FLEX K birim oranının medyanı ∈ [0.8, 1.2] olmalı.
   - Test: `pytest tests/data_layer/test_physics_sanity.py`
   - Kabul: Üç test de geçiyor.
+  ✔ 2026-11-14 · `python -m pytest tests/data_layer/test_physics_sanity.py -q` · 3 passed. Değerler parquet'ten yeniden hesaplandı (EDA çıktısından okunmadı); bozulmuş kopyada 3 test de düştü
 
 ## Faz C — DuckDB Feature Store
 
