@@ -4,7 +4,7 @@ Mimari: [Architecture.md §5–§7](../../Architecture.md) · Kod: `.github/work
 
 ## Durum
 
-- **İlerleme:** 0 / 14
+- **İlerleme:** 1 / 14
 - **Son güncelleme:** 2026-11-14
 - **Sıradaki adım:** A1 (genel sıra 1, 00/F3 ile birlikte: CI erken kurulursa her push'ta testler otomatik çalışır). B, C ve D adımları en sonda (genel sıra 6).
 - **Açık sorunlar:** —
@@ -27,11 +27,12 @@ Jüri ve ekip, repoyu klonlayıp tek komutla sonuçları yeniden üretebilmeli. 
   - ~~Yap: PlatformIO ile `pio run -e esp32-s3` ve `pio test -e native`.~~
   - ~~Test: `pytest tests/delivery/test_ci_config.py::test_firmware_job`~~
   - ~~Kabul: İş tanımlı.~~
-- [ ] **A3** Plan tutarlılık testi (bütün konular için)
+- [x] **A3** Plan tutarlılık testi (bütün konular için)
   - Yap: Her `PLAN.md` dosyasında işaretli kutu sayısı Durum satırıyla ve `plans/README.md` tablosuyla eşleşmeli.
     İptal edilen (üstü çizili, `- ~~[ ]`) adımlar sayıma girmez. Her `[x]` kutusunun altında `✔ YYYY-MM-DD` ile başlayan bir kanıt satırı olmalı.
   - Test: `pytest tests/delivery/test_plans.py`
-  - Kabul: Bütün planlar tutarlı. Kanıt satırı olmayan `[x]` kutusu testi düşürüyor.
+  - Kabul: Bütün planlar tutarlı. Kanıt satırı olmayan `[x]` kutusu testi düşürüyor. Not: denetleyici `tests/plancheck.py` (R1–R9: sayılar, kanıt satırı biçimi, işaretsiz adımda kanıt yok, iptal biçimi, benzersiz ID ve faz harfi, açık adımda Test/Kabul, README satırları, Sıradaki adım, Son güncelleme); her kural ayrı bir mutasyon testiyle kanıtlandı.
+  ✔ 2026-11-14 · `python -m pytest tests/delivery/test_plans.py -q` · 23 passed (7 plan tutarlı; R1–R9 için 18 mutasyon testinin her biri kendi kuralını yakaladı; iptal adımların sayılmadığı ve tamamlanan planda '—' kuralı ayrıca test edildi); tüm set 361 passed, 0 skipped. Negatif kontrol (14, baz çizgisi yeşil): denetleyiciden her kural kaldırılınca ilgili mutasyon testi düştü; bu sırada 'iptal adımlar sayılmaz' testinin zayıf olduğu görüldü (mutasyondan önce kopyanın temiz olduğunu doğrulamıyordu) ve güçlendirildi
 
 ## Faz B — Tekrarlanabilirlik
 

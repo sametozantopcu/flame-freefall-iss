@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 21 / 22
+- **İlerleme:** 22 / 22
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** F3 (plan ve durum tutarlılığı testi; genel sıra 1). Tüm planlar için yazılır, 06/A3'ü de kapatır; 06/A1 (CI) ile birlikte. Faz B, C, D tamam; Faz E (video) tamamen iptal.
+- **Sıradaki adım:** — (plan tamamlandı; açık sorunlar aşağıda)
 - **Açık sorunlar:**
   - Dosya listesi eksik (7 investigation, toplam ≈7,2 TB): PSI-20, 21, 22, 68, 69, 99, 106 için `detail.json`'da dosya listesi yok/boş ya da 1 dosya, oysa `totalFileSize` 17 GB – 2 TB. Listelenen boyut toplam boyutla tüm diğer investigation'larda birebir tutuyor, bunlarda tutmuyor. Bu investigation'lar için dosya düzeyinde bilgi bu repoda yok. Veri kapsamı değerlendirmesinde (01/C5) bilinmeli.
   - D1'in `files` tablosu yalnızca `added`/`removed` listelerini alıyor; `detail.json`'daki ayrı `experimentalTable` (22 dosya) ve `images` listeleri `files`'a girmedi. Eklemek D1/D2'nin sabit sayılarını (27.076) değiştirir; ayrı küçük bir adım olarak karar verilecek.
@@ -25,11 +25,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
 - [x] **A1** Ingest: 24 combustion investigation indirildi (`data_analysis/Nasa_data/ingest/psi_all.py` → `raw/`, `csv/`).
   ✔ 2026-11-14 · EDA çalıştırması · 2487 kanonik dosya. Regresyon testi B1'de.
 - [x] **A2** Audit: kopya, sentinel ve şema denetimi yapıldı (`ingest/audit_csv.py`, `ingest/drilldown.py` → `audit/canonical_files.csv`).
-  ✔ 2026-11-14 · EDA çalıştırması
+  ✔ 2026-11-14 · EDA çalıştırması · audit/canonical_files.csv: 3185 dosya denetlendi, 2487'si kanonik (use=True) (sonuç 2026-11-14'te F3 sırasında dosyadan yeniden doğrulanıp eklendi)
 - [x] **A3** Harmonize: 11 parquet tablosu üretildi (`analysis/scripts/01_load_core.py` → `analysis/data/*.parquet`).
   ✔ 2026-11-14 · EDA çalıştırması · art arda iki çalıştırmada 50 çıktı birebir aynı
 - [x] **A4** Feature kataloğu oluşturuldu (`analysis/outputs/feature_catalog.csv`; roller: target / feature / leakage / meta / exclude).
-  ✔ 2026-11-14 · EDA çalıştırması
+  ✔ 2026-11-14 · EDA çalıştırması · analysis/outputs/feature_catalog.csv: 226 satır (sonuç 2026-11-14'te F3 sırasında dosyadan yeniden doğrulanıp eklendi)
 
 ## Faz B — Mevcut çıktılar için regresyon testleri
 
@@ -167,7 +167,8 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Test: `pytest tests/data_layer/test_no_raw_access.py`
   - Kabul: Hiç referans yok. Not: bugün ihlal yok (app/ 23 dosya temiz, backend/ henüz yok, src/ içinde data_layer dışında dosya yok), yani gerçek tarama ilk günden boş geçiyor; asıl kanıt dedektörün doğruluğu (13 pozitif + 19 negatif örnek, gerçek ham-veri okuyan ingest/EDA kodunu buluyor, enjekte edilen ihlal yakalanıyor). AST tabanlı statik kontrol: çalışma zamanında birleştirilen yolları göremez (güvenlik ağı, ispat değil). Plan metninin ötesinde: `src/data_layer/` içinde yalnızca `metadata.py` ve `build_all.py` raw/'a değebilir, hiçbir dosya csv/'ye değemez. Not: `app/config.py` `data/processed/bass2_clean.csv`'yi doğrudan okuyor; bu raw/csv klasörü değil, bu kuralın dışında, 05/A3 Feature Store'a geçirecek. İzin listesi (`ALLOWLIST`) boş.
   ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 337 passed, 0 skipped (test_no_raw_access.py: 39). app/ + src/ (data_layer hariç) + backend/ taraması: 0 ihlal, app/'de ≥20 dosya gerçekten tarandı; data_layer'da yalnızca metadata.py ve build_all.py raw/'a değiyor, csv/ yok. Negatif kontrol (8, baz çizgisi yeşil): app/'e eklenen `pd.read_csv('csv/...')`, pathlib '/' kuralının silinmesi, MIME ('text/csv') tuzağı, taranan klasörlerden app/'in çıkarılması, data_layer/store.py'ye csv/ referansı, docstring'lerin ihlal sayılması, çıplak "csv"/"raw" metinlerinin ihlal sayılması, ayrıştırılamayan dosyanın sessizce atlanması hepsi yakalandı
-- [ ] **F3** Plan ve durum güncellemesi
+- [x] **F3** Plan ve durum güncellemesi
   - Yap: Bu dosyanın Durum bölümünü ve `plans/README.md` tablosunu güncelle.
   - Test: `pytest tests/data_layer/test_plan_status.py`. Test, işaretli kutu sayısının Durum satırındaki sayıyla eşleştiğini kontrol eder.
-  - Kabul: Sayılar tutarlı.
+  - Kabul: Sayılar tutarlı. Not: tek denetleyici (`tests/plancheck.py`, R1–R9) 06/A3 ile ortak; bu adımın testi onu yalnızca 00 için çalıştırır.
+  ✔ 2026-11-14 · `python -m pytest tests/data_layer/test_plan_status.py -q` · 1 passed; tüm set 361 passed, 0 skipped. Denetleyici ilk çalıştırmada A2 ve A4'ün 2 parçalı kanıt satırlarını buldu (dosyadan doğrulanan sonuçlarla tamamlandı) ve işaretlerken yazdığım yer tutucu kanıt satırlarını da R2 olarak yakaladı
