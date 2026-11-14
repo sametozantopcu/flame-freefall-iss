@@ -313,6 +313,158 @@ button.row.hl:hover { background: linear-gradient(90deg, rgba(255, 255, 255, 0.1
 @keyframes spin-in { from { opacity: 0; transform: rotate(-40deg); } to { opacity: 1; transform: none; } }
 @keyframes spin-in-glow { from { opacity: 0; transform: rotate(-40deg); } to { opacity: 0.55; transform: none; } }
 
+/* Soru sohbeti (ui/ask.js): sağ altta yuvarlak düğme; basınca ekranın alt ortasında küçük bir sohbet açılır.
+ * Cevaplar giriş kutusunun üstüne, yukarı doğru dizilir; sınırına gelince kendi içinde kayar, sayfa kaymaz.
+ * Yüzey "liquid glass": buzlu değil, su gibi berrak. Beyaz perde yok; arkası yalnızca hafif kararır ve
+ * çok az bulanıklaşır. Camın kalınlığı kenarlardaki ışıktan okunur: üstte parlak bir çizgi, altta kırılan ışık,
+ * kenarlarda içe doğru solan parıltı. Chromium'da arka plan ayrıca su gibi dalgalanır (.liquid, ask.js). */
+.glass {
+  position: relative; isolation: isolate;
+  background:
+    radial-gradient(130% 80% at 50% 125%, rgba(255, 255, 255, 0.07), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 28%, transparent 78%, rgba(255, 255, 255, 0.025));
+  -webkit-backdrop-filter: blur(4px) saturate(185%) brightness(0.36);
+          backdrop-filter: blur(4px) saturate(185%) brightness(0.36);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.22),
+    inset 1px 0 0 rgba(255, 255, 255, 0.14),
+    inset -1px 0 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 22px rgba(255, 255, 255, 0.06),
+    0 14px 36px rgba(0, 0, 0, 0.45);
+}
+.liquid .glass {
+  -webkit-backdrop-filter: url(#ff-liquid) blur(2.5px) saturate(185%) brightness(0.36);
+          backdrop-filter: url(#ff-liquid) blur(2.5px) saturate(185%) brightness(0.36);
+}
+/* Kenar ışığı: sol üst ve sağ alt köşede parlayan, ortada kaybolan 1px çerçeve. */
+.glass::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.1) 28%, rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, 0.45));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+/* Üst kenarda damla gibi ince bir parlama. */
+.glass::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(55% 22% at 30% 0%, rgba(255, 255, 255, 0.16), transparent 70%);
+}
+.chat, .chat-fab { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75); }
+.glass svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Yuvarlak düğme */
+.chat-fab {
+  position: fixed; z-index: 30; right: clamp(16px, 2vw, 28px); bottom: clamp(16px, 2.4vh, 28px);
+  width: 56px; height: 56px; border-radius: 50%;
+  display: grid; place-items: center; color: var(--ink);
+  transition: transform 0.35s var(--ease), opacity 0.25s, box-shadow 0.3s;
+}
+.chat-fab svg { width: 25px; height: 25px; }
+.chat-fab:hover { transform: translateY(-2px) scale(1.04); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 22px 2px rgba(255, 255, 255, 0.12), 0 20px 50px rgba(0, 0, 0, 0.6); }
+.chat-fab:focus-visible { outline: 1px solid var(--ink-soft); outline-offset: 4px; border-radius: 50%; }
+.chat-fab .new {
+  position: absolute; top: 4px; right: 4px; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--light); box-shadow: var(--glow); display: none;
+}
+.chat-fab.has-new .new { display: block; }
+/* Açıkken düğme kapatma düğmesine döner (sohbet alt ortada, düğme sağ altta kalır). */
+.chat-fab svg { position: absolute; transition: opacity 0.25s, transform 0.35s var(--ease); }
+.chat-fab .i-close { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+body.chat-open .chat-fab .i-chat { opacity: 0; transform: rotate(90deg) scale(0.6); }
+body.chat-open .chat-fab .i-close { opacity: 1; transform: none; }
+/* Dürüstlük bandının metni düğmenin altına girmesin. */
+.note { padding-right: 72px; }
+
+/* Sohbet */
+.chat {
+  position: fixed; z-index: 31; left: 50%; bottom: clamp(16px, 2.4vh, 28px);
+  width: min(600px, calc(100vw - 32px)); max-height: min(62vh, 600px);
+  box-sizing: border-box; display: flex; flex-direction: column; gap: 8px;
+  padding: 10px; border-radius: 26px;
+  color: var(--ink); font: 450 14px/20px var(--font-sans); letter-spacing: -0.006em; -webkit-font-smoothing: antialiased;
+  transform-origin: 50% 100%;
+  opacity: 0; visibility: hidden; transform: translate(-50%, 16px) scale(0.96); pointer-events: none;
+  transition: opacity 0.22s, transform 0.45s var(--ease), visibility 0s linear 0.45s;
+}
+body.chat-open .chat { opacity: 1; visibility: visible; transform: translate(-50%, 0); pointer-events: auto; transition: opacity 0.22s, transform 0.45s var(--ease); }
+.chat * { box-sizing: border-box; }
+.chat button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+.chat-head { flex: none; display: flex; align-items: center; gap: 12px; padding: 2px 2px 0 8px; }
+.chat-title { flex: 1; display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: var(--ink-soft); }
+.chat-title .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--light); box-shadow: var(--glow); }
+.chat-clear { font-size: 12px; color: var(--ink-faint); padding: 4px 6px !important; border-radius: 8px; }
+.chat-clear:hover { color: var(--ink); }
+.chat-clear[hidden] { display: none; }
+.chat-close {
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.07) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: background 0.2s, color 0.2s;
+}
+.chat-close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.chat-close:hover { color: var(--ink); background: rgba(255, 255, 255, 0.14) !important; }
+
+/* Konuşma: en yenisi girişin hemen üstünde; yukarı doğru büyür. */
+.chat-thread {
+  flex: 0 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column; gap: 14px; padding: 6px 6px 2px 8px;
+  scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.22) transparent; overflow-wrap: anywhere;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 14px);
+          mask-image: linear-gradient(180deg, transparent 0, #000 14px);
+}
+.chat.empty .chat-thread { display: none; }
+.chat-turn { display: flex; flex-direction: column; gap: 8px; animation: rise 0.35s var(--ease) both; }
+.chat-q {
+  align-self: flex-end; max-width: 86%; margin: 0; padding: 7px 12px;
+  border-radius: 16px 16px 5px 16px; color: var(--ink);
+  background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.chat-a { max-width: 96%; }
+.chat-a p { margin: 0 0 6px; }
+.chat-a p.dim { color: var(--ink-soft); }
+.chat-src { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+.chat-src a {
+  font-size: 12px; line-height: 18px; padding: 1px 9px; border-radius: 999px; text-decoration: none;
+  color: var(--ink-soft); box-shadow: inset 0 0 0 1px var(--hairline); transition: color 0.2s, background 0.2s;
+}
+.chat-src a:hover { color: var(--ink); background: rgba(255, 255, 255, 0.08); }
+.chat-tag { margin: 8px 0 0 !important; font-size: 11px; line-height: 15px; color: var(--ink-faint); }
+.chat-wait { display: flex; align-items: center; gap: 10px; color: var(--ink-faint); }
+.chat-wait .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--light); box-shadow: var(--glow); flex: none; animation: beat 1.4s ease-in-out infinite; }
+
+/* Boşken: öneri hapları */
+.chat-suggest { display: none; flex-wrap: wrap; gap: 6px; padding: 2px 4px; }
+.chat.empty .chat-suggest { display: flex; }
+.chat-suggest button {
+  font-size: 12.5px !important; line-height: 18px; padding: 6px 11px !important; border-radius: 999px; text-align: left;
+  color: var(--ink-soft); background: rgba(0, 0, 0, 0.3) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: background 0.2s, color 0.2s;
+}
+.chat-suggest button:hover { color: var(--ink); background: rgba(255, 255, 255, 0.11) !important; }
+
+/* Giriş */
+.chat-form {
+  flex: none; display: flex; align-items: flex-end; gap: 6px; padding: 5px 5px 5px 14px; border-radius: 18px;
+  background: rgba(0, 0, 0, 0.5); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 0.2s;
+}
+.chat-form:focus-within { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24), inset 0 1px 2px rgba(0, 0, 0, 0.5); }
+.chat-form textarea {
+  flex: 1; min-width: 0; height: 34px; max-height: 110px; resize: none; padding: 7px 0; border: 0; outline: 0; background: none;
+  color: var(--ink); font: inherit; line-height: 20px;
+}
+.chat-form textarea::placeholder { color: var(--ink-ghost); }
+.chat-send {
+  flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--light) !important; color: #000 !important; box-shadow: 0 0 14px rgba(255, 255, 255, 0.18);
+  transition: opacity 0.2s, transform 0.2s var(--ease);
+}
+.chat-send svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.chat-send:not(:disabled):hover { transform: scale(1.06); }
+.chat-send:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
+.chat-foot { flex: none; display: flex; justify-content: space-between; gap: 12px; padding: 0 8px; font-size: 10.5px; line-height: 14px; color: var(--ink-ghost); }
+
 /* Dar ekran (tablet dikey, telefon): tek sütun, normal kaydırma. Tek ekrana sığdırmak burada mümkün değil. */
 @media (max-width: 899px) {
   :root { --fs: 18px; --fs-label: 16px; --space-hair: 3px; --space-rule: 14px; --space-eyebrow: 16px; --gap-main: 32px; --size-hero: 300px; }
@@ -335,12 +487,17 @@ button.row.hl:hover { background: linear-gradient(90deg, rgba(255, 255, 255, 0.1
   .brand .sub { display: none; }
   .nav { gap: 0 22px; }
   .nav a .n { display: none; }
+  .chat { right: 8px; left: 8px; bottom: 8px; width: auto; max-height: 72vh; transform: translateY(16px) scale(0.96); }
+  body.chat-open .chat { transform: none; }
+  body.chat-open .chat-fab { opacity: 0; pointer-events: none; }
+  .note { padding-right: 0; padding-bottom: 72px; }
   .grid2 { grid-template-columns: 1fr; }
   .grid2.cols-down { grid-auto-flow: row; grid-template-rows: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .halo, .row .dot, .chart .pulse { animation: none; }
+  .halo, .row .dot, .chart .pulse, .chat-turn, .chat-wait .dot { animation: none; }
+  .chat, body.chat-open .chat, .chat-fab { transition: none; }
   .chart .pulse { display: none; }
   .enter .list, .enter .stage, .enter .note, .enter .draw, .enter .ring-wrap .arc { animation: none; }
 }
