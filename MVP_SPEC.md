@@ -71,13 +71,13 @@ Başlatma: `/home/halil/miniconda3/envs/nasa_hack/bin/python app/server.py` (var
 |---|---|---|---|---|
 | Metadata + envelope | `meta/investigations`, `inv_envelope_text` | 24 investigation zarfı | n/a | investigation başına (meta/investigations) |
 | M2 | `flex` (PSI-69, n=274) | `burn_rate_K_mm2_s` | fuel×diluent (6); ikincil year (3) | 10.60555/mbq8-0451 |
-| M3 | `flex`, `acme_normal`, `smoke`, `bass2` + `group_effects_numbers.json` | sayı kaynaklı bulgular | n/a | PSI-69 10.60555/mbq8-0451; PSI-159 10.60555/w4zy-bt45; PSI-101 10.60555/2np7-jv14; PSI-25 10.60555/4qc4-de67 |
+| M3 | `flex`, `acme_normal`, `smoke`, `bass2` + `group_effects_numbers.json` | sayı kaynaklı bulgular | n/a | PSI-69 10.60555/mbq8-0451; PSI-159 10.60555/cyt1-kh64; PSI-101 10.60555/2np7-jv14; PSI-25 10.60555/4qc4-de67 |
 
-M2 özellikleri: `d0_mm, p_atm, x_o2, x_he, x_co2, fuel, diluent` (yalnızca `role=feature`; `test_end`, `d_ext` gibi sızıntı sütunları dışarıda). Referans skorlar (keşif raporundan): fuel×diluent GroupKFold Ridge R²≈0.365 (fold'lar arası varyans yüksek); year GroupKFold Ridge R²≈0.564; n=258. Ekranda ikisi de gösterilir; birincil ve kısıtlayıcı olan fuel×diluent'tir.
+M2 özellikleri: `d0_mm, p_atm, x_o2, x_he, x_co2, fuel, diluent` (yalnızca `role=feature`; `test_end`, `d_ext` gibi sızıntı sütunları dışarıda). Referans skorlar (güncel ölçüm, `fit_flex()`): fuel×diluent GroupKFold Ridge R²≈0.373 (fold'lar arası varyans yüksek); year GroupKFold Ridge R²≈0.567; n=258. Ekranda ikisi de gösterilir; birincil ve kısıtlayıcı olan fuel×diluent'tir.
 
 ## 7. Dürüstlük ve sınırlar
 
-- Tahmin yalnızca FLEX'te bilinen yakıt/seyreltici kombinasyonları (heptane/methanol × N2/CO2/He) için geçerlidir; yeni kombinasyona genelleme zayıftır (grup-dışı R²≈0.365, fold'lar arası varyans yüksek). Ekranda görünür.
+- Tahmin yalnızca FLEX'te bilinen yakıt/seyreltici kombinasyonları (heptane/methanol × N2/CO2/He) için geçerlidir; yeni kombinasyona genelleme zayıftır (grup-dışı R²≈0.373, fold'lar arası varyans yüksek). Ekranda görünür.
 - Kısmi yerçekimi (Ay/Mars g) verisi yoktur; yalnızca flight (mikro-g) ve ground (1 g). Hiçbir yerde kısmi-g tahmini iddia edilmez. "Habitat relevance" yalnızca atmosfer (O2, basınç, akış) örtüşmesine dayanır, yerçekimine değil.
 - n küçük (274 satır, 3–6 grup); skorlar yüksek varyanslıdır.
 - Eksik değerler `null` kalır, asla 0 yapılmaz; ara tablolarda `psi_id`, `source_file`, `source_row` korunur.

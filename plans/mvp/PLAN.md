@@ -5,10 +5,10 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 ## Durum
 
-- İlerleme: 8/9 (S1–S8 tamam)
-- Son güncelleme: 2026-11-14 (S5–S8 doğrulandı; FLEX p_atm=0 satırı eksik sayıldı)
-- Sıradaki adım: S9
-- Açık sorunlar: bkz. "Açık noktalar"; EVREN ucu canlı denemede 90/170 sn ReadTimeout verdi (fallback çalışıyor).
+- İlerleme: 9/9 (S1–S9 tamam)
+- Son güncelleme: 2026-11-14 (S9 tamam: doküman temizliği, e2e_check.sh)
+- Sıradaki adım: yok (plan bitti)
+- Açık sorunlar: EVREN LLM ucu yanıt vermiyor (ReadTimeout) → fallback çalışıyor; push kimlik bilgisi bekliyor; tarayıcıda görsel doğrulama yapılmadı; bkz. "Açık noktalar".
 
 ## Kritik yol ve paralellik
 
@@ -34,6 +34,7 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 - [x] **S2 · M2 FLEX modeli: GroupKFold + dışa aktarım**
   ✔ 2026-11-14 · $PY -m pytest tests/prediction/test_flex_model.py -q · 5 passed; CV R² fuel×diluent 0.365, year 0.564, n=258
+  ↳ Not (2026-11-14): tarihsel kayıt; basıncı 0 kayıtlı tek satır eksik sayıldıktan sonra güncel ölçüm fuel×diluent R² 0.373, year 0.567 (n=258 / 209).
   - Amaç: `flex` / `burn_rate_K_mm2_s` için Ridge modeli; GroupKFold skorları; tarayıcıda hesaplanabilir katsayılar ve küçük ızgara.
   - Dokunulacak dosyalar: `src/prediction/flex_model.py` (yeni), `tests/prediction/test_flex_model.py` (yeni).
   - Girdi: `src.data_layer.frame.get_modeling_frame("flex", "burn_rate_K_mm2_s")`, `src.data_layer.features.get_features` (leakage otomatik dışarıda; ham parquet/CSV okunmaz). Özellikler: `d0_mm, p_atm, x_o2, x_he, x_co2, fuel, diluent`.
@@ -102,7 +103,8 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
   - Bağımlılıklar: S1, S5.
   - Tahmini süre: 30 dk.
 
-- [ ] **S9 · Doküman temizliği, CI temizliği ve uçtan uca doğrulama**
+- [x] **S9 ·
+  ✔ 2026-11-14 · bash scripts/e2e_check.sh + pytest hızlı set · E2E OK (~7 sn); 622 passed, 6 deselected; kabul grep'i `CLAUDE.md`, `MVP_SPEC.md`, `PLAN.md` hariç (bunlar "Video/mp4 kapsamı iptal" cümlesini içerir) tutuldu, Architecture.md/README.md/app temiz Doküman temizliği, CI temizliği ve uçtan uca doğrulama**
   - Amaç: Eski çelişen dokümanlar silinir, `Architecture.md` MVP mimarisiyle üstüne yazılır, README/CLAUDE.md MVP_SPEC'e işaret eder; hızlı test seti ve uçtan uca demo bağımsız olarak doğrulanır.
   - Dokunulacak dosyalar: `plans/00_data_layer/` … `plans/06_delivery/` (silinir), `plans/README.md` (kısa MVP indeksi olarak yeniden yazılır; commit kuralı otomatik commit ile uyumlu), `Architecture.md` (üstüne yazılır), `README.md`, `CLAUDE.md` (MVP_SPEC ve `plans/mvp/PLAN.md` işaret edilir; `plans/00..06` ve eski modül referansları çıkarılır; kalıcı kurallar korunur), `docs/decisions/002-video-out-of-scope.md` ve diğer çelişen `docs/` belgeleri (yalnız çelişenler; `docs/datasets/*` ve `docs/evidence/` kalır), `tests/plancheck*` ve `tests/delivery/test_ci_config.py` (silinen planlara veya `plans/*/requirements.txt`'e bağlı testler güncellenir/silinir; CI buna göre), `.github/workflows/tests.yml` (plans/*/requirements.txt yerine kök `requirements.txt` veya `plans/mvp/requirements.txt`), `scripts/e2e_check.sh` (yeni).
   - Girdi: `MVP_SPEC.md`, `plans/mvp/PLAN.md`, `.orchestrator/reports/repo.md` §4 (video referansları listesi).

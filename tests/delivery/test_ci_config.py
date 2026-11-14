@@ -1,4 +1,4 @@
-"""06/A1 - the CI workflow: one job, every plan's requirements, marked tests excluded, no secrets."""
+"""The CI workflow: one job, root requirements.txt, marked tests excluded, no secrets."""
 import configparser
 import re
 from pathlib import Path
@@ -40,15 +40,9 @@ def test_python_version_matches_local_env(wf):
     assert any(str(s.get("uses", "")).startswith("actions/checkout") for s in _steps(wf))
 
 
-def test_installs_every_plan_requirements_file(wf):
-    plans = sorted(p.relative_to(REPO).as_posix() for p in REPO.glob("plans/*/requirements.txt"))
-    assert len(plans) == 7
-    install = _runs(wf)
-    if "plans/*/requirements.txt" in install:              # the glob form covers every file, present and future
-        assert re.search(r"pip install .*plans/\*/requirements\.txt", install)
-    else:
-        missing = [p for p in plans if p not in install]
-        assert not missing, f"CI does not install: {missing}"
+def test_installs_root_requirements(wf):
+    assert (REPO / "requirements.txt").is_file()
+    assert re.search(r"pip install .*-r requirements\.txt", _runs(wf))
 
 
 def test_marked_tests_are_excluded_and_markers_registered(wf):

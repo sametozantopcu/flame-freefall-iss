@@ -1,7 +1,0 @@
-# 02 — M2 Tahmin & Senaryo Motoru (minimum)
--r ../00_data_layer/requirements.txt
-pydantic>=2.5
-lightgbm>=4.3
-joblib>=1.3           # model kaydı (F1)
-# (2026-11-14: catboost, xgboost, mapie, m2cgen, onnx, onnxruntime kaldırıldı; tek GBM = LightGBM, conformal kendi uygulamamız, export ertelendi)
-# (requests ve ffmpeg kaldırıldı: video önizleme / presigned URL adımları iptal, 2026-11-14)

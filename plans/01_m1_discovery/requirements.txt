@@ -1,6 +1,0 @@
-# 01 — M1 Keşif & Sıralama (minimum)
--r ../00_data_layer/requirements.txt
-pydantic>=2.5
-pyyaml>=6.0
-# TF-IDF için scikit-learn, LLM çağrıları için requests 00 üzerinden gelir (EVREN OpenAI uyumlu API; ek paket yok).
-# (2026-11-14: sentence-transformers, faiss-cpu ve anthropic kaldırıldı)

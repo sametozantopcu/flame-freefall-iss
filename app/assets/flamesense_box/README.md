@@ -1,6 +1,6 @@
 # FlameSense — temsili donanım modeli (Blender, v3)
 
-`plans/04_flamesense` planı FlameSense'i donanımsız bir yazılım demosu olarak tanımlıyor. Sunumda cihazı göstermek için
+`MVP_SPEC.md` ve `plans/mvp/PLAN.md` FlameSense'i donanımsız bir yazılım demosu olarak tanımlıyor. Sunumda cihazı göstermek için
 kullanılacak temsili 3D model bu klasörde. Gerçek bir donanım tasarımı değildir; ölçüler gerçek parçalara yakın tutulmuştur.
 
 | Dosya | İçerik |

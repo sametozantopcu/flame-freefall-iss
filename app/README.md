@@ -112,7 +112,7 @@ Genişliği 900 px ve üstü olan ekranlarda sayfa tam ekran yüksekliğindedir;
   görünüyor.
 - Mimarideki O₂ × basınç zarf grafiği yok; BASS-II tablosunda basınç bulunmadığı için O₂ × akış çizildi.
 - Model, tahmin aralığı ve FastAPI bağlantısı yok. Bu klasör tasarımın çalışan bir taslağı; repodaki
-  `plans/05_backend_dashboard` planının yerine geçmez.
+  `MVP_SPEC.md` ve `plans/mvp/PLAN.md` içindeki MVP kapsamının yerine geçmez.
 
 ## Tuval
 
