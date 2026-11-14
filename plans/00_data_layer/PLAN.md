@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 8 / 27
+- **İlerleme:** 9 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** B4 (veya C1; B4 `csv/` ister)
+- **Sıradaki adım:** C2 (veya B4; B4 `csv/` ister)
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -66,11 +66,12 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
 
 ## Faz C — DuckDB Feature Store
 
-- [ ] **C1** `SPEC` sözlüğünü paylaşılan modüle taşı
+- [x] **C1** `SPEC` sözlüğünü paylaşılan modüle taşı
   - Yap: `analysis/scripts/_common.py` içindeki `SPEC`, `UNITS` ve `target_frame` mantığını `src/data_layer/spec.py` dosyasına kopyala.
     EDA script'leri değişmeden çalışmaya devam etmeli: `_common.py` bunları `spec.py` içinden import etsin.
   - Test: `pytest tests/data_layer/test_spec.py` ve `09_build_report.py` sonrasında `REPORT.md` dosyasının değişmemesi
   - Kabul: `REPORT.md` farkı boş; SPEC tek bir yerde tanımlı.
+  ✔ 2026-11-14 · `python -m pytest tests -q` · 95 passed (test_spec.py: 22). `analysis/scripts/00–09` yeniden çalıştırıldı: `REPORT.md` + `outputs/figures/data` altındaki 147 dosyanın md5'i taşıma öncesiyle birebir aynı. Negatif kontrol: bozulmuş SPEC sütunu ve script'te yeniden tanım testi düşürdü
 - [ ] **C2** `feature_store.duckdb` oluşturucu
   - Yap: `src/data_layer/store.py build` komutu, her parquet tablosu için bir görünüm (view) oluştursun. Parquet yolları göreli olmalı.
   - Test: `pytest tests/data_layer/test_store.py::test_views`

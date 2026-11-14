@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from conftest import OUT
-from _common import SPEC
+from src.data_layer.spec import SPEC
 
 CAT = pd.read_csv(OUT / "feature_catalog.csv")
 TARGETS = [(n, t) for n, s in SPEC.items() for t in s["targets"]]

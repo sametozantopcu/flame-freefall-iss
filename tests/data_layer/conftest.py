@@ -9,7 +9,7 @@ REPO = Path(__file__).resolve().parents[2]
 ANALYSIS = REPO / "data_analysis" / "Nasa_data" / "analysis"
 DATA = ANALYSIS / "data"
 OUT = ANALYSIS / "outputs"
-sys.path.insert(0, str(ANALYSIS / "scripts"))  # _common.SPEC / TRACE (moves to src/data_layer in step C1)
+sys.path.insert(0, str(REPO))  # `src.data_layer` (SPEC lives in src/data_layer/spec.py since step C1)
 
 TABLES = ["acme_normal", "acme_inverse", "acme_testdays", "flex", "bass2", "smoke",
           "cfi", "saffire1", "saffire2", "saffire3", "spice"]
