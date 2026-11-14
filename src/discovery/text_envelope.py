@@ -30,6 +30,9 @@ STD = {"o2": "%", "pressure": "atm", "flow": "cm/s"}
 COLUMNS = ["psi_id", "field", "value_min", "value_max", "unit_raw", "value_text", "section", "source_span",
            "value_min_std", "value_max_std", "unit_std", "source", "accepted", "reject_reason"]
 OUT = metadata.META_DIR / "inv_envelope_text.parquet"
+REVIEW = metadata.META_DIR / "inv_envelope_text_review.csv"          # step A3: human/developer decisions per row
+REVIEW_MD = Path(__file__).resolve().parents[2] / "docs" / "evidence" / "envelope_review.md"
+REVIEWER = "İnceleyen: Claude (geliştirici), 2026-11-14"
 CACHE = metadata.META_DIR / "llm_cache"
 _WS = re.compile(r"\s+", re.UNICODE)
 _NUMS = re.compile(r"(?<![\d.])-?\d+(?:\.\d+)?|\d+(?:\.\d+)?")   # "20-40": the dash after a digit is a range, not a minus
@@ -165,6 +168,77 @@ def extract_text_envelope(psi_ids=None, llm=None, con=None) -> pd.DataFrame:
     return out.reindex(columns=COLUMNS)
 
 
+def load_review(path: str | Path = REVIEW) -> pd.DataFrame:
+    """Review decisions (step A3). Blank cells stay empty strings; numbers are parsed in apply_review."""
+    return pd.read_csv(path, dtype=str, keep_default_na=False, encoding="utf-8").astype({"row": int})
+
+
+def _corr_num(cell: str, original):
+    """'' -> unchanged, 'unknown' -> NaN, otherwise a number (validated elsewhere to be one of the originals)."""
+    cell = (cell or "").strip()
+    if cell == "":
+        return original
+    if cell == "unknown":
+        return float("nan")
+    return float(cell)
+
+
+def apply_review(facts: pd.DataFrame, review: pd.DataFrame) -> pd.DataFrame:
+    """Reviewed facts: 'silindi' rows dropped, corrections applied, decision/context/note added; `row` = original index."""
+    rv = review.set_index("row")
+    out = []
+    for i, r in facts.reset_index(drop=True).iterrows():
+        d = rv.loc[i]
+        if d["decision"] == "silindi":
+            continue
+        rec = r.to_dict()
+        rec["row"] = i
+        if d["corrected_field"]:
+            rec["field"] = d["corrected_field"]
+        if d["corrected_value_text"]:
+            rec["value_text"] = d["corrected_value_text"]
+        rec["value_min_std"] = _corr_num(d["corrected_value_min_std"], r["value_min_std"])
+        rec["value_max_std"] = _corr_num(d["corrected_value_max_std"], r["value_max_std"])
+        rec.update(review_decision=d["decision"], context=d["context"], note=d["note"])
+        out.append(rec)
+    cols = ["row"] + COLUMNS + ["review_decision", "context", "note"]
+    df = pd.DataFrame(out, columns=cols)
+    return df.astype({"value_min_std": float, "value_max_std": float})
+
+
+def _value(r) -> str:
+    if r["field"] in NUMERIC and r.get("unit_std"):
+        lo, hi = r["value_min_std"], r["value_max_std"]
+        f = lambda v: "?" if pd.isna(v) else f"{v:g}"  # noqa: E731
+        return f"{f(lo)}–{f(hi)} {r['unit_std']}" if lo != hi or pd.isna(lo) else f"{f(lo)} {r['unit_std']}"
+    return str(r["value_text"] if isinstance(r["value_text"], str) else "—")
+
+
+def render_review_md(facts: pd.DataFrame, review: pd.DataFrame) -> str:
+    rv = review.set_index("row")
+    counts = rv["decision"].value_counts()
+    L = ["# Metinden gelen koşul zarfı: inceleme (01/A3)", "",
+         "Kaynak: `data_analysis/Nasa_data/meta/inv_envelope_text.parquet` (01/A2, LLM önerisi + birebir alıntı doğrulaması). "
+         "Kararlar: `data_analysis/Nasa_data/meta/inv_envelope_text_review.csv`. Bu dosya ondan üretilir "
+         "(`python -m src.discovery.text_envelope review-md`).", "", REVIEWER, "",
+         "Özet: " + ", ".join(f"{k} {int(counts.get(k, 0))}" for k in ("doğru", "düzeltildi", "silindi")) + f" (toplam {len(rv)})", "",
+         "| row | psi_id | alan | değer | karar | bağlam | not |", "|---|---|---|---|---|---|---|"]
+    for i, r in facts.reset_index(drop=True).iterrows():
+        d = rv.loc[i]
+        note = (d["note"] or "").replace("|", "/")
+        L.append(f"| {i} | {r['psi_id']} | {r['field']} | {_value(r).replace('|', '/')} | {d['decision']} | {d['context']} | {note} |")
+    L += ["", "Bağlam: `experiment` = değer investigation'ın kendi uçuş/zemin deneyini tanımlar; `modeling` = sayısal/analiz çalışması "
+          "(zarfta ayrı işaretlenir, ISS deney koşulu sayılmaz).", ""]
+    return "\n".join(L)
+
+
+def write_review_md(path: Path | None = None) -> Path:
+    path = Path(path or REVIEW_MD)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(render_review_md(pd.read_parquet(OUT), load_review()), encoding="utf-8")
+    return path
+
+
 def generate(out: Path = OUT, cache_dir: Path = CACHE) -> pd.DataFrame:
     df = extract_text_envelope(llm=_cached_llm(cache_dir))
     df.to_parquet(out, index=False)
@@ -172,7 +246,11 @@ def generate(out: Path = OUT, cache_dir: Path = CACHE) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or sys.argv[1] != "generate":
-        sys.exit("usage: python -m src.discovery.text_envelope generate")
+    cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    if cmd == "review-md":
+        print(f"wrote {write_review_md()}")
+        sys.exit(0)
+    if cmd != "generate":
+        sys.exit("usage: python -m src.discovery.text_envelope generate | review-md")
     d = generate()
     print(f"wrote {OUT}: {len(d)} facts, {int(d.accepted.sum())} accepted, {int((~d.accepted).sum())} rejected")

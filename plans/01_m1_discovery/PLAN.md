@@ -4,9 +4,9 @@ Mimari: [Architecture.md §2](../../Architecture.md) · Kod: `src/discovery/` ·
 
 ## Durum
 
-- **İlerleme:** 2 / 21
+- **İlerleme:** 3 / 21
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A3 (metinden gelen zarfların kontrolü; genel sıra 3)
+- **Sıradaki adım:** A4 (zarf tablosunun dışa aktarımı: tablo + incelenmiş metin zarfı, 24 investigation; genel sıra 3)
 - **Açık sorunlar:**
   - LLM adımları (A2, E1–E4) EVREN API anahtarını kök `.env`'den okur; EVREN kullanım şartları hesap sahibince onaylanmış olmalı.
   - Veri sürprizi (A1): PSI-21 `fuel_bottle` değerleri tablo programı otomatik doldurma artığı gibi (`100% C2H5…C2H11`, `40% CH5…CH14`; 30 farklı değer), PSI-23'te `45% CH4 with N3`. Zarf bunları olduğu gibi tutar; skorlama `material_class` kullanmalı, ileride bir temizlik adımı gerekebilir.
@@ -45,10 +45,11 @@ Her sıranın gerekçesi gösterilir ve kaynaklara atıf yapılır.
   - Test: `pytest tests/discovery/test_text_envelope.py::test_text_spans` (+ dosyanın tamamı; bağımsız analiz ajanı yazar). LLM mock'lanır. Test, her `source_span` değerinin kaynak metinde birebir geçtiğini kontrol eder.
   - Kabul: Alıntısı kaynakta bulunmayan satır reddediliyor; çıktı bir kez üretilip kaydediliyor (A4 ile dışa aktarılır), uygulama LLM çağırmıyor. Not: `src/discovery/llm.py` (EVREN istemcisi, anahtar yalnız `.env`'den, hiçbir çıktıda/hatada görünmez) ve `src/discovery/text_envelope.py`. LLM yalnızca öneri verir; her sayı alıntıda geçmeli, birim dönüşümü kodda yapılır (mole fraction ×100 dahil); reddedilenler nedeniyle saklanır. Üretim bir kez yapıldı (9 çağrı, 226 sn): `meta/inv_envelope_text.parquet` (33 olgu: 31 kabul, 2 red) ve `meta/llm_cache/` (9 yanıt) commit edildi; yeniden üretim önbellekten API'siz.
   ✔ 2026-11-14 · `python -m pytest tests/discovery/test_text_envelope.py -q` · 92 passed (bağımsız ajan yazdı; '20-40 atm'deki tireyi eksi sanan sayı ayrıştırma hatasını yakaladı ve 'mole fraction' birimi eksikliğini gösterdi, ikisi de düzeltildi); tüm set 593 passed, 0 skipped. Commit edilen dosyalarda API anahtarı bulunmadığı ayrıca doğrulandı. Negatif kontrol (8, koda uygulandı, baz çizgisi yeşil): alıntı kontrolünü kaldırmak, boşluk normalleştirmesini kaldırmak, sayı-alıntıda kontrolünü kaldırmak, eski tire regex'i, mole fraction ×1, anahtarı hata mesajına koymak, yeniden denemeyi kapatmak, thinking=true hepsi yakalandı
-- [ ] **A3** Metinden gelen zarfların kontrolü
+- [x] **A3** Metinden gelen zarfların kontrolü
   - Yap: Text kaynaklı bütün satırları kaynak metinle tek tek karşılaştır (geliştirici yapar; ekip üyesi rastgele birkaçını kontrol edebilir) ve sonucu `docs/evidence/envelope_review.md` dosyasına yaz.
-  - Test: `pytest tests/discovery/test_envelope.py::test_review_evidence`
-  - Kabul: Her text satırı için "doğru / düzeltildi / silindi" kararı yazılmış.
+  - Test: `pytest tests/discovery/test_envelope_review.py` (`test_review_evidence` + kurallar; bağımsız analiz ajanı yazar)
+  - Kabul: Her text satırı için "doğru / düzeltildi / silindi" kararı yazılmış. Not: kararlar `meta/inv_envelope_text_review.csv` (33 satır: 22 doğru, 4 düzeltildi, 7 silindi; her satıra bağlam experiment/modeling), `docs/evidence/envelope_review.md` ondan üretilir; `apply_review()` incelenmiş zarfı verir (26 satır). İnceleme hiçbir zaman yeni sayı üretmez, düzeltilen metin satırın kendi alıntısında geçer. Bağımsız ajan ayrı bir ikinci inceleme yaptı: 33 satırın 31'inde karar ve bağlam aynı; ayrışan 2 satırda (4: PSI-26 'nitrogen' → söndürme olgusu, 18: PSI-106 'nitrogen-diluted mixtures' → yakıt karışımı) ajan silmeyi önerdi, geliştirici metne dayalı yeniden sınıflandırıp tuttu.
+  ✔ 2026-11-14 · `python -m pytest tests/discovery/test_envelope_review.py -q` · 22 passed; tüm set 615 passed, 0 skipped. Negatif kontrol (7, kod ve CSV'ye uygulandı, baz çizgisi yeşil): silinenleri tutmak, 'unknown'ı 0 yapmak, alan düzeltmesini yok saymak, md'yi yeniden üretmeden notu değiştirmek, uydurma sayı (99), bir psi içinde karışık bağlam, reddedilmiş satırı 'doğru' saymak hepsi yakalandı (md sapması kontrolünü ilk denemede virgüllü notla CSV'yi bozarak yanlış kurmuştum, düzeltip tekrarladım)
 - [ ] **A4** Zarf tablosunun dışa aktarımı
   - Yap: `inv_envelope` tablosunu `meta.duckdb` içine yaz.
   - Test: `pytest tests/discovery/test_envelope.py::test_export`
