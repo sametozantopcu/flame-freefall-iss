@@ -39,27 +39,58 @@ def _drop_first_evidence(text):
     return "\n".join(lines[:k] + lines[k + 1:])
 
 
+def _first_open(text):
+    """ID of the first open step: mutations must not depend on how far a plan has progressed."""
+    return re.search(r"^- \[ \] \*\*([A-Z]\d+)\*\*", text, re.M).group(1)
+
+
+def _bump_progress(text):
+    m = re.search(r"^(- \*\*İlerleme:\*\* )(\d+)( / \d+)", text, re.M)
+    return text[:m.start()] + f"{m.group(1)}{int(m.group(2)) + 1}{m.group(3)}" + text[m.end():]
+
+
+def _bump_readme(folder):
+    def f(text):
+        m = re.search(rf"(\[{folder}\].*\| )(\d+) / (\d+) \|", text)
+        return text[:m.start()] + f"{m.group(1)}{m.group(2)} / {int(m.group(3)) + 1} |" + text[m.end():]
+    return f
+
+
+def _evidence_under_open(text):
+    sid = _first_open(text)
+    return re.sub(rf"^(- \[ \] \*\*{sid}\*\*.*)$", r"\1\n  ✔ 2026-11-14 · pytest · 1 passed", text, count=1, flags=re.M)
+
+
+def _drop_line_of_open(label):
+    def f(text):
+        sid = _first_open(text)
+        return re.sub(rf"^(- \[ \] \*\*{sid}\*\*[^\n]*\n(?:(?!- |## ).*\n)*?)  - {label}:[^\n]*\n", r"\1", text,
+                      count=1, flags=re.M)
+    return f
+
+
+def _next_step(to):
+    return _sub(r"^(- \*\*Sıradaki adım:\*\* )[A-Z]\d+", rf"\g<1>{to}")
+
+
 MUTATIONS = [
-    ("R1 durum sayısı", "01_m1_discovery/PLAN.md", _sub(r"^(- \*\*İlerleme:\*\* )0 / 21", r"\g<1>1 / 21"), "R1"),
-    ("R1 README sayısı", "README.md", _sub(r"(\[02_m2_prediction\].*\| )0 / 26 \|", r"\g<1>0 / 25 |"), "R1"),
+    ("R1 durum sayısı", "01_m1_discovery/PLAN.md", _bump_progress, "R1"),
+    ("R1 README sayısı", "README.md", _bump_readme("02_m2_prediction"), "R1"),
     ("R2 kanıt satırı silindi", "00_data_layer/PLAN.md", _drop_first_evidence, "R2"),
     ("R2 kanıt 2 parçalı", "00_data_layer/PLAN.md", _sub(r"^(  ✔ \d{4}-\d{2}-\d{2} · [^·\n]+?) · .*$", r"\1"), "R2"),
     ("R2 gelecek tarih", "00_data_layer/PLAN.md", _sub(r"^  ✔ \d{4}-\d{2}-\d{2}", "  ✔ 2099-01-01"), "R2"),
     ("R2 geçersiz tarih", "00_data_layer/PLAN.md", _sub(r"^  ✔ \d{4}-\d{2}-\d{2}", "  ✔ 2026-13-45"), "R2"),
-    ("R3 açık adımda kanıt", "01_m1_discovery/PLAN.md",
-     _sub(r"^(- \[ \] \*\*A1\*\*.*)$", r"\1\n  ✔ 2026-11-14 · pytest · 1 passed"), "R3"),
+    ("R3 açık adımda kanıt", "01_m1_discovery/PLAN.md", _evidence_under_open, "R3"),
     ("R4 iptal nedeni boş", "04_flamesense/PLAN.md", _sub(r"(\*\*İPTAL \(\d{4}-\d{2}-\d{2}\):\*\*) .*$", r"\1"), "R4"),
     ("R4 İPTAL işareti yok", "04_flamesense/PLAN.md", _sub(r"~~ — \*\*İPTAL \(\d{4}-\d{2}-\d{2}\):\*\*", "~~ —"), "R4"),
     ("R5 tekrar eden ID", "01_m1_discovery/PLAN.md", _sub(r"^- \[ \] \*\*A4\*\*", "- [ ] **A1**"), "R5"),
     ("R5 faz harfi uyuşmuyor", "06_delivery/PLAN.md", _sub(r"^- \[ \] \*\*D6\*\*", "- [ ] **C9**"), "R5"),
-    ("R6 Test satırı yok", "01_m1_discovery/PLAN.md",
-     _sub(r"^(- \[ \] \*\*A1\*\*[^\n]*\n(?:(?!- |## ).*\n)*?)  - Test:[^\n]*\n", r"\1"), "R6"),
-    ("R6 Kabul satırı yok", "03_m3_equipment/PLAN.md",
-     _sub(r"^(- \[ \] \*\*A1\*\*[^\n]*\n(?:(?!- |## ).*\n)*?)  - Kabul:[^\n]*\n", r"\1"), "R6"),
+    ("R6 Test satırı yok", "01_m1_discovery/PLAN.md", _drop_line_of_open("Test"), "R6"),
+    ("R6 Kabul satırı yok", "03_m3_equipment/PLAN.md", _drop_line_of_open("Kabul"), "R6"),
     ("R7 README satırı silindi", "README.md", _sub(r"^\| 03 \|.*\n", ""), "R7"),
     ("R7 bağlantı yanlış klasöre", "README.md", _sub(r"\(03_m3_equipment/PLAN\.md\)", "(03_m3_equipmentX/PLAN.md)"), "R7"),
-    ("R8 sıradaki adım yok olan ID", "02_m2_prediction/PLAN.md", _sub(r"^(- \*\*Sıradaki adım:\*\* )A1", r"\1Z9"), "R8"),
-    ("R8 sıradaki adım iptal edilmiş", "02_m2_prediction/PLAN.md", _sub(r"^(- \*\*Sıradaki adım:\*\* )A1", r"\1D5"), "R8"),
+    ("R8 sıradaki adım yok olan ID", "02_m2_prediction/PLAN.md", _next_step("Z9"), "R8"),
+    ("R8 sıradaki adım iptal edilmiş", "02_m2_prediction/PLAN.md", _next_step("D5"), "R8"),
     ("R9 son güncelleme gelecekte", "03_m3_equipment/PLAN.md",
      _sub(r"^(- \*\*Son güncelleme:\*\* )\S+", r"\g<1>2099-01-01"), "R9"),
 ]

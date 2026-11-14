@@ -4,9 +4,9 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
 
 ## Durum
 
-- **İlerleme:** 0 / 26
+- **İlerleme:** 1 / 26
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A1 (genel sıra 2: veri setleri A1–A4; modeller B–H genel sıra 4; 00/C5 hazır)
+- **Sıradaki adım:** A2 (genel sıra 2: veri setleri A2–A4; modeller B–H genel sıra 4)
 - **Açık sorunlar:**
   - Smoke ground eşlemesi doğrulanmadı. Bu yüzden smoke modeli yalnızca flight verisiyle kurulur (A1).
   - FLEX'te Extinction/Disruption ile biten testlerin yanma süresi kesilmiş; Completion testleriyle aynı şekilde modellenemez (D3).
@@ -26,7 +26,7 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
 
 ## Faz A — Modelleme veri setleri (Objective 2'nin doğrudan karşılığı)
 
-- [ ] **A1** Dört veri setini üret
+- [x] **A1** Dört veri setini üret
   - Yap: Setler `data/modeling/` altına yazılır:
     - `droplet` (FLEX + CFI, ortak sütun adları)
     - `gas_flame` (ACME CFI-G)
@@ -36,7 +36,8 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
   - Kabul:
     - Hiçbir sette leakage sütunu yok.
     - İz sütunları ve grup sütunu dolu.
-    - Satır sayıları `target_candidates.csv` ile tutarlı.
+    - Satır sayıları `target_candidates.csv` ile tutarlı. Not: duman yalnızca uçuş (134 satır), bu yüzden amd/dusttrak 153/148 değil 131/133 (zemin satırları düşülmüş, bağımsız hesaplandı). Damlacık hedefleri birleştirilmedi (FLEX `burn_rate_K_mm2_s` ≠ CFI `k_hot_mm2_s`; yakıtlar kesişmiyor); yalnızca aynı fiziksel büyüklükler ortak adlı (`shared` listesi, bildirilmeyen ad çakışması hata verir). Gaz alevinde `flame_type` kaynaktan (Normal/Inverse), farklı O2 büyüklükleri (`xo2_init` / `xo2`) ayrı. Hedef başına `in_subset__<hedef>` maskesi; filtre sütunları sette yok. CV anahtarları (`cv_group`) tam dolu; diğer grup boşlukları gerçek ve sabit (FLEX `year`: 50/274). Çıktılar `data/modeling/` (gitignore, commit edilmez; `python -m src.prediction.datasets build`).
+  ✔ 2026-11-14 · `python -m pytest tests/prediction/test_datasets.py -q` · 9 passed; tüm set 376 passed, 0 skipped. Satırlar: damlacık 501, gaz alevi 333, duman 134, katı 129; her hedefin sayısı target_candidates ile birebir (duman: n − zemin); her değer kaynakla aynı; maskeyle seçilen satırlar get_modeling_frame ile aynı. İlk turda iki gerçek bulgu: FLEX `year` 50 testte boş (doldurulmadı, CV anahtarı değil) ve ACME'de zaten bir `flame_type` sütunu var (uydurduğum etiket yerine kaynaktaki kullanıldı). Negatif kontrol (7, baz çizgisi yeşil): zemin dahil duman, FlameDesign dahil gaz alevi, `xo2_final` sızıntısı, NaN→0, FLEX/CFI K birleştirme, alt kümesiz maske, uydurulmuş etiket hepsi yakalandı
 - [ ] **A2** Sansür bayrakları
   - Yap:
     - `gas_flame`: `burn_time_censored` (FT testleri = sağdan sansürlü).

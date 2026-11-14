@@ -9,7 +9,7 @@ Mimari kaynağı: [`../Architecture.md`](../Architecture.md).
 |---|---|---|---|---|
 | 00 | Ortak Veri Katmanı (Feature Store, Metadata) | [00_data_layer](00_data_layer/PLAN.md) | — | 22 / 22 |
 | 01 | M1 — Keşif & Sıralama | [01_m1_discovery](01_m1_discovery/PLAN.md) | 00 | 0 / 21 |
-| 02 | M2 — Tahmin & Senaryo Motoru | [02_m2_prediction](02_m2_prediction/PLAN.md) | 00 | 0 / 26 |
+| 02 | M2 — Tahmin & Senaryo Motoru | [02_m2_prediction](02_m2_prediction/PLAN.md) | 00 | 1 / 26 |
 | 03 | M3 — Ekipman İçgörüsü | [03_m3_equipment](03_m3_equipment/PLAN.md) | 00, 01, 02 | 0 / 14 |
 | 04 | FlameSense (donanımsız yazılım demosu) | [04_flamesense](04_flamesense/PLAN.md) | 02 (F3 predict) | 0 / 9 |
 | 05 | Uygulama (Streamlit dashboard) | [05_backend_dashboard](05_backend_dashboard/PLAN.md) | 01, 02, 03, 04 | 0 / 12 |
