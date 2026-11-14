@@ -4,9 +4,9 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
 
 ## Durum
 
-- **İlerleme:** 0 / 29
+- **İlerleme:** 0 / 26
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A1 (önce 00/C5 tamamlanmalı)
+- **Sıradaki adım:** A1 (genel sıra 2: veri setleri A1–A4; modeller B–H genel sıra 4; 00/C5 hazır)
 - **Açık sorunlar:**
   - Smoke ground eşlemesi doğrulanmadı. Bu yüzden smoke modeli yalnızca flight verisiyle kurulur (A1).
   - FLEX'te Extinction/Disruption ile biten testlerin yanma süresi kesilmiş; Completion testleriyle aynı şekilde modellenemez (D3).
@@ -98,7 +98,7 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
 Her adımda "Kabul" kısmına şu şart da dahildir: **grup CV sonucu `eval.md` dosyasına yazıldı ve baseline'larla kıyaslandı.**
 Baseline geçilemezse adım yine tamamlanabilir, ama bu durum dürüstçe raporlanır ve Durum bölümüne not edilir.
 
-- [ ] **D1** Damlacık `test_end`: CatBoost sınıflandırıcı
+- [ ] **D1** Damlacık `test_end`: LightGBM sınıflandırıcı
   - Test: `pytest tests/prediction/test_models.py::test_droplet_test_end`
   - Kabul: Olasılıkların toplamı 1; 3 sınıf; fixture verisinde eğitim çalışıyor.
 - [ ] **D2** Damlacık `K`: LightGBM, `x_o2` için monoton artan kısıt
@@ -107,17 +107,17 @@ Baseline geçilemezse adım yine tamamlanabilir, ama bu durum dürüstçe raporl
 - [ ] **D3** Hibrit yanma süresi: t_b = (d0² − d_ext²) / K
   - Test: `pytest tests/prediction/test_models.py::test_hybrid_tb`
   - Kabul: Elle hesaplanan değerlerle eşleşiyor; t_b > 0; d_ext ≥ d0 olursa uyarı veriliyor.
-- [ ] **D4** Gaz alevi `hot_ignition`: lojistik regresyon + CatBoost, day grubuyla
+- [ ] **D4** Gaz alevi `hot_ignition`: lojistik regresyon + LightGBM, day grubuyla
   - Test: `pytest tests/prediction/test_models.py::test_gas_ignition`
   - Kabul: Olasılıklar [0, 1] içinde; Brier skoru hesaplanıyor; sınıf ağırlığı uygulanıyor.
-- [ ] **D5** Gaz alevi `burn_time`: XGBoost `survival:aft`
-  - Yap: FT testleri sağdan sansürlü olarak modellenir.
-  - Test: `pytest tests/prediction/test_models.py::test_gas_aft_labels`
-  - Kabul:
-    - SE testlerinde alt sınır = üst sınır.
-    - FT testlerinde üst sınır = +∞.
-    - Tahminler pozitif.
-- [ ] **D6** Duman `amd_um`: Ridge (log hedef) + CatBoost
+- ~~[ ] **D5** Gaz alevi `burn_time`: XGBoost `survival:aft`~~ — **İPTAL (2026-11-14):** XGBoost AFT (sansürlü yanma süresi) ertelendi; tek geliştirici kapsamı; zaman kalırsa çizgi kaldırılıp geri açılır
+  - ~~Yap: FT testleri sağdan sansürlü olarak modellenir.~~
+  - ~~Test: `pytest tests/prediction/test_models.py::test_gas_aft_labels`~~
+  - ~~Kabul:~~
+    - ~~SE testlerinde alt sınır = üst sınır.~~
+    - ~~FT testlerinde üst sınır = +∞.~~
+    - ~~Tahminler pozitif.~~
+- [ ] **D6** Duman `amd_um`: Ridge (log hedef) + LightGBM
   - Yap: `material` her zaman feature olarak kalır (Simpson paradoksu nedeniyle).
   - Test: `pytest tests/prediction/test_models.py::test_smoke_material_forced`
   - Kabul: Feature listesinden `material` çıkarılmaya çalışılırsa hata veriliyor; yalnızca flight verisi kullanılıyor.
@@ -127,7 +127,8 @@ Baseline geçilemezse adım yine tamamlanabilir, ama bu durum dürüstçe raporl
 
 ## Faz E — Belirsizlik, kapsam dışı (AD) ve fizik testleri
 
-- [ ] **E1** Conformal aralıklar (MAPIE, jackknife+ / CV+, grup bazlı)
+- [ ] **E1** Conformal aralıklar (kendi grup bazlı split-conformal uygulamamız; MAPIE yok)
+  - Yap: Grup bazlı katlamaların dışarıda tutulan kalıntılarından kantil alınarak %90 aralık; birkaç düzine satır, ek bağımlılık yok.
   - Test: `pytest tests/prediction/test_uncertainty.py::test_coverage`
   - Kabul: Dışarıda tutulan gruplarda %90 aralığın ampirik kapsaması [0.85, 0.95] içinde. Dışındaysa rapora yazılır.
 - [ ] **E2** AD testi: kNN uzaklığı
@@ -149,10 +150,10 @@ Baseline geçilemezse adım yine tamamlanabilir, ama bu durum dürüstçe raporl
     Kartta veri hash'i, feature listesi, CV şeması, metrikler ve tarih olsun.
   - Test: `pytest tests/prediction/test_registry.py::test_roundtrip`
   - Kabul: Yükle → tahmin et sonuçları eğitimdeki tahminlerle birebir aynı; kartta zorunlu alanların hepsi var.
-- [ ] **F2** Mevcut uygulamayla uyumluluk
-  - Yap: `app/core/models.py` dosyasındaki joblib sözleşmesine uyan bir adaptör yaz.
-  - Test: `pytest tests/prediction/test_registry.py::test_app_contract`
-  - Kabul: Uygulama modeli keşfediyor ve vekil RandomForest'a geri dönmüyor.
+- ~~[ ] **F2** Mevcut uygulamayla uyumluluk~~ — **İPTAL (2026-11-14):** eski `app/` joblib adaptörü gereksiz: yeni Senaryo sayfası (05/E2) `predict()`'i doğrudan çağırır; tek geliştirici kapsamı; zaman kalırsa çizgi kaldırılıp geri açılır
+  - ~~Yap: `app/core/models.py` dosyasındaki joblib sözleşmesine uyan bir adaptör yaz.~~
+  - ~~Test: `pytest tests/prediction/test_registry.py::test_app_contract`~~
+  - ~~Kabul: Uygulama modeli keşfediyor ve vekil RandomForest'a geri dönmüyor.~~
 - [ ] **F3** `predict(scenario) -> Prediction` fonksiyonu
   - Yap: Aile yönlendirici (sıvı → damlacık, gaz → gaz alevi, katı → katı malzeme/duman; belirsiz → hepsi) + ön işleme + tahmin + aralık + AD + fizik testi.
   - Test: `pytest tests/prediction/test_api.py::test_predict`
@@ -192,10 +193,10 @@ Baseline geçilemezse adım yine tamamlanabilir, ama bu durum dürüstçe raporl
   - Yap: `python -m src.prediction.train_all` komutu A → F adımlarını çalıştırsın (`random_state=42`).
   - Test: `pytest tests/prediction/test_train_all.py -m slow`
   - Kabul: Komut hatasız bitiyor; iki çalıştırmada model kartlarındaki metrikler aynı.
-- [ ] **H2** Model export'u (FlameSense için, 04/E1'in girdisi)
-  - Yap: Ağaç modellerini m2cgen ile C koduna, CatBoost modellerini ONNX'e çevir.
-  - Test: `pytest tests/prediction/test_export.py`
-  - Kabul: Export edilen modellerle Python modelleri arasındaki tahmin farkı 1e-4'ün altında (100 örnek).
+- ~~[ ] **H2** Model export'u (FlameSense için, 04/E1'in girdisi)~~ — **İPTAL (2026-11-14):** fiziksel cihaz yok (04'ün donanım adımları iptal); model export'u gerekmiyor; tek geliştirici kapsamı; zaman kalırsa çizgi kaldırılıp geri açılır
+  - ~~Yap: Ağaç modellerini m2cgen ile C koduna, CatBoost modellerini ONNX'e çevir.~~
+  - ~~Test: `pytest tests/prediction/test_export.py`~~
+  - ~~Kabul: Export edilen modellerle Python modelleri arasındaki tahmin farkı 1e-4'ün altında (100 örnek).~~
 - [ ] **H3** Plan ve durum güncellemesi
   - Test: `pytest tests/prediction/test_plan_status.py`
   - Kabul: Sayılar tutarlı.

@@ -6,7 +6,7 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 - **İlerleme:** 21 / 22
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** F3 (plan ve durum tutarlılığı testi). Faz B, C, D tamam; Faz E (video) tamamen iptal.
+- **Sıradaki adım:** F3 (plan ve durum tutarlılığı testi; genel sıra 1). Tüm planlar için yazılır, 06/A3'ü de kapatır; 06/A1 (CI) ile birlikte. Faz B, C, D tamam; Faz E (video) tamamen iptal.
 - **Açık sorunlar:**
   - Dosya listesi eksik (7 investigation, toplam ≈7,2 TB): PSI-20, 21, 22, 68, 69, 99, 106 için `detail.json`'da dosya listesi yok/boş ya da 1 dosya, oysa `totalFileSize` 17 GB – 2 TB. Listelenen boyut toplam boyutla tüm diğer investigation'larda birebir tutuyor, bunlarda tutmuyor. Bu investigation'lar için dosya düzeyinde bilgi bu repoda yok. Veri kapsamı değerlendirmesinde (01/C5) bilinmeli.
   - D1'in `files` tablosu yalnızca `added`/`removed` listelerini alıyor; `detail.json`'daki ayrı `experimentalTable` (22 dosya) ve `images` listeleri `files`'a girmedi. Eklemek D1/D2'nin sabit sayılarını (27.076) değiştirir; ayrı küçük bir adım olarak karar verilecek.

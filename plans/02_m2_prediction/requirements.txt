@@ -1,12 +1,7 @@
 # 02 — M2 Tahmin & Senaryo Motoru (minimum)
 -r ../00_data_layer/requirements.txt
 pydantic>=2.5
-catboost>=1.2
 lightgbm>=4.3
-xgboost>=2.0          # survival:aft
-mapie>=0.8            # conformal aralıklar
-joblib>=1.3           # app/core/models.py sözleşmesi
-m2cgen>=0.10          # H2: C'ye export
-onnx>=1.15            # H2: CatBoost → ONNX
-onnxruntime>=1.17     # H2: export doğrulama
+joblib>=1.3           # model kaydı (F1)
+# (2026-11-14: catboost, xgboost, mapie, m2cgen, onnx, onnxruntime kaldırıldı; tek GBM = LightGBM, conformal kendi uygulamamız, export ertelendi)
 # (requests ve ffmpeg kaldırıldı: video önizleme / presigned URL adımları iptal, 2026-11-14)

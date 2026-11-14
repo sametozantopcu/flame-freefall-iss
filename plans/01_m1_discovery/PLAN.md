@@ -4,16 +4,25 @@ Mimari: [Architecture.md §2](../../Architecture.md) · Kod: `src/discovery/` ·
 
 ## Durum
 
-- **İlerleme:** 0 / 22
+- **İlerleme:** 0 / 21
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A1 (önce 00/C5 ve 00/D2 tamamlanmalı)
-- **Açık sorunlar:** —
+- **Sıradaki adım:** A1 (genel sıra 3: 03 ve 05/E1, E3 ile birlikte; 00/C5 ve 00/D2 hazır)
+- **Açık sorunlar:**
+  - LLM adımları (A2, E1–E4) EVREN API anahtarını kök `.env`'den okur; EVREN kullanım şartları hesap sahibince onaylanmış olmalı.
 
 ## Hedef
 
 Kullanıcı bir habitat seçer (ISS, keşif aracı, Ay/Mars üssü, gezgin araç). Sistem 24 investigation'ı **şeffaf bileşenli** bir skorla sıralar.
 Her sıranın gerekçesi gösterilir ve kaynaklara atıf yapılır.
 
+
+**LLM kuralları (A2, E1–E4):**
+- Sağlayıcı: EVREN LLM API (OpenAI uyumlu). Varsayılan adres `https://evren-llmapi.ssyz.org.tr/v1`, varsayılan model `deepseek-v4.1-flash`; `.env`'de `LLM_BASE_URL` / `LLM_MODEL` ile değiştirilebilir.
+- Anahtar: kök `.env` dosyasındaki `API_KEY` (gitignore'da; asla yazdırılmaz, commit edilmez). Ek paket yok (`requests`).
+- **Bir kez üret → doğrula → kaydet.** Uygulama çalışırken LLM çağrılmaz; yayında anahtar gerekmez.
+- Testler LLM'i mock'lar; yalnızca E4 gerçek API'yi çağırır.
+- Düşünen model: `max_tokens` ≥ 4096 ya da `thinking: false`. 429/503'te `Retry-After` kadar beklenip tekrar denenir.
+- Giden veri yalnızca kamuya açık PSI metinleridir. Kullanım şartlarının onayı hesap sahibine aittir (onaysız çağrı 403 döner).
 ---
 
 ## Faz A — Koşul zarfı (`inv_envelope`)
@@ -26,12 +35,13 @@ Her sıranın gerekçesi gösterilir ve kaynaklara atıf yapılır.
     - ACME O2 aralığı parquet tablosundaki min/max ile birebir aynı.
     - Hiçbir satırda min > max yok.
     - Birimler O2 için %, basınç için atm.
-- [ ] **A2** Metinden zarf çıkarımı (tablosu olmayanlar için)
-  - Yap: LLM ile çıkarım yap. Her değer için `source=text` olsun ve kaynak metinden **birebir alıntı** (`source_span`) saklansın.
+- [ ] **A2** Metinden zarf çıkarımı (tablosu olmayanlar için, LLM)
+  - Yap: Parquet tablosu olmayan investigation'lar için (00/D4 `table_map`'te `coverage='none'`, bugün 9 investigation) amaç, yaklaşım ve etkiler metninden O2, basınç, seyreltici, yakıt/malzeme sınıfı, yerçekimi ve olgu etiketlerini LLM ile çıkar (`src/discovery/llm.py`, aşağıdaki LLM kuralları).
+    Her değer için `source=text` olsun ve kaynak metinden **birebir alıntı** (`source_span`) saklansın.
   - Test: `pytest tests/discovery/test_envelope.py::test_text_spans`. LLM mock'lanır. Test, her `source_span` değerinin kaynak metinde birebir geçtiğini kontrol eder.
-  - Kabul: Alıntısı kaynakta bulunmayan satır reddediliyor.
-- [ ] **A3** Metinden gelen zarfların elle kontrolü
-  - Yap: Text kaynaklı bütün satırları gözle kontrol et ve sonucu `docs/evidence/envelope_review.md` dosyasına yaz.
+  - Kabul: Alıntısı kaynakta bulunmayan satır reddediliyor; çıktı bir kez üretilip kaydediliyor (A4 ile dışa aktarılır), uygulama LLM çağırmıyor.
+- [ ] **A3** Metinden gelen zarfların kontrolü
+  - Yap: Text kaynaklı bütün satırları kaynak metinle tek tek karşılaştır (geliştirici yapar; ekip üyesi rastgele birkaçını kontrol edebilir) ve sonucu `docs/evidence/envelope_review.md` dosyasına yaz.
   - Test: `pytest tests/discovery/test_envelope.py::test_review_evidence`
   - Kabul: Her text satırı için "doğru / düzeltildi / silindi" kararı yazılmış.
 - [ ] **A4** Zarf tablosunun dışa aktarımı
@@ -61,8 +71,8 @@ Her sıranın gerekçesi gösterilir ve kaynaklara atıf yapılır.
 - [ ] **C2** c₂ Malzeme eşleşmesi (Jaccard)
   - Test: `pytest tests/discovery/test_score.py::test_c2`
   - Kabul: Bilinen kümelerde beklenen değerler çıkıyor; boş envanterde sonuç 0 ve hata yok.
-- [ ] **C3** c₃ Olgu eşleşmesi (embedding kosinüs benzerliği)
-  - Yap: Arayüzü yaz ve testte sahte bir embedder kullan. Gerçek embedder D2'de bağlanır.
+- [ ] **C3** c₃ Olgu eşleşmesi (TF-IDF kosinüs benzerliği)
+  - Yap: Arayüzü yaz ve testte sahte bir benzerlik fonksiyonu kullan. Gerçek TF-IDF indeksi D3'te bağlanır (scikit-learn; model indirme ve ağ yok).
   - Test: `pytest tests/discovery/test_score.py::test_c3`
   - Kabul: Aynı metin → 1; sonuç [0, 1] içinde.
 - [ ] **C4** c₄ Yerçekimi uygunluğu
@@ -86,46 +96,48 @@ Her sıranın gerekçesi gösterilir ve kaynaklara atıf yapılır.
   - Test: `pytest tests/discovery/test_docs.py`. Test, README'deki ağırlıkların koddakilerle eşleştiğini kontrol eder.
   - Kabul: Değerler eşleşiyor.
 
-## Faz D — Embedding + vektör indeksi
+## Faz D — Metin benzerliği (TF-IDF)
 
-- [ ] **D1** Parçalayıcı (chunker)
-  - Yap: Kaynaklar: amaç, yaklaşım, etkiler, yayın başlıkları, REPORT.md bulguları. Metni ~300 token'lık parçalara böl.
-    Her parçada `chunk_id`, `psi_id`, `doi` ve `section` tutulsun.
-  - Test: `pytest tests/discovery/test_index.py::test_chunker`
-  - Kabul: Parçaların hiçbiri 400 token'dan uzun değil; meta alanları boş değil; `chunk_id` benzersiz.
-- [ ] **D2** Lokal embedding ve FAISS indeksi
-  - Yap: sentence-transformers ile embedding üret ve indeksi diske kaydet (`data_analysis/Nasa_data/meta/index/`).
-  - Test: `pytest tests/discovery/test_index.py::test_retrieval`
-  - Kabul: Bir parçanın kendi cümlesiyle sorgu yapılınca o parça ilk sırada dönüyor (rastgele 20 parçanın en az 19'unda).
-- [ ] **D3** c₃'ü gerçek embedder'a bağla
+- [ ] **D1** Investigation metin belgeleri
+  - Yap: Her investigation için tek bir metin belgesi: amaç, yaklaşım, etkiler, yayın başlıkları (metadata katmanından, `connect_meta()`).
+    Her belgede `psi_id`, `doi` ve kaynak alanlar (`section`) tutulsun. Parçalama gerekmez (TF-IDF belge düzeyinde çalışır).
+  - Test: `pytest tests/discovery/test_index.py::test_documents`
+  - Kabul: 24 investigation'ın hepsi için belge var; boş belge yok; meta alanları dolu.
+- ~~[ ] **D2** Lokal embedding ve FAISS indeksi~~ — **İPTAL (2026-11-14):** ağır embedding + FAISS yerine TF-IDF yeterli (C3, D1, D3); tek geliştirici kapsamı; zaman kalırsa çizgi kaldırılıp geri açılır
+  - ~~Yap: sentence-transformers ile embedding üret ve indeksi diske kaydet (`data_analysis/Nasa_data/meta/index/`).~~
+  - ~~Test: `pytest tests/discovery/test_index.py::test_retrieval`~~
+  - ~~Kabul: Bir parçanın kendi cümlesiyle sorgu yapılınca o parça ilk sırada dönüyor (rastgele 20 parçanın en az 19'unda).~~
+- [ ] **D3** c₃'ü TF-IDF indeksine bağla (D1 belgeleri üzerinde)
   - Test: `pytest tests/discovery/test_score.py::test_c3_real`
   - Kabul: "duman algılama" senaryosu için PSI-101 (SAME) ilk 3 içinde.
 
 ## Faz E — RAG yorumu (alıntı zorunlu)
 
 - [ ] **E1** Prompt ve çıktı şeması
-  - Yap: LLM şu JSON'u döndürsün: `{"sentences":[{"text":..., "chunk_ids":[...]}], "sections":["neden ilgili","ana bulgular","sınırlar"]}`.
+  - Yap: LLM (`src/discovery/llm.py`) şu JSON'u döndürsün: `{"sentences":[{"text":..., "source_ids":[...]}], "sections":["neden ilgili","ana bulgular","sınırlar"]}`.
+    `source_id` = D1 belgesindeki kaynak alan (`psi_id` + `section`, ör. `PSI-25:objective`).
   - Test: `pytest tests/discovery/test_rag.py::test_schema`. LLM mock'lanır.
   - Kabul: Şema doğrulanıyor; eksik bölüm varsa hata veriliyor.
 - [ ] **E2** Alıntı doğrulayıcı
   - Yap:
-    - Geçerli bir `chunk_id` taşımayan cümleyi sil.
-    - Cümledeki bir sayı alıntılanan parçada geçmiyorsa cümleyi sil.
+    - Geçerli bir `source_id` taşımayan cümleyi sil.
+    - Cümledeki bir sayı alıntılanan kaynakta geçmiyorsa cümleyi sil.
   - Test: `pytest tests/discovery/test_rag.py::test_validator`. Testte elle hazırlanmış 10 iyi ve 10 kötü örnek kullanılır.
   - Kabul: Kötü örneklerin 10'u da siliniyor; iyi örneklerin 10'u da kalıyor.
 - [ ] **E3** Uçtan uca test (mock LLM)
   - Yap: Habitat → skor → ilk k investigation → RAG kartları akışını test et.
   - Test: `pytest tests/discovery/test_pipeline.py`
   - Kabul: Her kartta en az 1 alıntılı cümle ve DOI var.
-- [ ] **E4** Canlı LLM duman testi
-  - Yap: Gerçek API ile tek bir habitat çalıştır ve çıktıyı `docs/evidence/m1_live_sample.md` dosyasına kaydet.
+- [ ] **E4** Gerçek LLM ile üretim ve duman testi
+  - Yap: Gerçek API (EVREN, varsayılan `deepseek-v4.1-flash`) ile kartlar bir kez üretilir, E2 ile doğrulanır ve kaydedilir; uygulama kayıtlı kartları okur.
+    Örnek bir habitatın çıktısı, kullanılan model ve token kullanımı `docs/evidence/m1_live_sample.md` dosyasına yazılır.
   - Test: `pytest tests/discovery/test_pipeline.py::test_live_evidence`
-  - Kabul: Kanıt dosyası var; doğrulayıcının sildiği cümle oranı raporlanmış.
+  - Kabul: Kanıt dosyası var; doğrulayıcının sildiği cümle oranı raporlanmış; kayıtlı kartlar E1 şemasına uyuyor.
 
 ## Faz F — Servis arayüzü
 
 - [ ] **F1** `rank(habitat) -> list[RankedInvestigation]` fonksiyonu
-  - Yap: Backend'in (05/C1) çağıracağı saf Python fonksiyonu; içinde Streamlit veya FastAPI bağımlılığı olmamalı.
+  - Yap: Uygulamanın Keşif sayfasının (05/E1) çağıracağı saf Python fonksiyonu; içinde Streamlit bağımlılığı olmamalı.
   - Test: `pytest tests/discovery/test_api.py`
   - Kabul: Dönen nesnede bileşen dökümü, uyarılar ve zarf verisi (grafik için) var.
 - [ ] **F2** Plan ve durum güncellemesi
