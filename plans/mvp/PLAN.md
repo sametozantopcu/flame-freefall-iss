@@ -164,7 +164,8 @@ Onaylı plan: LLM soru-cevabını sağlamlaştır ve kapatılmış PR #7'deki (y
   - Kabul testi: `node scripts/smoke_risk.mjs` (ızgara okuma, ISS taban ≈ 0/Low, PMMA 40 % → Critical, panel yokken çökme yok) + `node scripts/smoke_explore_scenario.mjs && node scripts/smoke_equipment.mjs`.
   - Bağımlılık: R3.
 
-- [ ] **R5 · Soru-cevap bağlamına risk**
+- [x] **R5 · Soru-cevap bağlamına risk**
+  ✔ 2026-11-15 · `$PY -m pytest tests/delivery/test_server.py -q` + canlı `/api/ask` "What is FlameSense?" · 18 passed, skip yok; canlı: mode=llm, 26 s, sources=[flamesense_concept]
   - Amaç: Soru risk/malzeme içeriyorsa bağlama risk özetinden (provenance dahil) kısa bir parça eklenir; L1'in 2000 karakter sınırı içinde.
   - Dosyalar: `app/server.py`, `tests/delivery/test_server.py`.
   - Kabul testi: `$PY -m pytest tests/delivery/test_server.py -q` (risk sorusunda bağlamda risk parçası var, sınır aşılmıyor).

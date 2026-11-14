@@ -184,3 +184,49 @@ def test_context_limit_and_defaults(fast):
     for q in ("Which experiments matter most for a high-oxygen Mars habitat?", "What does the FLEX model predict?", "smoke PSI-101"):
         ctx = fast.build_context(fast.select_context(q, site), site)
         assert len(ctx) <= 2000 and "[LIMITS]" in ctx
+
+
+# ---- R5: flamesense / ranking / risk context ----
+def _ctx(m, q, site=None):
+    site = site or m.load_site()
+    items = m.select_context(q, site)
+    return m.build_context(items, site), items
+
+
+def test_ctx_flamesense_not_built(fast):
+    ctx, items = _ctx(fast, "What is FlameSense?")
+    assert "not built" in ctx and "ESP32" in ctx and len(ctx) <= 2000
+    assert any(i["id"] == "flamesense_concept" for i in items)
+
+
+def test_ctx_mars_habitat_has_top_psi(fast):
+    site = fast.load_site()
+    top = min((i for i in site["investigations"] if i.get("score_status") == "scored"), key=lambda i: i["rank"])
+    ctx, _ = _ctx(fast, "Which experiments matter most for a high-oxygen Mars habitat?", site)
+    assert f"#{top['rank']} {top['psi_id']}" in ctx and "hypothetical" in ctx and "low-confidence" in ctx
+
+
+def test_ctx_nomex_risk(fast):
+    site = fast.load_site()
+    nomex = next(m for m in site["risk"]["materials"] if m["key"] == "Nomex")
+    ctx, items = _ctx(fast, "How risky is Nomex at 30 % oxygen?", site)
+    assert "[RISK]" in ctx and f"limit O2 {nomex['threshold_o2_pct_ref']}%" in ctx and "exploration" in ctx
+    assert "R2=" in ctx and "uncalibrated" in ctx and len(ctx) <= 2000
+    assert fast._source(next(i for i in items if i["id"] == "risk_engine")) == {"card_id": "risk_engine", "doi": None}
+
+
+def test_ctx_limits_always_and_no_risk_data(fast):
+    site = fast.load_site()
+    for q in ("What is FlameSense?", "How risky is PMMA in the exploration atmosphere?",
+              "Which experiments matter most for a high-oxygen Mars habitat?"):
+        ctx, _ = _ctx(fast, q, site)
+        assert "[LIMITS]" in ctx and len(ctx) <= 2000
+    bare = {k: v for k, v in site.items() if k not in ("risk", "flamesense")}
+    for q in ("How risky is Nomex at 30 % oxygen?", "What is FlameSense?"):
+        ctx, items = _ctx(fast, q, bare)
+        assert "[LIMITS]" in ctx and not any(i["type"] == "special" and i["id"] != "investigation_ranking" for i in items)
+    assert fast.fallback_answer("x", fast.select_context("What is FlameSense?", site))["answer"]
+
+
+def test_prompt_mentions_relative_index(fast):
+    assert "relative" in fast.SYSTEM_PROMPT and "fire probability" in fast.SYSTEM_PROMPT

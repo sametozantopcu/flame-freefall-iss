@@ -41,7 +41,7 @@ SYSTEM_PROMPT = (
     "context (investigation summaries and result cards). Cite PSI ids and DOIs for every claim. If the context "
     "does not contain the answer, say 'not in the data'. State that there is NO partial-gravity (Moon/Mars g) "
     "data in the datasets when relevant. Mention briefly that this is a prototype and must not be used for "
-    "safety decisions. Be concise (under 150 words). Reply as JSON only: "
+    "safety decisions. The risk index is relative and heuristic; never present it as an absolute fire probability. Be concise (under 150 words). Reply as JSON only: "
     '{"answer": "...", "sources": ["PSI-101", "flex_d2_slope", ...]} using ids from the context.'
 )
 
@@ -63,6 +63,123 @@ def _flat(obj) -> str:
     if isinstance(obj, (list, tuple)):
         return " ".join(_flat(v) for v in obj)
     return "" if obj is None else str(obj)
+
+
+_TRIGGERS = {
+    "flamesense_concept": ("flamesense", "sensor", "detector", "hardware", "device", "esp32", "prototype box"),
+    "investigation_ranking": ("most relevant", "rank", "priorit", "habitat", "mars", "moon", "which experiment",
+                              "matter most", "important", "score"),
+    "risk_engine": ("risk", "index", "material", "oxygen", "pressure", "ignition", "flammab", "atmosphere",
+                    "o2", "limit", "threshold"),
+}
+_MARKERS = {"flamesense_concept": "flamesense", "investigation_ranking": "rank", "risk_engine": "risk"}
+_PRESET_KEYS = ("iss", "exploration", "ceiling")
+
+
+def _nearest(axis: list, v: float) -> int:
+    return min(range(len(axis)), key=lambda i: abs(axis[i] - v))
+
+
+def _risk_index(risk: dict, mat: str, o2: float, kpa: float):
+    try:
+        grid, ax = risk["grid"][mat], risk["axes"]
+        row = grid[_nearest(ax["pressure_kpa"], kpa)][_nearest(ax["o2_pct"], o2)]
+        return row[risk["fields"].index("risk_index")]
+    except (KeyError, IndexError, ValueError, TypeError):
+        return None
+
+
+def _preset_text(risk: dict, mat: str) -> str:
+    out = []
+    for p in risk.get("presets") or []:
+        if p.get("key") in _PRESET_KEYS:
+            v = _risk_index(risk, mat, p["o2_pct"], p["pressure_kpa"])
+            if v is not None:
+                out.append(f"{p['key']} ({p['o2_pct']:g}% O2, {p['pressure_kpa']:g} kPa)={v:.0f}")
+    return ", ".join(out)
+
+
+def _mentioned_materials(question: str, risk: dict) -> list[dict]:
+    ql = question.lower()
+    found = []
+    for m in risk.get("materials") or []:
+        names = {str(m.get("key", "")).lower(), *(s.strip().lower() for s in str(m.get("label", "")).split("/"))}
+        if any(n and n in ql for n in names):
+            found.append(m)
+    return found[:2]
+
+
+def _flamesense_text(site: dict) -> str | None:
+    fs = site.get("flamesense")
+    if not fs:
+        return None
+    state = "concept - designed, not built" if fs.get("concept") and not fs.get("built") else \
+        ("built" if fs.get("built") else "concept")
+    dims = fs.get("dimensions_mm")
+    return (f"[FLAMESENSE] FlameSense is a {state} sensor box (no hardware exists yet) | "
+            f"size {'x'.join(str(d) for d in dims) + ' mm' if dims else 'n/a'} | MCU {fs.get('mcu')} | "
+            f"sensors: {', '.join(str(s) for s in fs.get('sensors') or [])}")
+
+
+def _ranking_text(site: dict) -> str | None:
+    invs = site.get("investigations") or []
+    scored = sorted((i for i in invs if i.get("score_status") == "scored" and i.get("rank") is not None),
+                    key=lambda i: i["rank"])[:5]
+    if not scored:
+        return None
+    n_low = sum(1 for i in invs if i.get("score_status") == "low_confidence")
+    n_ns = sum(1 for i in invs if i.get("score_status") == "not_scorable")
+    top = "; ".join(f"#{i['rank']} {i['psi_id']} {i.get('name')} ({i.get('score', 0):.0f})" for i in scored)
+    return (f"[RANKING] Habitat relevance, top {len(scored)}: {top} | scores rest on hypothetical weights "
+            f"(not validated) | {n_low} low-confidence, {n_ns} not scorable")
+
+
+def _risk_text(site: dict, question: str) -> str | None:
+    risk = site.get("risk")
+    if not risk or not risk.get("grid"):
+        return None
+    ref = risk.get("reference") or {}
+    data_mats = [str(m.get("key")) for m in risk.get("materials") or [] if m.get("basis") == "data"]
+    th = risk.get("level_thresholds") or {}
+    parts = [f"[RISK] Relative index, 0 = {ref.get('o2_pct', 21):g}% O2 / 1 atm, 100 = 40% O2; weights and level "
+             f"thresholds ({', '.join(f'{k} {v}' for k, v in th.items())}) are uncalibrated assumptions, not "
+             f"absolute fire probability; only the {'/'.join(data_mats) or 'n/a'} limit comes from ISS data"]
+    if "PMMA" in (risk.get("grid") or {}):
+        parts.append("PMMA index at " + _preset_text(risk, "PMMA"))
+    for m in _mentioned_materials(question, risk):
+        k = m.get("key")
+        if k != "PMMA" and k in risk["grid"]:
+            parts.append(f"{m.get('label')}: limit O2 {m.get('threshold_o2_pct_ref')}% ({m.get('basis')}); index at "
+                         + _preset_text(risk, k))
+        elif k == "PMMA":
+            parts.append(f"PMMA limit O2 {m.get('threshold_o2_pct_ref')}% (ISS data)")
+    prov = []
+    for p in risk.get("provenance") or []:
+        s = f"{p.get('component')} {p.get('basis')}"
+        if p.get("n"):
+            s += f" n={p['n']}"
+        if p.get("r2") is not None:
+            s += f" R2={p['r2']:.2f}" + (" (low)" if p["r2"] < 0.2 else "")
+        prov.append(s)
+    if prov:
+        parts.append("basis: " + "; ".join(prov))
+    return " | ".join(parts)
+
+
+def _special_items(question: str, site: dict) -> list[dict]:
+    ql = question.lower()
+    mats = _mentioned_materials(question, site["risk"]) if site.get("risk") else []
+    out = []
+    for ident, text in (("flamesense_concept", _flamesense_text(site)), ("investigation_ranking", _ranking_text(site)),
+                        ("risk_engine", _risk_text(site, question))):
+        if not text:
+            continue
+        s = 5 * sum(1 for k in _TRIGGERS[ident] if k in ql)
+        if ident == "risk_engine" and mats:
+            s += 10
+        if s > 0:
+            out.append({"type": "special", "id": ident, "doi": None, "raw": {"text": text}, "score": s})
+    return sorted(out, key=lambda x: -x["score"])
 
 
 def select_context(question: str, site: dict, n_inv: int = 4, n_cards: int = 2) -> list[dict]:
@@ -89,11 +206,14 @@ def select_context(question: str, site: dict, n_inv: int = 4, n_cards: int = 2) 
     for kind, limit in (("investigation", n_inv), ("card", n_cards)):
         pool = sorted((x for x in scored if x[1] == kind), key=lambda x: -x[0])
         out += [x for x in pool[:limit] if x[0] > 0 or kind == "card" or not out]
-    return [{"type": k, "id": i, "doi": d, "raw": r, "score": s} for s, k, i, d, r in out]
+    base = [{"type": k, "id": i, "doi": d, "raw": r, "score": s} for s, k, i, d, r in out]
+    return _special_items(question, site) + base
 
 
 def _render_item(it: dict) -> str:
     r = it["raw"]
+    if it["type"] == "special":
+        return r["text"]
     if it["type"] == "card":
         return (f"[CARD {it['id']}] {r.get('title')} | value {r.get('value')} {r.get('unit')} (n={r.get('n')}) | "
                 f"{r.get('finding')} | caveat: {r.get('caveat')} | DOI {it['doi']}")
@@ -122,7 +242,7 @@ def build_context(items: list[dict], site: dict) -> str:
 
 
 def _source(it: dict) -> dict:
-    return {("card_id" if it["type"] == "card" else "psi_id"): it["id"], "doi": it["doi"]}
+    return {("psi_id" if it["type"] == "investigation" else "card_id"): it["id"], "doi": it["doi"]}
 
 
 def fallback_answer(question: str, items: list[dict], reason: str | None = None) -> dict:
@@ -130,7 +250,9 @@ def fallback_answer(question: str, items: list[dict], reason: str | None = None)
     lines = []
     for it in top:
         r = it["raw"]
-        if it["type"] == "card":
+        if it["type"] == "special":
+            lines.append(r["text"][:400])
+        elif it["type"] == "card":
             lines.append(f"{r.get('title')}: {r.get('finding')} (caveat: {r.get('caveat')})")
         else:
             lines.append(f"{it['id']} {r.get('name')}: {(r.get('summary') or r.get('title') or '')[:300]}")
@@ -200,6 +322,10 @@ def answer_question(question: str, site: dict | None = None) -> dict:
                 raise LLMCallError("bad_response")
             wanted = {str(s) for s in (res.get("sources") or res.get("cards") or [])}
             used = [i for i in items if str(i["id"]) in wanted] or [i for i in items if i["id"] and str(i["id"]) in answer]
+            al = answer.lower()
+            for i in items:  # special parts are rarely cited by id; match on their topic word in the answer
+                if i["type"] == "special" and i not in used and _MARKERS[i["id"]] in al:
+                    used.append(i)
             return {"answer": answer, "sources": [_source(i) for i in used], "mode": "llm", "reason": None}
         except Exception as e:
             reason = classify_error(e)
