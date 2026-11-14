@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 15 / 27
+- **İlerleme:** 16 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** D1 (`raw/` ister). Faz B ve C tamam.
+- **Sıradaki adım:** D2 (`meta/` dışa aktarımı, 5 MB sınırı: `files` 27 bin satır, boyut ölçülmeli). Faz B ve C tamam.
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -101,13 +101,14 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
 
 ## Faz D — Metadata DB
 
-- [ ] **D1** `detail.json` ayrıştırıcı
+- [x] **D1** `detail.json` ayrıştırıcı
   - Yap: `raw/*/detail.json` dosyalarından üç tablo üret:
     - `investigations`: psi_id, başlık, amaç, yaklaşım, etkiler, tarih.
     - `publications`: psi_id, doi, başlık, yıl.
     - `files`: psi_id, ad, uzantı, boyut, kategori.
   - Test: `pytest tests/data_layer/test_metadata.py`. Testte `tests/fixtures/detail_PSI-25.json` kullanılır (küçük, gerçek bir dosyadan kesilmiş).
-  - Kabul: Fixture'dan beklenen satırlar çıkıyor. Gerçek veriyle tam 24 investigation çıkıyor.
+  - Kabul: Fixture'dan beklenen satırlar çıkıyor. Gerçek veriyle tam 24 investigation çıkıyor. Not (plandan sapmalar): `publications`'ta yıl sütunu yok (kaynakta yok, uydurulmadı); `contacts` (e-posta/telefon) alınmadı; `files` tablosu `added` + `removed` içerir (`status` sütunu); `removed`'da 3.023 yinelenen yol gerçek veridir, tekilleştirilmedi (`source_row` added+removed sırasındaki konumdur, anahtar benzersiz kalır). Tablolar henüz dosyaya yazılmıyor (D2).
+  ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 231 passed, 0 skipped (test_metadata.py: 16; fixture `tests/fixtures/detail_PSI-25.json`, 14 KB, kişisel veri yok). Gerçek veri: 24 investigation (DOI'leri kalıba uygun), 352 yayın (68 DOI'siz), 16.354 added + 10.722 removed dosya, 855 mp4; 24 `detail.json`'un md5'i değişmedi. Negatif kontrol (6): tarih biçimi, boş DOI, contacts sızıntısı, eksik yayın, tekilleştirme, float yuvarlama hepsi yakalandı
 - [ ] **D2** `meta.duckdb` ve parquet dışa aktarımı
   - Yap: Üç tabloyu `data_analysis/Nasa_data/meta/` klasörüne yaz. Toplam boyut 5 MB'ın altında kalmalı ki commit edilebilsin.
   - Test: `pytest tests/data_layer/test_metadata.py::test_export`
