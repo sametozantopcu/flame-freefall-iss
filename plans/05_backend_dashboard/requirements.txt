@@ -1,9 +1,0 @@
-# 05 — Uygulama: Streamlit dashboard (minimum)
-pydantic>=2.5
-streamlit>=1.35       # mevcut app/
-plotly>=5.20
-pandas>=2.2
-pyarrow>=15
-pytest>=8
-# Modül paketleri: plans/01, 02, 03 requirements dosyalarına bakın (sayfalar bunları import eder)
-# (2026-11-14: fastapi, uvicorn, pydantic-settings, paho-mqtt, httpx kaldırıldı; yalnızca Streamlit)

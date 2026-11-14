@@ -1,0 +1,1578 @@
+window.FF = window.FF || {};
+window.FF.site = {
+ "cards": [
+  {
+   "caveat": "Only the completion subset (a small share of tests) supports d-squared scaling; burn time of extinguished droplets is cut short and must not be read without the end-of-test flag. In the CFI data (PSI-39, DOI 10.60555/m6pj-a914) the hot-flame burn time vs d0 slope is reversed (-1.42, from group_effects_numbers.json): large droplets reach radiative extinction earlier.",
+   "doi": "10.60555/mbq8-0451",
+   "equipment_implication": "Droplet-combustion sizing or burn-time planning must condition on completion vs extinction; do not extrapolate a single d-squared law across both outcomes.",
+   "finding": "For FLEX droplets that burned to completion, log burn time rises with log initial diameter with slope 2.13 (95% CI 1.76 to 2.52, n=27), close to the d-squared value of 2. Over all tests the slope drops to 1.31 (n=260) and for tests ending in extinction to 1.00 (n=179).",
+   "id": "flex_d2_slope",
+   "n": 27,
+   "psi_id": "PSI-69",
+   "source_file": "data_analysis/Nasa_data/analysis/outputs/d2_law_flex.csv",
+   "title": "FLEX droplets: burn time follows the d-squared law only when the burn completes",
+   "unit": "log-log slope",
+   "value": 2.125010356056976,
+   "values": {
+    "cfi_doi": "10.60555/m6pj-a914",
+    "cfi_hf_slope": -1.4247235803,
+    "cfi_psi_id": "PSI-39",
+    "ci_hi": 2.5223619911275392,
+    "ci_lo": 1.759391298014787,
+    "n_all": 260,
+    "n_extinction": 179,
+    "slope_all": 1.3095343814009959,
+    "slope_extinction": 0.9959579662558418
+   }
+  },
+  {
+   "caveat": "The EDA report (section 6.1) states there is no hot ignition at ~21% O2 for butane/propane; this is not reproduced by the Feature Store rows (hot_ignition_raw), so the card reports the measured rate. Small n, mixed fuel fractions and pressures, test-day effects are strong; flames that ignite mostly self-extinguish (SE). PSI-10 (Flame Design) rows carry no outcome column and are not used.",
+   "doi": "10.60555/cyt1-kh64",
+   "equipment_implication": "Do not assume a cabin-air (~21% O2) flame will fail to ignite: treat ignition as possible but uncertain and keep ignition sources controlled in the habitat.",
+   "finding": "At 20.5-21.5% initial O2 (butane and propane, ACME CFI-G normal flames) 20 of 34 tests hot-ignited (rate 0.59; butane 5/11, propane 15/23). At 35% O2 and above the rate is 0.72 (n=86).",
+   "id": "acme_ignition_21pct_o2",
+   "n": 34,
+   "psi_id": "PSI-159",
+   "source_file": "data_analysis/Nasa_data/analysis/data/acme_normal.parquet",
+   "title": "ACME normal flames: hot ignition at about 21% O2 is partial, not absent",
+   "unit": "hot-ignition fraction",
+   "value": 0.5882352941176471,
+   "values": {
+    "hot": 20,
+    "n": 34,
+    "n_o2_ge_35": 86,
+    "per_fuel": {
+     "butane": {
+      "hot": 5,
+      "n": 11
+     },
+     "propane": {
+      "hot": 15,
+      "n": 23
+     }
+    },
+    "rate_o2_ge_35": 0.7209302325581395
+   }
+  },
+  {
+   "caveat": "Smoke rows (SAME and SAME-R flight data) sit in the PSI-101 workbook; the pooled n includes 10 ground rows whose column mapping is unverified (the within-material check is flight only). Correlation, not a causal model; materials are not balanced across campaigns.",
+   "doi": "10.60555/2np7-jv14",
+   "equipment_implication": "Smoke-detector or particle-size models must include material as a feature; without it the learned heater-temperature trend points the wrong way.",
+   "finding": "Across all smoke tests, heater temperature ratio Rt/R0 correlates negatively with particle mean diameter (Spearman rho -0.27, n=141); with material held fixed the partial rho is 0.49, and within each material it is positive in 5 of 5 materials.",
+   "id": "smoke_simpson_rt_r0",
+   "n": 141,
+   "psi_id": "PSI-101",
+   "source_file": "data_analysis/Nasa_data/analysis/outputs/partial_correlations.csv",
+   "title": "Smoke particle size: Simpson's paradox hides the heater-temperature effect",
+   "unit": "partial Spearman rho (material fixed)",
+   "value": 0.4913896972239928,
+   "values": {
+    "marginal_rho": -0.27148050004320295,
+    "materials_positive": 5,
+    "materials_total": 5,
+    "partial_rho": 0.4913896972239928
+   }
+  },
+  {
+   "caveat": "PMMA only, burns with an O2 drop larger than 0.2 points; O2 and CO2 changes carry nearly the same information, so they are not independent targets. Median ratio, not a fit uncertainty.",
+   "doi": "10.60555/4qc4-de67",
+   "equipment_implication": "O2 and CO2 sensors in the enclosure cross-check each other; a ratio far from about -0.8 for a PMMA-like fuel signals a sensor fault.",
+   "finding": "Median change in CO2 over change in O2 for PMMA burns is -0.80 (n=66), against the theoretical -0.83 (-5/6).",
+   "id": "bass2_co2_o2_ratio",
+   "n": 66,
+   "psi_id": "PSI-25",
+   "source_file": "data_analysis/Nasa_data/analysis/outputs/group_effects_numbers.json",
+   "title": "BASS-II PMMA: CO2 gain per O2 lost matches stoichiometry",
+   "unit": "dCO2/dO2 (median)",
+   "value": -0.8,
+   "values": {
+    "theoretical": -0.8333333333333334
+   }
+  }
+ ],
+ "flamesense": {
+  "built": false,
+  "concept": true,
+  "dimensions_mm": [
+   140,
+   90,
+   45
+  ],
+  "images": [
+   "assets/flamesense_box/render_assembled.png",
+   "assets/flamesense_box/render_internal.png",
+   "assets/flamesense_box/render_exploded.png",
+   "assets/flamesense_box/render_detail.png"
+  ],
+  "ionization": "concept only",
+  "mcu": "ESP32-S3",
+  "sensors": [
+   "O2 (LuminOx)",
+   "CO",
+   "CO2 (SCD41)",
+   "hot-wire flow",
+   "particulate (SPS30)",
+   "thermal array (MLX90640)"
+  ]
+ },
+ "generated": "2026-06-09",
+ "investigations": [
+  {
+   "components": {
+    "data_volume": 0.8327948301433042,
+    "has_flight": 1.0,
+    "has_solid": 1.0,
+    "low_flow_overlap": 1.0,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/2np7-jv14",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": {
+     "max": 8.1,
+     "min": 1.0
+    },
+    "fuels": [
+     "Kapton",
+     "Lampwick",
+     "Pyrell",
+     "Silicone",
+     "Teflon"
+    ],
+    "gravity": [
+     "1g",
+     "µg"
+    ],
+    "materials": [
+     "Kapton",
+     "Lampwick",
+     "Pyrell",
+     "Silicone",
+     "Teflon"
+    ],
+    "n_rows": 167,
+    "o2_pct": null,
+    "phenomena": [
+     "smoke"
+    ],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap"
+   ],
+   "n_components_known": 4,
+   "name": "SAME-R",
+   "psi_id": "PSI-101",
+   "rank": 1,
+   "rationale": "Score 95/100 from 4 known components (low-flow overlap 100%, micro-g flight data); 2 component(s) unknown.",
+   "score": 95.4398590039083,
+   "score_status": "scored",
+   "summary": "Similar to the original SAME investigation, the primary objective of the SAME-R investigation was to quantify the sizes that the liquid smoke particulate achieves in low gravity and to relate the droplet size distribution to the smoke generation and smoke transport conditions in the experiment. One of the problems encountered during the SAME investigation was that after the thermal precipitators were returned to the...",
+   "title": "Smoke Aerosol Measurement Experiment-Reflight"
+  },
+  {
+   "components": {
+    "data_volume": 0.4506272025479436,
+    "has_flight": 1.0,
+    "has_solid": 1.0,
+    "low_flow_overlap": 1.0,
+    "o2_overlap": 1.0,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/2chp-m469",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": {
+     "max": 20.0,
+     "min": 20.0
+    },
+    "fuels": [
+     "Cotton-Fiberglass (SIBAL)",
+     "PMMA",
+     "PMMA & Nomex",
+     "Silicone"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [
+     "Cotton-Fiberglass (SIBAL)",
+     "PMMA",
+     "PMMA & Nomex",
+     "Silicone"
+    ],
+    "n_rows": 15,
+    "o2_pct": {
+     "max": 22.1,
+     "min": 21.5
+    },
+    "phenomena": [
+     "burn_time",
+     "flame_spread"
+    ],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "pressure_overlap"
+   ],
+   "n_components_known": 5,
+   "name": "SAFFIRE-II",
+   "psi_id": "PSI-99",
+   "rank": 2,
+   "rationale": "Score 90/100 from 5 known components (O2 overlap 100%, low-flow overlap 100%, micro-g flight data); 1 component(s) unknown.",
+   "score": 89.69926004777393,
+   "score_status": "scored",
+   "summary": "The objectives of SAFFIRE-II are to determine how rapidly a large scale fire grows in low-gravity and to investigate the low-g flammability limits compared to those obtained in NASA’s normal gravity material flammability screening test.",
+   "title": "Spacecraft Fire Experiment-II"
+  },
+  {
+   "components": {
+    "data_volume": 0.5295365002327912,
+    "has_flight": 1.0,
+    "has_solid": 1.0,
+    "low_flow_overlap": 1.0,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/gd4k-8h62",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": {
+     "max": 8.0,
+     "min": 2.0
+    },
+    "fuels": [
+     "Kapton",
+     "Lampwick",
+     "Silicone",
+     "Teflon"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [
+     "Kapton",
+     "Lampwick",
+     "Silicone",
+     "Teflon"
+    ],
+    "n_rows": 25,
+    "o2_pct": null,
+    "phenomena": [
+     "smoke"
+    ],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap"
+   ],
+   "n_components_known": 4,
+   "name": "SAME",
+   "psi_id": "PSI-102",
+   "rank": 3,
+   "rationale": "Score 87/100 from 4 known components (low-flow overlap 100%, micro-g flight data); 2 component(s) unknown.",
+   "score": 87.16917727907612,
+   "score_status": "scored",
+   "summary": "One of the major goals of this investigation was to quantify the sizes that the liquid smoke particulate achieves in low gravity and to relate the droplet size distribution to the smoke generation and smoke transport conditions in the experiment. A numerical code was to be developed to predict the smoke droplet growth as a function of the fuel pyrolysis rate, the thermodynamic properties of the pyrolysis vapor, and...",
+   "title": "Smoke and Aerosol Measurement Experiment"
+  },
+  {
+   "components": {
+    "data_volume": 0.2615809904791421,
+    "has_flight": 1.0,
+    "has_solid": 1.0,
+    "low_flow_overlap": 1.0,
+    "o2_overlap": 1.0,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/0t15-1z43",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": {
+     "max": 20.0,
+     "min": 20.0
+    },
+    "fuels": [
+     "SIBAL Fabric"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [
+     "SIBAL Fabric"
+    ],
+    "n_rows": 4,
+    "o2_pct": {
+     "max": 21.5,
+     "min": 21.5
+    },
+    "phenomena": [
+     "burn_time"
+    ],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "pressure_overlap"
+   ],
+   "n_components_known": 5,
+   "name": "SAFFIRE-I",
+   "psi_id": "PSI-98",
+   "rank": 4,
+   "rationale": "Score 86/100 from 5 known components (O2 overlap 100%, low-flow overlap 100%, micro-g flight data); 1 component(s) unknown.",
+   "score": 86.15464357148392,
+   "score_status": "scored",
+   "summary": "The objectives of this investigation were to: (1) determine how rapidly a large scale fire grows in low-gravity and (2) investigate the low-g flammability limits compared to those obtained in NASA’s normal gravity material flammability screening test.",
+   "title": "Spacecraft Fire Safety Experiment-I"
+  },
+  {
+   "components": {
+    "data_volume": 0.7911174907119334,
+    "has_flight": 1.0,
+    "has_solid": 1.0,
+    "low_flow_overlap": null,
+    "o2_overlap": 0.6046511627906976,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/4qc4-de67",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "Nomex",
+     "PMMA",
+     "SIBAL",
+     "Wax candle"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [
+     "Nomex",
+     "PMMA",
+     "SIBAL",
+     "Wax candle"
+    ],
+    "n_rows": 129,
+    "o2_pct": {
+     "max": 22.2,
+     "min": 13.6
+    },
+    "phenomena": [
+     "combustion_products"
+    ],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "pressure_overlap",
+    "low_flow_overlap"
+   ],
+   "n_components_known": 4,
+   "name": "BASS-II",
+   "psi_id": "PSI-25",
+   "rank": 5,
+   "rationale": "Score 80/100 from 4 known components (O2 overlap 60%, micro-g flight data); 2 component(s) unknown.",
+   "score": 79.97390989299451,
+   "score_status": "scored",
+   "summary": "BASS-II results contribute to the combustion computational models used in the design of fire detection and suppression systems in microgravity and on Earth. Objectives Include: 1) Study the ignition, flame growth, flame spread, and extinction limits for solid fuels burning in low-velocity forced flows in microgravity. 2) Begin to bridge the gap between the normal gravity NASA-STD-6001 Test #1 method, ground-based...",
+   "title": "Burning and Suppression of Solids - II"
+  },
+  {
+   "components": {
+    "data_volume": 0.882428328737195,
+    "has_flight": 1.0,
+    "has_solid": 0.0,
+    "low_flow_overlap": null,
+    "o2_overlap": 1.0,
+    "pressure_overlap": 0.09869232667160129
+   },
+   "doi": "10.60555/m6pj-a914",
+   "envelope": {
+    "diluents": [
+     "He",
+     "N2"
+    ],
+    "flow_cm_s": null,
+    "fuels": [
+     "Farnesane",
+     "dodecane60/isododecane40",
+     "dodecane75/isododecane25",
+     "n-dodecane"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [],
+    "n_rows": 227,
+    "o2_pct": {
+     "max": 21.0,
+     "min": 17.0
+    },
+    "phenomena": [
+     "burn_time",
+     "burning_rate",
+     "cool_flame",
+     "extinction"
+    ],
+    "pressure_atm": {
+     "max": 5.0,
+     "min": 0.5
+    }
+   },
+   "missing_components": [
+    "low_flow_overlap"
+   ],
+   "n_components_known": 5,
+   "name": "CFI",
+   "psi_id": "PSI-39",
+   "rank": 6,
+   "rationale": "Score 65/100 from 5 known components (O2 overlap 100%, pressure overlap 10%, micro-g flight data); 1 component(s) unknown.",
+   "score": 64.95326054645876,
+   "score_status": "scored",
+   "summary": "The objectives of this investigation are to: 1) Examine the combustion behavior of n-dodecane and mixtures of n-dodecane/iso-dodecane at pressures ranging from 0.25 atm to 5 atm. 2) Analyze the effects of helium dilution on cool flame behavior. 3) Examine the behavior of combustion characteristics. 4) Investigate the relationship between droplet size, pressure, and flame extinction, and (5) understand the...",
+   "title": "Cool Flames Investigation"
+  },
+  {
+   "components": {
+    "data_volume": 1.0,
+    "has_flight": 1.0,
+    "has_solid": 0.0,
+    "low_flow_overlap": 0.2285511699361853,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/9kbh-e962",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": {
+     "max": 85.28,
+     "min": 0.66
+    },
+    "fuels": [
+     "50 % Propylene",
+     "75 % Propylene",
+     "75% Propylene",
+     "Ethylene",
+     "Methane",
+     "Propane",
+     "Propylene"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [],
+    "n_rows": 469,
+    "o2_pct": null,
+    "phenomena": [
+     "burn_time"
+    ],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap"
+   ],
+   "n_components_known": 4,
+   "name": "SPICE",
+   "psi_id": "PSI-107",
+   "rank": 7,
+   "rationale": "Score 61/100 from 4 known components (low-flow overlap 23%, micro-g flight data); 2 component(s) unknown.",
+   "score": 60.77866827098686,
+   "score_status": "scored",
+   "summary": "The objective of SPICE is to better understand the complex process of combustion by observing flames in a microgravity environment aboard the International Space Station (ISS) and analogous ground experiments. Specific objectives were: (1) Identify the laminar smoke-point properties of non-buoyant jet diffusion flames under various co-flow conditions in microgravity. (2) Determine the effects of burner diameter and...",
+   "title": "Smoke Point In Co-flow Experiment"
+  },
+  {
+   "components": {
+    "data_volume": 0.9128904791363917,
+    "has_flight": 1.0,
+    "has_solid": 0.0,
+    "low_flow_overlap": null,
+    "o2_overlap": 0.7727272727272727,
+    "pressure_overlap": 0.1289374997386326
+   },
+   "doi": "10.60555/mbq8-0451",
+   "envelope": {
+    "diluents": [
+     "CO2",
+     "He",
+     "N2"
+    ],
+    "flow_cm_s": null,
+    "fuels": [
+     "Heptane",
+     "Methanol"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [],
+    "n_rows": 274,
+    "o2_pct": {
+     "max": 34.0,
+     "min": 12.0
+    },
+    "phenomena": [
+     "burn_time",
+     "burning_rate",
+     "extinction"
+    ],
+    "pressure_atm": {
+     "max": 3.0525,
+     "min": 0.6924999999999999
+    }
+   },
+   "missing_components": [
+    "low_flow_overlap"
+   ],
+   "n_components_known": 5,
+   "name": "FLEX",
+   "psi_id": "PSI-69",
+   "rank": 8,
+   "rationale": "Score 60/100 from 5 known components (O2 overlap 77%, pressure overlap 13%, micro-g flight data); 1 component(s) unknown.",
+   "score": 59.51798705882394,
+   "score_status": "scored",
+   "summary": "The FLEX (Flame Extinguishment Experiment) investigation aims to map the flammability limits of liquid fuels in microgravity environments, measure the effectiveness of various gaseous fire suppressants such as CO2, He, and SF6, and develop reliable predictive models for combustion limits under reduced gravity conditions. The mission seeks to validate and improve simplified models by incorporating detailed chemical...",
+   "title": "Flame Extinguishment Experiment"
+  },
+  {
+   "components": {
+    "data_volume": 0.5682853026389494,
+    "has_flight": 1.0,
+    "has_solid": 0.0,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/23e1-9950",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "100% C2H10",
+     "100% C2H11",
+     "100% C2H4",
+     "100% C2H5",
+     "100% C2H6",
+     "100% C2H7",
+     "100% C2H8",
+     "100% C2H9",
+     "100% CH4",
+     "100% CH5",
+     "100% CH6",
+     "30% C2H4",
+     "30% C2H5",
+     "40% CH10",
+     "40% CH11",
+     "40% CH12",
+     "40% CH13",
+     "40% CH14",
+     "40% CH4",
+     "40% CH5",
+     "40% CH6",
+     "40% CH7",
+     "40% CH8",
+     "40% CH9",
+     "50% C2H4",
+     "50% C2H5",
+     "50% C2H6",
+     "50% C2H7",
+     "50% C2H8",
+     "50% C2H9"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [],
+    "n_rows": 32,
+    "o2_pct": null,
+    "phenomena": [
+     "ignition"
+    ],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap"
+   ],
+   "n_components_known": 3,
+   "name": "ACME CLD Flame",
+   "psi_id": "PSI-21",
+   "rank": 9,
+   "rationale": "Score 59/100 from 3 known components (micro-g flight data); 3 component(s) unknown.",
+   "score": 58.810698848960605,
+   "score_status": "scored",
+   "summary": "In order to provide the experimental data needed to allow rigorous testing of computational models at the extremes of the fuel dilution spectrum, we have the following objectives: A) Characterize the behavior of weak coflow diffusion flames of methane and ethylene, as a function of velocity and fuel dilution, through measurement of flame shape, lift-off heights, temperatures and extinction limits. B) Characterize...",
+   "title": "Advanced Combustion via Microgravity Experiments / Coflow Laminar Diffusion Flame"
+  },
+  {
+   "components": {
+    "data_volume": 0.5682853026389494,
+    "has_flight": 1.0,
+    "has_solid": 0.0,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/se5a-8c73",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "100% C2H4",
+     "100% CH4",
+     "30% C2H4",
+     "40% CH4"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [],
+    "n_rows": 32,
+    "o2_pct": null,
+    "phenomena": [
+     "ignition"
+    ],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap"
+   ],
+   "n_components_known": 3,
+   "name": "ACME E-FIELD Flames",
+   "psi_id": "PSI-22",
+   "rank": 10,
+   "rationale": "Score 59/100 from 3 known components (micro-g flight data); 3 component(s) unknown.",
+   "score": 58.810698848960605,
+   "score_status": "scored",
+   "summary": "The objective of this investigation is to better understand the relationship between electric field voltage and chemi-ion current, analyze the dynamic response of flames to electric field changes, evaluate soot formation, and characterize stabilized near-limit lifted flames.",
+   "title": "Advanced Combustion via Microgravity Experiments Electric-Field Effects on Laminar Diffusion Flames"
+  },
+  {
+   "components": {
+    "data_volume": null,
+    "has_flight": 1.0,
+    "has_solid": null,
+    "low_flow_overlap": null,
+    "o2_overlap": 0.6,
+    "pressure_overlap": 0.1776461880088823
+   },
+   "doi": "10.60555/byp8-h018",
+   "envelope": {
+    "diluents": [
+     "diluent gas"
+    ],
+    "flow_cm_s": null,
+    "fuels": [],
+    "gravity": [
+     "microgravity"
+    ],
+    "materials": [],
+    "n_rows": null,
+    "o2_pct": {
+     "max": 40.0,
+     "min": 10.0
+    },
+    "phenomena": [],
+    "pressure_atm": {
+     "max": 3.0,
+     "min": 0.5
+    }
+   },
+   "missing_components": [
+    "low_flow_overlap",
+    "has_solid",
+    "data_volume"
+   ],
+   "n_components_known": 3,
+   "name": "FLEX-2",
+   "psi_id": "PSI-68",
+   "rank": 11,
+   "rationale": "Score 56/100 from 3 known components (O2 overlap 60%, pressure overlap 18%, micro-g flight data); 3 component(s) unknown.",
+   "score": 55.92153960029607,
+   "score_status": "scored",
+   "summary": "The primary goal of the FLEX-2 flight experiments is to extend the results of FLEX-1 to fuels and environmental conditions that mimic real combustor conditions, as well as, provide benchmark experimental data on bi-component droplet combustion over a wide range of initial conditions in order to validate numerical simulations and to develop new theoretical models. Detailed experimental objectives can be further...",
+   "title": "Flame Extinguishment Experiment - 2"
+  },
+  {
+   "components": {
+    "data_volume": 0.4785579230023812,
+    "has_flight": 1.0,
+    "has_solid": 0.0,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/vb93-3y72",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "100% C2H4",
+     "100% CH4",
+     "100%C2H4",
+     "50% C2H4"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [],
+    "n_rows": 18,
+    "o2_pct": null,
+    "phenomena": [
+     "ignition"
+    ],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap"
+   ],
+   "n_components_known": 3,
+   "name": "ACME BRE",
+   "psi_id": "PSI-20",
+   "rank": 12,
+   "rationale": "Score 55/100 from 3 known components (micro-g flight data); 3 component(s) unknown.",
+   "score": 55.44592211258929,
+   "score_status": "scored",
+   "summary": "The BRE flight program seeks to establish the burning conditions in a quiescent microgravity ambient in terms of material properties. The specific flight objectives are as follows. 1. Observe burning behavior in long-duration microgravity for CH4/N2 and C2H4/N2mixtures on porous circular burners of 25 and 50 mm diameter. Consider O2/N2 ambients with various pressures and ambient O2 concentrations and pressures. NASA...",
+   "title": "Advanced Combustion via Microgravity Experiments - Burning Rate Emulator"
+  },
+  {
+   "components": {
+    "data_volume": 0.4785579230023812,
+    "has_flight": 1.0,
+    "has_solid": 0.0,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/k57n-p030",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "100% H2",
+     "20% C2H4 with He",
+     "20% H2, 25% CH4, with He",
+     "25% C2H4 with He",
+     "25% H2, 20% CH4, with He",
+     "30% C2H4 with He",
+     "30% H2, 15% CH4, with He",
+     "35% H2 with He",
+     "44.4% H2 with CH4",
+     "45% CH4 with He",
+     "45% CH4 with N2",
+     "45% CH4 with N3",
+     "45% H2 with He",
+     "50% C2H4 with N2",
+     "50% C2H4 with N3",
+     "66.7% H2 with CH4"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [],
+    "n_rows": 18,
+    "o2_pct": null,
+    "phenomena": [
+     "ignition"
+    ],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap"
+   ],
+   "n_components_known": 3,
+   "name": "ACME s-Flame",
+   "psi_id": "PSI-23",
+   "rank": 13,
+   "rationale": "Score 55/100 from 3 known components (micro-g flight data); 3 component(s) unknown.",
+   "score": 55.44592211258929,
+   "score_status": "scored",
+   "summary": "A series of experiments is proposed with the following specific objectives, in both soot-free and sooty flames, to compare with detailed computational simulation to assess transport properties and detailed chemical kinetics (including chemiluminescence): Objective A. Measure and characterize the transient structure (such as temperature and species distribution) of diffusion flames established at initially...",
+   "title": "Advanced Combustion via Microgravity Experiments-Structure and Response of Spherical Diffusion Flames"
+  },
+  {
+   "components": {
+    "data_volume": 0.1785568044608419,
+    "has_flight": 1.0,
+    "has_solid": 1.0,
+    "low_flow_overlap": 0.0,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/040q-4h36",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": {
+     "max": 30.0,
+     "min": 30.0
+    },
+    "fuels": [
+     "SIBAL Fabric"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [
+     "SIBAL Fabric"
+    ],
+    "n_rows": 2,
+    "o2_pct": null,
+    "phenomena": [],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap"
+   ],
+   "n_components_known": 4,
+   "name": "SAFFIRE-III",
+   "psi_id": "PSI-100",
+   "rank": 14,
+   "rationale": "Score 50/100 from 4 known components (low-flow overlap 0%, micro-g flight data); 2 component(s) unknown.",
+   "score": 50.324276485295684,
+   "score_status": "scored",
+   "summary": "The objectives of this investigation were to: (1) determine how rapidly a large scale fire grows in low-gravity and (2) investigate the low-g flammability limits compared to those obtained in NASA’s normal gravity material flammability screening test.",
+   "title": "Spacecraft Fire Experiment-III"
+  },
+  {
+   "components": {
+    "data_volume": 0.9444813030766922,
+    "has_flight": 1.0,
+    "has_solid": 0.0,
+    "low_flow_overlap": null,
+    "o2_overlap": 0.2465753424657534,
+    "pressure_overlap": 0.15988526349251306
+   },
+   "doi": "10.60555/cyt1-kh64",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "butane",
+     "ethane",
+     "propane"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [],
+    "n_rows": 333,
+    "o2_pct": {
+     "max": 85.0,
+     "min": 12.0
+    },
+    "phenomena": [
+     "burn_time",
+     "extinction",
+     "ignition"
+    ],
+    "pressure_atm": {
+     "max": 3.2666173205033306,
+     "min": 0.48890372563533185
+    }
+   },
+   "missing_components": [
+    "low_flow_overlap"
+   ],
+   "n_components_known": 5,
+   "name": "ACME CFI-G",
+   "psi_id": "PSI-159",
+   "rank": 15,
+   "rationale": "Score 45/100 from 5 known components (O2 overlap 25%, pressure overlap 16%, micro-g flight data); 1 component(s) unknown.",
+   "score": 45.32859809134644,
+   "score_status": "scored",
+   "summary": "1. Plan and support flight testing on the International Space Station (ISS). 2. Determine the conditions for which cool diffusion flames occur for propane, n-butane, and n-pentane; normal and inverse flames; and a broad range of Zst, Tad, and fluent flow rate. 3. Support the flight tests with advanced CFD simulations. 4. Identify or develop a chemical kinetics mechanism that yields good agreement between the CFD...",
+   "title": "Advanced Combustion via Microgravity Experiments / Cool Flames Investigation with Gases"
+  },
+  {
+   "components": {
+    "data_volume": 0.9415350699975014,
+    "has_flight": 1.0,
+    "has_solid": 0.0,
+    "low_flow_overlap": null,
+    "o2_overlap": 0.23308003594540727,
+    "pressure_overlap": 0.17132680761885483
+   },
+   "doi": "10.60555/w4zy-bt45",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "ethylene",
+     "propane"
+    ],
+    "gravity": [
+     "µg"
+    ],
+    "materials": [],
+    "n_rows": 327,
+    "o2_pct": {
+     "max": 84.9977932,
+     "min": 19.804819300000002
+    },
+    "phenomena": [],
+    "pressure_atm": {
+     "max": 3.01818033,
+     "min": 0.42596796
+    }
+   },
+   "missing_components": [
+    "low_flow_overlap"
+   ],
+   "n_components_known": 5,
+   "name": "ACME/Flame Design",
+   "psi_id": "PSI-10",
+   "rank": 16,
+   "rationale": "Score 45/100 from 5 known components (O2 overlap 23%, pressure overlap 17%, micro-g flight data); 1 component(s) unknown.",
+   "score": 45.14889776585271,
+   "score_status": "scored",
+   "summary": "The primary objectives of this flight experiment are: A. Obtain soot-inception limits of quasi-steady normal and inverse spherical diffusion flames as functions of flow rate, Zst, amount of inert (N2 or CO2), and pressure for C2H4 and CH4 flames. Identify the corresponding temperatures in hot regions. Obtain similar limits and temperatures for inverse and normal coflow flames. B. Obtain detailed measurements in...",
+   "title": "Advanced Combustion via Microgravity Experiments / Flame Design"
+  },
+  {
+   "components": {
+    "data_volume": null,
+    "has_flight": 1.0,
+    "has_solid": null,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/pm12-rg61",
+   "envelope": {
+    "diluents": [
+     "nitrogen"
+    ],
+    "flow_cm_s": null,
+    "fuels": [
+     "ethylene",
+     "methane"
+    ],
+    "gravity": [
+     "microgravity"
+    ],
+    "materials": [],
+    "n_rows": null,
+    "o2_pct": null,
+    "phenomena": [],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap",
+    "has_solid",
+    "data_volume"
+   ],
+   "n_components_known": 1,
+   "name": "SLICE",
+   "psi_id": "PSI-106",
+   "rank": 17,
+   "rationale": "Low confidence: only 1 of 6 components known (micro-g flight flag); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
+   "summary": "Objective: The objective of this investigation is to better understand the structure and stability of laminar diffusion flames in microgravity. Specific objectives of this investigation were: 1. To investigate the structure of laminar diffusion flames in microgravity to understand the stabilizing mechanisms at the flames base. 2. Determine the liftoff velocity limits for different fuels and burner diameters. 3....",
+   "title": "Structure and Liftoff In Combustion Experiment"
+  },
+  {
+   "components": {
+    "data_volume": null,
+    "has_flight": 1.0,
+    "has_solid": null,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/q0v5-1v28",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "dibutyl-phthalate (DBP)"
+    ],
+    "gravity": [
+     "Earth gravity",
+     "microgravity"
+    ],
+    "materials": [],
+    "n_rows": null,
+    "o2_pct": null,
+    "phenomena": [],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap",
+    "has_solid",
+    "data_volume"
+   ],
+   "n_components_known": 1,
+   "name": "Utilization of the Smoke Aerosol Measurement Experiment Data for Advanced Modeling and Simulation of Smoke Generation in Micro-Gravity",
+   "psi_id": "PSI-115",
+   "rank": 18,
+   "rationale": "Low confidence: only 1 of 6 components known (micro-g flight flag); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
+   "summary": "The objective of this investigation was to use numerical simulation to explore the influence of gravity on pyrolysis smoke growth from a fundamental perspective. The intention of this effort is to quantify the differences between microgravity and Earth gravity smoke, and to identify the fluid dynamic mechanisms that cause the differences.",
+   "title": "Utilization of the Smoke Aerosol Measurement Experiment Data for Advanced Modeling and Simulation of Smoke Generation in Micro-Gravity"
+  },
+  {
+   "components": {
+    "data_volume": null,
+    "has_flight": 1.0,
+    "has_solid": null,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/gz0q-b577",
+   "envelope": {
+    "diluents": [
+     "ozone"
+    ],
+    "flow_cm_s": null,
+    "fuels": [
+     "n-alkane"
+    ],
+    "gravity": [
+     "microgravity"
+    ],
+    "materials": [],
+    "n_rows": null,
+    "o2_pct": null,
+    "phenomena": [],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap",
+    "has_solid",
+    "data_volume"
+   ],
+   "n_components_known": 1,
+   "name": "Effect of External Thermo-Convective Perturbation on Cool Flame Dynamics: A Multidimensional Multi-Physics CFD Analysis",
+   "psi_id": "PSI-117",
+   "rank": 19,
+   "rationale": "Low confidence: only 1 of 6 components known (micro-g flight flag); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
+   "summary": "The objective of this ground investigation was to use flight data obtained from PSI through NASA’s Flame Extinguishment Experiment (FLEX) to quantify how externally imposed thermal and convective perturbations regulated the dynamics and ultimate fate of already established droplet cool flames, and to explain run-to-run variability by isolating the roles of deliberate heating and unintentional drift-induced...",
+   "title": "Effect of External Thermo-Convective Perturbation on Cool Flame Dynamics: A Multidimensional Multi-Physics CFD Analysis"
+  },
+  {
+   "components": {
+    "data_volume": null,
+    "has_flight": null,
+    "has_solid": null,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": 0.0
+   },
+   "doi": "10.60555/80qf-vj95",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "DME",
+     "dimethyl ether (DME)",
+     "n-heptane"
+    ],
+    "gravity": [],
+    "materials": [],
+    "n_rows": null,
+    "o2_pct": null,
+    "phenomena": [
+     "cool flame transitions",
+     "radiation / stretch extinction"
+    ],
+    "pressure_atm": {
+     "max": 20.0,
+     "min": 20.0
+    }
+   },
+   "missing_components": [
+    "o2_overlap",
+    "low_flow_overlap",
+    "has_flight",
+    "has_solid",
+    "data_volume"
+   ],
+   "n_components_known": 1,
+   "name": "Quantitative Studies of Cool Flame Transitions at Radiation / Stretch Extinction Using Counterflow Flames",
+   "psi_id": "PSI-142",
+   "rank": 20,
+   "rationale": "Low confidence: only 1 of 6 components known (pressure overlap); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
+   "summary": "By using the Flame Extinguishment (FLEX) experimental data from the Physical Sciences Informatics (PSI) system of combustion science, the purpose of this grant was to conduct new simulations and ground-based experiments using ozone-sensitized counterflow flames to: 1) Develop a new diagram of the flammability limits of diffusional cool flames affected by radiation, diffusion, and convection. 2) Bridge the knowledge...",
+   "title": "Quantitative Studies of Cool Flame Transitions at Radiation / Stretch Extinction Using Counterflow Flames"
+  },
+  {
+   "components": {
+    "data_volume": null,
+    "has_flight": null,
+    "has_solid": null,
+    "low_flow_overlap": 0.0,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/58h4-dy80",
+   "envelope": {
+    "diluents": [
+     "nitrogen"
+    ],
+    "flow_cm_s": {
+     "max": 40.0,
+     "min": 40.0
+    },
+    "fuels": [
+     "75% cotton and 25% fiberglass",
+     "Nomex fabric",
+     "Ultem"
+    ],
+    "gravity": [],
+    "materials": [],
+    "n_rows": null,
+    "o2_pct": null,
+    "phenomena": [],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "has_flight",
+    "has_solid",
+    "data_volume"
+   ],
+   "n_components_known": 1,
+   "name": "BASS",
+   "psi_id": "PSI-26",
+   "rank": 21,
+   "rationale": "Low confidence: only 1 of 6 components known (low-flow overlap); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
+   "summary": "The two main objectives for BASS are to: 1.) Begin to bridge the gap between the normal gravity NASA-STD-6001 Test#1 method, ground-based microgravity tests, and actual material flammability in microgravity. The relation between these can be investigated by observing flames burning for the longer times available in flight. Practical, realistic (thicker) fuels in typical geometries will be examined, including wake...",
+   "title": "Burning and Suppression of Solids"
+  },
+  {
+   "components": {
+    "data_volume": null,
+    "has_flight": 1.0,
+    "has_solid": null,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/e9xp-ex83",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "polymethyl methacrylate (PMMA)",
+     "wax"
+    ],
+    "gravity": [
+     "microgravity",
+     "normal-gravity"
+    ],
+    "materials": [],
+    "n_rows": null,
+    "o2_pct": null,
+    "phenomena": [],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap",
+    "has_solid",
+    "data_volume"
+   ],
+   "n_components_known": 1,
+   "name": "Concurrent Flame Spread Modeling using Flamelet Generated Manifolds in Microgravity with Comparison to BASS Experiments using Two-Color Tomography",
+   "psi_id": "PSI-62",
+   "rank": 22,
+   "rationale": "Low confidence: only 1 of 6 components known (micro-g flight flag); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
+   "summary": "The objective of this research was to develop and validate new flamelet generated manifold (FGM) modeling techniques for concurrent flame spread in microgravity. Concurrent flame spread presented one of the greatest modeling challenges in combustion science due to the intricate coupling between heat transfer, mass transport, and chemical kinetics near the solid-vapor interface. Traditional modeling strategies often...",
+   "title": "Concurrent Flame Spread Modeling using Flamelet Generated Manifolds in Microgravity with Comparison to BASS Experiments using Two-Color Tomography"
+  },
+  {
+   "components": {
+    "data_volume": null,
+    "has_flight": null,
+    "has_solid": null,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/ztgj-d202",
+   "envelope": {
+    "diluents": [
+     "GN2"
+    ],
+    "flow_cm_s": null,
+    "fuels": [
+     "Arizona Red Dust (ARD)"
+    ],
+    "gravity": [],
+    "materials": [],
+    "n_rows": null,
+    "o2_pct": null,
+    "phenomena": [],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap",
+    "has_flight",
+    "has_solid",
+    "data_volume"
+   ],
+   "n_components_known": 0,
+   "name": "DAFT / DAFT-2",
+   "psi_id": "PSI-47",
+   "rank": 23,
+   "rationale": "Not scorable: no habitat-relevant condition is known for this investigation.",
+   "score": null,
+   "score_status": "not_scorable",
+   "summary": "The focus of DAFT / DAFT-2 was to mitigate the risk for the Smoke Aerosol Measurement Experiment (SAME). SAME relied on a commercially available condensate nuclei counter, the TSI P-Trak, to quantify smoke aerosols in a microgravity environment, however there were concerns that th P-Trak would not be reliable in microgravity as it relies on gravity to recycle isopropyl alcohol used in the measurement process. DAFT /...",
+   "title": "Dust and Aerosol Measurement Feasibility Test / Dust and Aerosol Measurement Feasibility Test-2"
+  },
+  {
+   "components": {
+    "data_volume": null,
+    "has_flight": null,
+    "has_solid": null,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/mzjm-yv57",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [],
+    "gravity": [],
+    "materials": [],
+    "n_rows": null,
+    "o2_pct": null,
+    "phenomena": [],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap",
+    "has_flight",
+    "has_solid",
+    "data_volume"
+   ],
+   "n_components_known": 0,
+   "name": "Computational and Experimental Analysis of SPICE Data Sets",
+   "psi_id": "PSI-60",
+   "rank": 24,
+   "rationale": "Not scorable: no habitat-relevant condition is known for this investigation.",
+   "score": null,
+   "score_status": "not_scorable",
+   "summary": "This ground investigation sought to increase understanding of the issues that control the large discrepancy between soot formation in 1g and in 0g flames. The objective of this investigation was to integrate computational and experimental methods to derive temperature distributions and soot volume fractions from the Smoke Point in Coflow Experiment (SPICE) data available in PSI. By analyzing over 1600 raw DSLR...",
+   "title": "Computational and Experimental Analysis of SPICE Data Sets"
+  }
+ ],
+ "meta": {
+  "model_cv": {
+   "fuel_diluent": {
+    "groups": [
+     "Heptane|CO2",
+     "Heptane|He",
+     "Heptane|N2",
+     "Methanol|CO2",
+     "Methanol|He",
+     "Methanol|N2"
+    ],
+    "mae": 0.08698952543740891,
+    "n": 258,
+    "n_groups": 6,
+    "r2": 0.3728400677249778
+   },
+   "method": "GroupKFold (pooled out-of-fold), Ridge alpha=1",
+   "n_splits": {
+    "fuel_diluent": 6,
+    "year": 3
+   },
+   "primary": "fuel_diluent",
+   "year": {
+    "groups": [
+     "2009",
+     "2010",
+     "2011"
+    ],
+    "mae": 0.05399363538068745,
+    "n": 209,
+    "n_groups": 3,
+    "r2": 0.5670865718865574
+   }
+  },
+  "no_partial_gravity_data": true,
+  "notes": [
+   "No partial-gravity (Moon/Mars) data exists in the datasets; scores are habitat-condition overlap only.",
+   "Valid only for fuel/diluent combinations present in FLEX data."
+  ],
+  "score_assumptions": {
+   "habitat": {
+    "low_flow_cm_s": [
+     0.0,
+     20.0
+    ],
+    "o2_pct": [
+     17.0,
+     35.0
+    ],
+    "pressure_kpa": [
+     56.0,
+     101.0
+    ]
+   },
+   "kpa_per_atm": 101.325,
+   "min_known": 3,
+   "weights": {
+    "data_volume": 0.15,
+    "has_flight": 0.15,
+    "has_solid": 0.1,
+    "low_flow_overlap": 0.15,
+    "o2_overlap": 0.25,
+    "pressure_overlap": 0.2
+   }
+  },
+  "source_dois": [
+   "10.60555/040q-4h36",
+   "10.60555/0t15-1z43",
+   "10.60555/23e1-9950",
+   "10.60555/2chp-m469",
+   "10.60555/2np7-jv14",
+   "10.60555/4qc4-de67",
+   "10.60555/58h4-dy80",
+   "10.60555/80qf-vj95",
+   "10.60555/9kbh-e962",
+   "10.60555/byp8-h018",
+   "10.60555/cyt1-kh64",
+   "10.60555/e9xp-ex83",
+   "10.60555/gd4k-8h62",
+   "10.60555/gz0q-b577",
+   "10.60555/k57n-p030",
+   "10.60555/m6pj-a914",
+   "10.60555/mbq8-0451",
+   "10.60555/mzjm-yv57",
+   "10.60555/pm12-rg61",
+   "10.60555/q0v5-1v28",
+   "10.60555/se5a-8c73",
+   "10.60555/vb93-3y72",
+   "10.60555/w4zy-bt45",
+   "10.60555/ztgj-d202"
+  ]
+ },
+ "model": {
+  "coef": {
+   "alpha": 1.0,
+   "coef": [
+    -0.044336850993854926,
+    0.00840635904294275,
+    0.0906699724509919,
+    0.0667186436421331,
+    -0.02236759154760704,
+    0.016426093607146898,
+    -0.016426093607144258,
+    0.004184874526253744,
+    -0.017597371761407632,
+    0.013412497235141164
+   ],
+   "columns": [
+    "d0_mm",
+    "p_atm",
+    "x_o2",
+    "x_he",
+    "x_co2",
+    "fuel=Heptane",
+    "fuel=Methanol",
+    "diluent=CO2",
+    "diluent=He",
+    "diluent=N2"
+   ],
+   "intercept": 0.5011217811311058,
+   "kind": [
+    "num",
+    "num",
+    "num",
+    "num",
+    "num",
+    "cat",
+    "cat",
+    "cat",
+    "cat",
+    "cat"
+   ],
+   "mean": [
+    2.995775193798449,
+    0.9201402488780089,
+    0.20089147286821704,
+    0.04883720930232559,
+    0.11531007751937986,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "scale": [
+    0.6918991249268746,
+    0.2966355060301979,
+    0.04762966639696812,
+    0.11368818983052147,
+    0.1622972819485926,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "cv": {
+   "fuel_diluent": {
+    "groups": [
+     "Heptane|CO2",
+     "Heptane|He",
+     "Heptane|N2",
+     "Methanol|CO2",
+     "Methanol|He",
+     "Methanol|N2"
+    ],
+    "mae": 0.08698952543740891,
+    "n": 258,
+    "n_groups": 6,
+    "r2": 0.3728400677249778
+   },
+   "method": "GroupKFold (pooled out-of-fold), Ridge alpha=1",
+   "n_splits": {
+    "fuel_diluent": 6,
+    "year": 3
+   },
+   "primary": "fuel_diluent",
+   "year": {
+    "groups": [
+     "2009",
+     "2010",
+     "2011"
+    ],
+    "mae": 0.05399363538068745,
+    "n": 209,
+    "n_groups": 3,
+    "r2": 0.5670865718865574
+   }
+  },
+  "diluents": [
+   "CO2",
+   "He",
+   "N2"
+  ],
+  "doi": "10.60555/mbq8-0451",
+  "features": [
+   "d0_mm",
+   "p_atm",
+   "x_o2",
+   "x_he",
+   "x_co2",
+   "fuel",
+   "diluent"
+  ],
+  "fuels": [
+   "Heptane",
+   "Methanol"
+  ],
+  "impute": {
+   "d0_mm": 3.0149999999999997,
+   "p_atm": 0.9989473684210527,
+   "x_co2": 0.0,
+   "x_he": 0.0,
+   "x_o2": 0.2
+  },
+  "known_combos": [
+   {
+    "diluent": "CO2",
+    "fuel": "Heptane",
+    "n": 45
+   },
+   {
+    "diluent": "He",
+    "fuel": "Heptane",
+    "n": 21
+   },
+   {
+    "diluent": "N2",
+    "fuel": "Heptane",
+    "n": 41
+   },
+   {
+    "diluent": "CO2",
+    "fuel": "Methanol",
+    "n": 72
+   },
+   {
+    "diluent": "He",
+    "fuel": "Methanol",
+    "n": 26
+   },
+   {
+    "diluent": "N2",
+    "fuel": "Methanol",
+    "n": 53
+   }
+  ],
+  "leakage_excluded": [
+   "burn_time_s",
+   "d_ext_mm",
+   "d_ext_over_d0",
+   "K_from_d2_law",
+   "test_end"
+  ],
+  "n": 258,
+  "ranges": {
+   "d0_mm": {
+    "max": 4.67,
+    "min": 1.1
+   },
+   "p_atm": {
+    "max": 3.052236842105263,
+    "min": 0.6924999999999999
+   },
+   "x_co2": {
+    "max": 0.7,
+    "min": 0.0
+   },
+   "x_he": {
+    "max": 0.45,
+    "min": 0.0
+   },
+   "x_o2": {
+    "max": 0.34,
+    "min": 0.12
+   }
+  },
+  "target": "burn_rate_K_mm2_s"
+ }
+};
+window.FF.siteData = window.FF.site;

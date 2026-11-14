@@ -86,7 +86,7 @@ def test_the_rule_holds_in_app_backend_and_src():
     """Acceptance: no direct raw/csv access outside the data layer."""
     targets = _scan_targets()
     violations, scanned, missing = scan_dirs(targets, REPO, ALLOWLIST)
-    assert "app" not in missing and len([f for f in scanned if f.startswith("app/")]) >= 20   # it really looked at app/
+    assert "app" not in missing   # app/ is now the static JS site (no .py files expected); the scan still must find the directory
     assert not violations, format_violations(violations)
     assert set(missing) <= {"backend"}                                    # a missing backend/ is reported, scanned once it exists
 

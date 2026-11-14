@@ -1,0 +1,13 @@
+['psi_id', 'acronym', 'title', 'objective', 'approach', 'hypothesis', 'research_impacts', 'doi', 'flight_program', 'hardware', 'research_area', 'sub_research_area', 'license', 'managing_center', 'start_date', 'end_date', 'release_date', 'submission_date', 'modified_date', 'version', 'total_file_size', 'n_publications', 'n_files_added', 'n_files_removed', 'n_experimental_tables', 'source_file', 'source_row', 'doi_flag', 'n_publication_dois', 'pub_doi_status']
+     psi_id                                                                                    title                 doi doi_flag  n_publication_dois pub_doi_status
+0    PSI-10                          Advanced Combustion via Microgravity Experiments / Flame Design  10.60555/w4zy-bt45       ok                  33             ok
+1    PSI-20                 Advanced Combustion via Microgravity Experiments - Burning Rate Emulator  10.60555/vb93-3y72       ok                  15             ok
+5    PSI-25                                                   Burning and Suppression of Solids - II  10.60555/4qc4-de67       ok                   9             ok
+7    PSI-39                                                                Cool Flames Investigation  10.60555/m6pj-a914       ok                   6             ok
+12   PSI-69                                                          Flame Extinguishment Experiment  10.60555/mbq8-0451       ok                  45             ok
+13   PSI-98                                                      Spacecraft Fire Safety Experiment-I  10.60555/0t15-1z43       ok                   3             ok
+14   PSI-99                                                            Spacecraft Fire Experiment-II  10.60555/2chp-m469       ok                   5             ok
+15  PSI-100                                                           Spacecraft Fire Experiment-III  10.60555/040q-4h36       ok                   0         no_doi
+16  PSI-101                                            Smoke Aerosol Measurement Experiment-Reflight  10.60555/2np7-jv14       ok                   3             ok
+19  PSI-107                                                        Smoke Point In Co-flow Experiment  10.60555/9kbh-e962       ok                   7             ok
+23  PSI-159  Advanced Combustion via Microgravity Experiments / Cool Flames Investigation with Gases  10.60555/cyt1-kh64       ok                   2             ok

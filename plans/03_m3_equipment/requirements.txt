@@ -1,6 +1,0 @@
-# 03 — M3 Ekipman İçgörüsü (minimum)
-pandas>=2.2
-pydantic>=2.5
-pyyaml>=6.0
-duckdb>=1.0       # A5: metadata sorguları
-pytest>=8

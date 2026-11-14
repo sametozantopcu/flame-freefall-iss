@@ -1,6 +1,0 @@
-# 04 — FlameSense host tarafı (minimum)
-numpy>=1.26
-pandas>=2.2           # SAFFIRE replay verisi
-pyyaml>=6.0           # rules, alarm_matrix
-pytest>=8
-# (2026-11-14: jsonschema, paho-mqtt, pyserial, platformio kaldırıldı; donanımsız yazılım demosu)

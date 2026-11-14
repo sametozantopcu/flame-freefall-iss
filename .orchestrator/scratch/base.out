@@ -1,0 +1,55 @@
+catalog roles per dataset
+role          exclude  feature  id  leakage  meta  target
+dataset                                                  
+acme_inverse        6       10   1       11    13       3
+acme_normal         6       10   1       10    13       3
+bass2               3       10   4        7    14       3
+cfi                 2       10   4       13    10       4
+flex                4        8   4        3     5       4
+smoke               0        7   1       10     7       2
+{'Heptane|CO2': 48, 'Heptane|He': 22, 'Heptane|N2': 47, 'Methanol|CO2': 75, 'Methanol|He': 28, 'Methanol|N2': 54}
+{'Farnesane|N2': 44, 'dodecane60/isododecane40|He': 14, 'dodecane60/isododecane40|N2': 38, 'dodecane75/isododecane25|He': 15, 'dodecane75/isododecane25|N2': 36, 'n-dodecane|He': 23, 'n-dodecane|N2': 57}
+FLEX features: ['fuel', 'x_o2', 'x_n2', 'x_co2', 'x_he', 'd0_mm', 'p_atm', 'diluent']
+CFI ['x_o2', 'x_n2', 'x_he', 'fiber', 'd0_mm', 'p_atm', 'ign_power_w', 'ign_time_ms', 'fuel', 'diluent']
+smoke ['material', 'inlet_velocity_cm_s', 'rt_r0', 'aging_s', 'sample_temp_c', 'campaign', 'gravity']
+acme_normal ['day', 'x_fuel', 'm_fuel_mg_s', 'xo2_init', 'p_atm', 'zst', 'tad_k_calc', 'experiment', 'fuel_base', 'fuel_bottle_frac']
+
+[flex] target=burn_time_s n=268 groups(fd)=6 target_missing_in_table=0.022 features=['d0_mm', 'p_atm', 'x_o2', 'x_he', 'x_co2', 'fuel', 'diluent']
+  GroupKFold(5) by fd: {'ridge': 'R2=-0.098 MAE=6.191', 'hgb': 'R2=0.214 MAE=4.944', 'mean': 'R2=-0.149 MAE=6.428'}
+
+[flex] target=burn_rate_K_mm2_s n=258 groups(fd)=6 target_missing_in_table=0.058 features=['d0_mm', 'p_atm', 'x_o2', 'x_he', 'x_co2', 'fuel', 'diluent']
+  GroupKFold(5) by fd: {'ridge': 'R2=0.176 MAE=0.101', 'hgb': 'R2=0.154 MAE=0.094', 'mean': 'R2=-0.158 MAE=0.118'}
+
+[flex] target=burn_time_s n=219 groups(year)=3 target_missing_in_table=0.022 features=['d0_mm', 'p_atm', 'x_o2', 'x_he', 'x_co2', 'fuel', 'diluent']
+  GroupKFold(3) by year: {'ridge': 'R2=0.306 MAE=5.168', 'hgb': 'R2=0.510 MAE=3.933', 'mean': 'R2=-0.016 MAE=6.247'}
+
+[flex] target=burn_rate_K_mm2_s n=209 groups(year)=3 target_missing_in_table=0.058 features=['d0_mm', 'p_atm', 'x_o2', 'x_he', 'x_co2', 'fuel', 'diluent']
+  GroupKFold(3) by year: {'ridge': 'R2=0.561 MAE=0.054', 'hgb': 'R2=0.374 MAE=0.070', 'mean': 'R2=-0.044 MAE=0.100'}
+
+[flex+] target=burn_time_s n=268 groups(fd)=6 target_missing_in_table=0.022 features=['d0_mm', 'p_atm', 'x_o2', 'x_he', 'x_co2', 'fuel', 'diluent', 'test_end']
+  GroupKFold(5) by fd: {'ridge': 'R2=-0.041 MAE=5.860', 'hgb': 'R2=0.279 MAE=4.583', 'mean': 'R2=-0.149 MAE=6.428'}
+
+[cfi] target=k_hot_mm2_s n=148 groups(fd)=5 target_missing_in_table=0.348 features=['d0_mm', 'p_atm', 'x_o2', 'x_he', 'x_n2', 'fuel', 'diluent', 'fiber']
+  GroupKFold(5) by fd: {'ridge': 'R2=0.568 MAE=0.100', 'hgb': 'R2=0.527 MAE=0.101', 'mean': 'R2=-0.173 MAE=0.191'}
+
+[cfi] target=hf_burn_time_s n=147 groups(fd)=5 target_missing_in_table=0.352 features=['d0_mm', 'p_atm', 'x_o2', 'x_he', 'x_n2', 'fuel', 'diluent', 'fiber']
+  GroupKFold(5) by fd: {'ridge': 'R2=0.660 MAE=1.620', 'hgb': 'R2=0.018 MAE=2.915', 'mean': 'R2=-0.301 MAE=3.530'}
+{'SAME-R': 109, 'ground': 33, 'SAME': 25} {'flight': 134, 'ground': 33}
+
+[smoke flight] target=amd_um n=131 groups(material)=5 target_missing_in_table=0.022 features=['rt_r0', 'aging_s', 'inlet_velocity_cm_s', 'campaign']
+  GroupKFold(5) by material: {'ridge': 'R2=-0.094 MAE=0.107', 'hgb': 'R2=0.033 MAE=0.100', 'mean': 'R2=-0.191 MAE=0.113'}
+
+[smoke flight no material] target=amd_um n=131 groups(material)=5 target_missing_in_table=0.022 features=['rt_r0', 'aging_s', 'inlet_velocity_cm_s', 'campaign']
+  GroupKFold(5) by material: {'ridge': 'R2=-0.094 MAE=0.107', 'hgb': 'R2=0.033 MAE=0.100', 'mean': 'R2=-0.191 MAE=0.113'}
+
+[acme_normal CFI-G] target=hot_ignition n=179 pos=0.737 groups(day)=11 target_missing=0.000 features=['xo2_init', 'p_atm', 'zst', 'tad_k_calc', 'x_fuel', 'fuel_base']
+  GroupKFold(5) by day: logit AUC=0.778
+
+[acme_normal CFI-G] target=hot_ignition n=179 pos=0.737 groups(fuel_base)=3 target_missing=0.000 features=['xo2_init', 'p_atm', 'zst']
+  GroupKFold(3) by fuel_base: logit AUC=0.585
+
+[acme_normal CFI-G] target=burn_time_s n=133 groups(day)=11 target_missing_in_table=0.257 features=['xo2_init', 'p_atm', 'zst', 'tad_k_calc', 'fuel_base']
+  GroupKFold(5) by day: {'ridge': 'R2=0.081 MAE=36.884', 'hgb': 'R2=-0.107 MAE=43.315', 'mean': 'R2=-0.219 MAE=45.594'}
+
+[bass2] target=d_o2_pct n=122 groups(pi)=6 target_missing_in_table=0.016 features=['thickness_mm', 'flow_restrictor', 'air_display_initial', 'material', 'geometry']
+  GroupKFold(5) by pi: {'ridge': 'R2=-0.089 MAE=0.404', 'hgb': 'R2=-0.043 MAE=0.392', 'mean': 'R2=-0.226 MAE=0.478'}

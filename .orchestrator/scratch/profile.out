@@ -1,0 +1,44 @@
+
+## acme_inverse.parquet (274, 44)
+cols: ['psi_id', 'source_file', 'source_row', 'flame_type', 'day', 'test', 'xo2', 'm_o2_mg_s', 'm_n2_mg_s', 'm_tot_mg_s', 'x_fuel_amb_init', 'x_fuel_amb_final', 'p_init_atm', 'p_final_atm', 'p_atm', 'zst', 'tad_k_calc', 'fuel_raw', 'experiment', 'xo2_flag', 'm_o2_mg_s_flag', 'm_n2_mg_s_flag', 'm_tot_mg_s_flag', 'zst_flag', 'tad_k_calc_flag', 'p_bar', 'hc_burnrate_mg_s', 'tfp', 'hot_ignition_raw', 'burn_time_s', 'ext_mode_raw', 'peak_burner_T_C', 'peak_burner_T_K', 'color_raw', 'comments', 'peak_burner_T_C_flag', 'peak_burner_T_K_flag', 'fuel_base', 'xo2_pct', 'ignition_class', 'hot_ignition', 'ext_mode', 'flame_color', 'color_hit_limit']
+psi_id: {'PSI-159': 154, 'PSI-10': 120}
+
+## acme_normal.parquet (386, 43)
+cols: ['psi_id', 'source_file', 'source_row', 'flame_type', 'day', 'fuel_raw', 'test', 'x_fuel', 'm_fuel_mg_s', 'm_n2_mg_s', 'm_tot_mg_s', 'xo2_init', 'xo2_final', 'p_init_atm', 'p_final_atm', 'p_atm', 'zst', 'tad_k_calc', 'experiment', 'x_fuel_flag', 'm_fuel_mg_s_flag', 'm_n2_mg_s_flag', 'm_tot_mg_s_flag', 'zst_flag', 'tad_k_calc_flag', 'cool_flame_raw', 'p_bar', 'tfp', 'hot_ignition_raw', 'burn_time_s', 'ext_mode_raw', 'peak_burner_T_C', 'comments', 'peak_burner_T_C_flag', 'fuel_base', 'fuel_bottle_frac', 'xo2_init_pct', 'xo2_final_pct', 'd_xo2', 'hot_ignition', 'ext_mode', 'cool_flame', 'any_ramp_flag']
+psi_id: {'PSI-10': 207, 'PSI-159': 179}
+
+## acme_testdays.parquet (100, 6)
+cols: ['psi_id', 'source_file', 'source_row', 'experiment', 'fuel_bottle', 'flames_ignited']
+psi_id: {'PSI-21': 32, 'PSI-22': 32, 'PSI-20': 18, 'PSI-23': 18}
+
+## bass2.parquet (129, 41)
+cols: ['psi_id', 'source_file', 'source_row', 'pi', 'test', 'date', 'gmt_day', 'sample_no', 'material_raw', 'flow_restrictor', 'fan_display_raw', 'air_display_raw', 'radiometer_gain_raw', 'frames_raw', 'o2_init_pct', 'o2_final_pct', 'co2_init_pct', 'co2_final_pct', 'co_init_ppm', 'co_final_ppm', 'co_init_ppm_overrange', 'co_final_ppm_overrange', 'o2_final_pct_flag', 'co2_init_pct_flag', 'co2_final_pct_flag', 'co_init_ppm_flag', 'co_final_ppm_flag', 'material', 'geometry', 'thickness_mm', 'rod_color', 'one_sided', 'air_display_initial', 'air_display_multi', 'fan_display_initial', 'frames', 'd_o2_pct', 'd_co2_pct', 'd_co_ppm', 'co_negative_flag', 'o2_final_anomaly_flag']
+psi_id: {'PSI-25': 129}
+
+## cfi.parquet (227, 43)
+cols: ['psi_id', 'source_file', 'source_row', 'flex_no', 'date', 'local_time', 'cir', 'pressure_raw', 'x_o2', 'x_n2', 'x_he', 'fiber', 'fuel_raw', 'd0_mm', 'd_ext_hot_mm', 'k_hot_mm2_s', 'k_cool_mm2_s', 'd_ext_cool_mm', 'p_atm_data', 'reignitions', 'extrap_cf', 'hf_burn_time_s', 'peak_hf_rad', 'peak_h2o_rad', 'rad_ratio', 'rad_2p5mm', 'rad_2p5mm_narrow', 'cf_rad_ratio', 'rad_2p5mm_cf', 'time_2p5mm', 'actual_d_mm', 'completed_analysis', 'ign_power_raw', 'ign_time_raw', 'p_atm', 'ign_power_w', 'ign_time_ms', 'fuel', 'diluent', 'x_o2_pct', 'in_experimental_table', 'has_cool_flame', 'p_mismatch']
+psi_id: {'PSI-39': 227}
+
+## flex.parquet (274, 28)
+cols: ['psi_id', 'source_file', 'source_row', 'test_no', 'flex_id', 'date', 'gmt', 'fuel', 'p_mmHg', 'x_o2', 'x_n2', 'x_co2', 'x_he', 'd0_mm', 'd_ext_mm', 'burn_rate_K_mm2_s', 'burn_time_s', 'test_end', 'burn_time_approx', 'd0_mm_flag', 'd_ext_mm_flag', 'year', 'p_atm', 'x_o2_pct', 'diluent', 'd0_sq_mm2', 'd_ext_over_d0', 'K_from_d2_law']
+psi_id: {'PSI-69': 274}
+
+## saffire1.parquet (4, 17)
+cols: ['psi_id', 'source_file', 'source_row', 'Sample Number', 'Material', 'Sample Thickness (cm)', 'Sample Length (cm)', 'Sample Width (cm)', 'Air Flow (cm/s)', 'Percent O2', 'Ignition Power (W)', 'Ignition Time (s)', 'Burn Time (s)', 'Flow Direction', 'Camera 1', 'Camera 2', 'o2_pct_approx']
+psi_id: {'PSI-98': 4}
+
+## saffire2.parquet (15, 24)
+cols: ['psi_id', 'source_file', 'source_row', 'Sample Number', 'Material', 'Samle Thickness', 'Sample Length', 'Sample Width (cm)', 'Air Flow (cm/s)', 'Percent O2 (Note 1)', 'Ignition Power (W)', 'Ignition Time (s)', 'Burn Time (s)', 'Flow Direction', 'ug Burn Length', 'ug Spread Length', '1-g Burn Length', '1-g Spread Rate', 'Camera 1', 'Camera 2', 'thickness_mm', 'o2_pct_approx', 'spread_rate_1g_mm_s', 'spread_rate_note']
+psi_id: {'PSI-99': 15}
+
+## saffire3.parquet (2, 12)
+cols: ['psi_id', 'source_file', 'source_row', 'Sample Number', 'Material', 'Sample Thickness', 'Sample Length', 'Sample Width', 'Air Flow', 'Direction', 'Camera 1', 'Camera 2']
+psi_id: {'PSI-100': 2}
+
+## smoke.parquet (167, 27)
+cols: ['psi_id', 'source_file', 'source_row', 'flight_code', 'material', 'description', 'inlet_velocity_cm_s', 'rt_r0', 'aging_s', 'm0_per_cc', 'm1_mm_per_cc', 'm3_mpass', 'dusttrak_a_mg_m3', 'dusttrak_b_mg_m3', 'amd_um', 'dam_um', 'mpass_3_2', 'sigma_g', 'dg_um', 'sample_temp_c', 'mass_loss_mg', 'sample_temp_c_flag', 'mass_loss_mg_flag', 'campaign', 'gravity', 'zero_as_missing_any', 'log_m0']
+psi_id: {'PSI-101': 167}
+
+## spice.parquet (469, 14)
+cols: ['psi_id', 'source_file', 'source_row', 'GMT date', 'GMT ignition', 'GMT Flame Off', 'Fuel', 'Nozzle (mm)', 'Fuel Rate (sccm)', 'Fuel Rate (mg/s)', 'HC Fuel Rate (mg/s)', 'Air Rate (cm/s)', 'flame_duration_s', 'dup_of_previous']
+psi_id: {'PSI-107': 469}
