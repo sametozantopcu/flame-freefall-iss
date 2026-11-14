@@ -5,10 +5,10 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 ## Durum
 
-- İlerleme: 13/16 (S1–S9, R1, L1, R2 ve R3 tamam; Faz 2: R4–R6 bekliyor)
+- İlerleme: 14/16 (S1–S9, R1, L1, R2, R3 ve R4 tamam; Faz 2: R5–R6 bekliyor)
 - Son güncelleme: 2026-11-15 (R1 tamam: PR #7 risk motoru `src/risk/` altına Feature Store üzerinden taşındı; önceki: S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
 - Güncelleme (2026-11-14): `design/` v4 (FlameSense koyu render + render_top) uygulandı; Explore taşma/çakışma düzeltildi (liste kendi içinde kaydırılır); Explore (ölçülmüş noktalar, Feature Store) ve Scenario (FLEX tepki eğrisi) grafikleri gerçek veriyle geri geldi.
-- Sıradaki adım: Faz 2 — R4, R5 (R3 hazır) ve R6 sonda
+- Sıradaki adım: Faz 2 — R5 (R3 hazır) ve R6 sonda
 - Açık sorunlar (R1): `Anchors.from_feature_store` yayılma (PSI-39) katsayısını gömülü değerle aynı üretemiyor — Feature Store `cfi` tablosu deney tablosunun 87 satırından 79'unu içerir; k_hot'lu satır 66 (gömülü n=74), üs 0.319 (gömülü 0.454, fark 0.135 > orijinal ±0.10 tolerans). Fark `tests/risk/test_engine.py::test_spread_embedded_vs_refit_difference_is_reported` ile ölçülüp raporlanır; karar (2026-11-15, orkestratör): indekste gömülü 0.454 değişmeden kullanılır; provenance kaydı ikisini de taşır. Diğerleri (yanma süresi n=175, tutuşma n=333, PMMA n=98/93) gömülü değerlerle aynı.
 - Açık sorunlar: EVREN LLM ucu yanıt vermiyor (ReadTimeout) → fallback çalışıyor; push kimlik bilgisi bekliyor; tarayıcıda görsel doğrulama yapılmadı; bkz. "Açık noktalar".
 
@@ -157,7 +157,8 @@ Onaylı plan: LLM soru-cevabını sağlamlaştır ve kapatılmış PR #7'deki (y
   - Kabul testi: `$PY scripts/build_site_data.py && node --check app/data/site_data.js && $PY -m pytest tests/delivery/test_build_site_data.py -q`.
   - Bağımlılık: R2.
 
-- [ ] **R4 · Scenario ekranına risk paneli**
+- [x] **R4 · Scenario ekranına risk paneli**
+  ✔ 2026-11-15 · `node scripts/smoke_risk.mjs && node scripts/smoke_explore_scenario.mjs && node scripts/smoke_equipment.mjs && bash scripts/e2e_check.sh && $PY -m pytest tests -m "not needs_raw and not slow and not live" -q` · smoke_risk 72 ok / ALL PASSED (ızgara hücresi == ekran, 11 malzeme × 4 basınç × 5 O2), E2E OK, hızlı set 721 passed; 1440/1024/390 ekran görüntüleri `.orchestrator/reports/screens/v3/`
   - Amaç: FLEX bölümünün altında ayrı "Material risk index — relative, heuristic" bölümü: malzeme, O2 %, basınç girdileri; indeks + seviye; 6 bileşen çubuğu (data/literature/assumption rozetli); O2'ye göre risk eğrisi; uyarılar. Kalıcı dürüstlük notu (bağıl ölçek, kalibre edilmemiş ağırlıklar, yerçekimi/akış girdi değil, FLEX'ten bağımsız). `FF.site.risk` yoksa "data not built" mesajı.
   - Dosyalar: `app/views/senaryo.js`, `app/i18n.js` (yalnız `risk.*` anahtarları), `scripts/smoke_risk.mjs`.
   - Kabul testi: `node scripts/smoke_risk.mjs` (ızgara okuma, ISS taban ≈ 0/Low, PMMA 40 % → Critical, panel yokken çökme yok) + `node scripts/smoke_explore_scenario.mjs && node scripts/smoke_equipment.mjs`.

@@ -9,6 +9,7 @@ $PY scripts/build_site_data.py
 find app -name '*.js' -print0 | xargs -0 -n1 node --check
 node scripts/smoke_explore_scenario.mjs
 node scripts/smoke_equipment.mjs
+node scripts/smoke_risk.mjs
 
 PORT=$($PY -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));print(s.getsockname()[1])')
 LLM_TIMEOUT=3 $PY app/server.py --port "$PORT" >/dev/null 2>&1 &
