@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 12 / 27
+- **İlerleme:** 13 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** C5 (veya B4; B4 `csv/` ister)
+- **Sıradaki adım:** C6 (veya B4; B4 `csv/` ister)
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -87,10 +87,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Test: `pytest tests/data_layer/test_store.py::test_get_features`
   - Kabul: Dönen listede hiçbir leakage sütunu yok; FLEX `burn_time_s` için `d_ext_mm` yok. Not: bugünkü katalogda sızıntı sütunları zaten `role=leakage` olduğu için çıkarma adımı fiilen bir şeyi değiştirmiyor; fonksiyon bir güvence katmanı ve yapay ihlalle (SPEC'e eklenen sızıntı, katalogda yanlışlıkla `feature` yapılan sızıntı) kanıtlandı. Sızıntı kaynağı `SPEC`.
   ✔ 2026-11-14 · `python -m pytest tests -q` · 141 passed (test_features.py: 28; 19 hedefin hepsi parametreli). Negatif kontrol: çıkarma satırı silinince iki yapay-ihlal testi düştü; hedef/diğer-hedef koruması silinince katalog-ihlal testi düştü
-- [ ] **C5** `get_modeling_frame(table, target)` fonksiyonu
+- [x] **C5** `get_modeling_frame(table, target)` fonksiyonu
   - Yap: Hedef alt küme sorgusunu uygula (ör. ACME burn_time için yalnızca CFI-G satırları). Feature'lar, hedef, grup sütunları ve iz sütunları dönsün.
   - Test: `pytest tests/data_layer/test_store.py::test_modeling_frame`
-  - Kabul: Satır sayısı `analysis/outputs/target_candidates.csv` dosyasındaki `n` ile birebir aynı (19 hedefin hepsi için).
+  - Kabul: Satır sayısı `analysis/outputs/target_candidates.csv` dosyasındaki `n` ile birebir aynı (19 hedefin hepsi için). Not: alt küme mantığı yalnızca `spec.target_frame`'de; yalnızca filtre için kullanılan sütunlar (`hot_ignition`, `o2_final_anomaly_flag`…) çıktıya girmez; hedefler kaynak dtype'ında kalır, `df.attrs` (target/task/features/groups) bir kolaylıktır, sözleşme değil.
+  ✔ 2026-11-14 · `python -m pytest tests -q` · 204 passed (test_frame.py: 63; 19 hedefin hepsi `target_candidates.csv`'deki n ile birebir). Negatif kontrol: alt küme uygulanmayınca 19, sızıntı sütunu eklenince 20, NaN 0'la doldurulunca 14 test düştü
 - [ ] **C6** Okuma API'sinin dokümantasyonu
   - Yap: `src/data_layer/README.md` dosyasında diğer modüllerin nasıl veri okuyacağını 10 satırlık bir örnekle anlat.
   - Test: `pytest tests/data_layer/test_docs.py`. Test, README'deki kod bloğunu çalıştırır.
