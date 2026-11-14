@@ -40,6 +40,7 @@
       + '<section class="fs-more">'
       + fig(W + 'render_detail.jpg', t('flamesense.alt_detail'), t('flamesense.cap_detail'))
       + fig(W + 'render_exploded.jpg', t('flamesense.alt_exploded'), t('flamesense.cap_exploded'))
+      + fig(W + 'render_top.jpg', t('flamesense.alt_top'), t('flamesense.cap_top'))
       + '</section>'
       + '<section class="fs-cols"><div><div class="fs-h">' + esc(t('flamesense.guide_h')) + '</div><ul class="fs-list">' + guides + '</ul></div>'
       + '<div><div class="fs-h">' + esc(t('flamesense.next_h')) + '</div><ul class="fs-list">' + steps + '</ul></div></section>'

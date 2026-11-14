@@ -10,7 +10,7 @@
 (function (FF) {
   var C = FF.config, P = FF.physics, t = FF.t, num = FF.num;
   var esc = function (s) { return FF.ui.components.esc(s); };
-  var plate = function (s, ar) { return FF.ui.components.plate(s, ar); };
+  var plate = function (s, ar, sized) { return FF.ui.components.plate(s, ar, sized); };
 
   // U-eğrisi grafiğinin alanı (viewBox 760 x 480)
   var G = { x0: 70, x1: 640, y0: 20, y1: 420, histX: 680, histPerTest: 4 };
@@ -129,6 +129,79 @@
       + '</svg>', 760 / 486);
   }
 
+
+  /* ---- Gerçek veri grafikleri (S6'da kaldırılan mock grafiklerin yerine) ----------------------------------------- */
+
+  /** Güzel eksen adımı: aralığı 4-6 aralığa böler. */
+  function niceTicks(lo, hi) {
+    var span = hi - lo || 1, raw = span / 5, pow = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
+    var step = [1, 2, 2.5, 5, 10].map(function (m) { return m * pow; }).filter(function (v) { return v >= raw; })[0];
+    var out = [], v = Math.ceil(lo / step - 1e-9) * step;
+    for (; v <= hi + step * 1e-9; v += step) out.push(+v.toPrecision(10));
+    return { ticks: out, step: step };
+  }
+  function decimals(step) { return step >= 1 ? 0 : Math.min(4, Math.ceil(-Math.log(step) / Math.LN10 - 1e-9)); }
+
+  /** Ortak çerçeve: verilen veri sınırlarından eksen ölçekleri ve ızgara. W x H viewBox, sol/alt boşluk eksen yazısı için. */
+  function frame(b, xl, yl) {
+    var W = 760, H = 310, M = { l: 78, r: 24, t: 30, b: 62 };
+    var xt = niceTicks(b.x0, b.x1), yt = niceTicks(b.y0, b.y1);
+    var X0 = Math.min(b.x0, xt.ticks[0]), X1 = Math.max(b.x1, xt.ticks[xt.ticks.length - 1]);
+    var Y0 = Math.min(b.y0, yt.ticks[0]), Y1 = Math.max(b.y1, yt.ticks[yt.ticks.length - 1]);
+    var fx = function (v) { return M.l + (v - X0) / ((X1 - X0) || 1) * (W - M.l - M.r); };
+    var fy = function (v) { return H - M.b - (v - Y0) / ((Y1 - Y0) || 1) * (H - M.t - M.b); };
+    var s = '', dx = decimals(xt.step), dy = decimals(yt.step);
+    yt.ticks.forEach(function (v) {
+      s += line('grid', M.l, fy(v), W - M.r, fy(v)) + '<text class="end" x="' + (M.l - 12) + '" y="' + f(fy(v) + 6) + '">' + v.toFixed(dy) + '</text>';
+    });
+    s += line('axis', M.l, H - M.b, W - M.r, H - M.b);
+    xt.ticks.forEach(function (v) {
+      s += line('tick', fx(v), H - M.b, fx(v), H - M.b + 6) + '<text class="mid" x="' + f(fx(v)) + '" y="' + (H - M.b + 28) + '">' + v.toFixed(dx) + '</text>';
+    });
+    s += '<text class="mid" x="' + f((M.l + W - M.r) / 2) + '" y="' + (H - 8) + '">' + esc(xl) + '</text>'
+      + '<text x="' + M.l + '" y="14">' + esc(yl) + '</text>';
+    return { W: W, H: H, M: M, fx: fx, fy: fy, axes: s, X0: X0, X1: X1, Y0: Y0, Y1: Y1 };
+  }
+
+  /** Keşif: ölçülmüş noktalar (Feature Store). Işıklı öğe: noktalar. Referans çizgisi varsa açıkça etiketli ve soluk.
+   *  ser: site.series[psi]; seçili nokta yok (yalnızca veriyi gösterir). */
+  function measured(ser, aria) {
+    var pts = ser.points, b = { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity };
+    pts.forEach(function (p) { b.x0 = Math.min(b.x0, p[0]); b.x1 = Math.max(b.x1, p[0]); b.y0 = Math.min(b.y0, p[1]); b.y1 = Math.max(b.y1, p[1]); });
+    var ref = ser.reference && ser.reference.kind === 'identity';
+    if (ref) { var lo = Math.min(b.x0, b.y0), hi = Math.max(b.x1, b.y1); b.x0 = b.y0 = lo; b.x1 = b.y1 = hi; }
+    var F = frame(b, ser.x.label + ', ' + ser.x.unit, ser.y.label + ', ' + ser.y.unit), dots = '';
+    pts.forEach(function (p) { dots += '<circle class="lit-fill" cx="' + f(F.fx(p[0])) + '" cy="' + f(F.fy(p[1])) + '" r="3.4" style="opacity:0.55"></circle>'; });
+    return plate(svgOpen(F.W, F.H, aria) + F.axes
+      + (ref ? line('guide', F.fx(F.X0), F.fy(F.X0), F.fx(F.X1), F.fy(F.X1))
+        + '<text class="end" x="' + f(F.fx(F.X1) - 6) + '" y="' + f(F.fy(F.X1) - 12) + '">' + esc(ser.reference.label) + '</text>' : '')
+      + dots + '</svg>', F.W / F.H, true);
+  }
+
+  /** Senaryo: FLEX Ridge tepki eğrisi. curve: [[x, y], ...] yalnızca eğitim aralığında; y < 0 noktalar çizilmez
+   *  (parçalara ayrılır). cur: {x, y} seçili nokta (y >= 0 ise işaretlenir). */
+  function response(o) {
+    var b = { x0: o.xr[0], x1: o.xr[1], y0: 0, y1: 0 };
+    o.curve.forEach(function (p) { if (p[1] >= 0) b.y1 = Math.max(b.y1, p[1]); });
+    if (o.cur && o.cur.y >= 0) b.y1 = Math.max(b.y1, o.cur.y);
+    if (!(b.y1 > 0)) b.y1 = 1;
+    b.y1 *= 1.08;
+    var F = frame(b, o.xLabel, o.yLabel), segs = [], seg = [];
+    o.curve.forEach(function (p) {
+      if (p[1] >= 0) seg.push(p); else { if (seg.length) segs.push(seg); seg = []; }
+    });
+    if (seg.length) segs.push(seg);
+    var d = segs.map(function (sg) { return 'M' + sg.map(function (p) { return f(F.fx(p[0])) + ' ' + f(F.fy(p[1])); }).join(' L'); }).join(' ');
+    var out = F.axes;
+    if (d) out += lit(function (st) { return '<path class="lit" d="' + d + '" style="' + st + '"></path>'; }, 3, [[14, 0.05], [8, 0.1], [5, 0.18]]);
+    if (o.cur && o.cur.y >= 0) {
+      var x = F.fx(o.cur.x), y = F.fy(o.cur.y);
+      out += line('guide', F.M.l, y, x, y) + line('guide', x, y, x, F.H - F.M.b)
+        + circle('pulse', x, y, 6) + litDot(x, y, 6, [[26, 0.05], [14, 0.12]]);
+    }
+    return plate(svgOpen(F.W, F.H, o.aria) + out + '</svg>', F.W / F.H, true);
+  }
+
   /** Ekipman: iki çizgi. Işıklı olan mikro yerçekimi; Dünya aynı ışığın ikinci hali (opacity-alt).
    *  İki sınır arasındaki fark taralı bir alanla ve altındaki parantezle gösterilir. */
   function limitLines(opts) {
@@ -186,5 +259,5 @@
   }
 
   FF.ui = FF.ui || {};
-  FF.ui.charts = { limitCurve: limitCurve, scenarioPoint: scenarioPoint, limitLines: limitLines, ring: ring };
+  FF.ui.charts = { measured: measured, response: response, limitCurve: limitCurve, scenarioPoint: scenarioPoint, limitLines: limitLines, ring: ring };
 })(window.FF = window.FF || {});

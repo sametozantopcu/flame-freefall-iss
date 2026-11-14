@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Flame in Freefall</title>
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<!-- Inter yüklenemezse (çevrimdışı) sistem yazı tipine düşer; düzen bozulmaz. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap">
+<link rel="stylesheet" href="ui/theme.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <!-- NASA Space Apps Challenge logosu; Halo için açık ışık rengine (#f5f5f7) çevrildi (bkz. README.md). -->
+      <img class="logo" src="assets/logo.png" alt="NASA Space Apps Challenge" width="580" height="227">
+      <span class="title"><span class="name" id="brand-name"></span><span class="sub" id="brand-sub"></span></span>
+    </div>
+    <nav class="nav" id="nav"></nav>
+  </header>
+  <main id="view" style="display: contents"></main>
+</div>
+
+<!-- Sıra önemli: sabitler, metinler, çekirdek, arayüz, görünümler, giriş. -->
+<script src="config.js"></script>
+<script src="i18n.js"></script>
+<script src="core/physics.js"></script>
+<script src="core/data.js"></script>
+<script src="ui/components.js"></script>
+<script src="ui/charts.js"></script>
+<script src="views/kesif.js"></script>
+<script src="views/senaryo.js"></script>
+<script src="views/ekipman.js"></script>
+<script src="views/canli.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

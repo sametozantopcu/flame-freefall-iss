@@ -6,6 +6,12 @@
 - **Son doğrulama:** `bash scripts/e2e_check.sh` → `E2E OK`; `pytest tests -m "not needs_raw and not slow and not live"` → 623 passed. Bağımsız e2e raporu `reports/e2e.md` GEÇTİ (headless Chrome, 4 ekran, konsol hatası 0; ekran görüntüleri `reports/screens/`). Not: low_confidence düzeltmesinden sonra tarayıcı düzeyi kontrol tekrarlanmadı (yalnız smoke + e2e betiği).
 - **Demo başlatma:** `$PY scripts/build_site_data.py` (isteğe bağlı, veri commit'li) → `$PY app/server.py --port 8000` → `http://127.0.0.1:8000/`.
 
+## Tasarım güncellemesi (kullanıcı isteği, 2026-11-14) — commit `e3961b0` (yerel)
+- Kullanıcı `design/` altına yeni sürüm ekledi. `design/dashboard/` eski orijinalle birebir aynı çıktı (uygulanacak fark yok); gerçek fark `design/flamesense_box/` v4 render'ları → `app/assets/flamesense_box/` güncellendi (eski v3 `v3_light/` altında).
+- Explore çakışması düzeltildi (liste kendi içinde kaydırılıyor). Grafikler gerçek veriyle geri geldi: Explore'da PSI-25/69/101/39 ölçülmüş noktalar (`site.series`), Scenario'da FLEX tepki eğrisi.
+- `design/` silinmedi (kullanıcıya soruldu). Sorulanlar: Olson eğrisi yerine PSI-25 O2 başlangıç/son grafiği uygun mu; `design/` ne olsun; dashboard tasarımında beklenen değişiklik neydi.
+- Testler: e2e OK, 623 passed. Ekran görüntüleri `reports/screens/v2/`.
+
 ## Açık sorunlar
 1. **PUSH BEKLİYOR:** subagent ortamında git GitHub kimlik bilgisi yok. Kullanıcı: `! git push -u origin data_analysis`. Push sonrası CI sonucunu hafızadaki commit günlüğüne yaz.
 2. **EVREN LLM ucu yanıt vermiyor** (90 sn ve 170 sn `ReadTimeout`). Soru kutusu statik kartlara düşüyor (`mode: fallback`). Uç dönerse kod değişmeden canlı çalışır (`LLM_TIMEOUT`, varsayılan 90 sn).
