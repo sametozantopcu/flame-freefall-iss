@@ -1,0 +1,60 @@
+flex (274, 28)
+  miss burn_time_s 0.022
+  miss burn_rate_K_mm2_s 0.058
+  miss d_ext_mm 0.281
+  miss test_end 0.000
+  miss d0_mm 0.044
+  groups year 3
+  groups fuel 2
+cfi (227, 43)
+  miss k_hot_mm2_s 0.348
+  miss hf_burn_time_s 0.352
+  miss d_ext_hot_mm 0.366
+  miss has_cool_flame 0.000
+  miss d0_mm 0.348
+  groups fuel 4
+  groups diluent 2
+acme_normal (386, 43)
+  miss hot_ignition 0.536
+  miss burn_time_s 0.547
+  miss ext_mode 0.655
+  groups day 14
+  groups fuel_base 4
+acme_inverse (274, 44)
+  miss hot_ignition 0.438
+  miss burn_time_s 0.438
+  miss ext_mode 0.493
+  groups day 12
+  groups fuel_base 4
+smoke (167, 27)
+  miss amd_um 0.084
+  miss dusttrak_b_mg_m3 0.114
+  miss dam_um 0.090
+  groups material 5
+  groups campaign 3
+  groups gravity 2
+bass2 (129, 41)
+  miss d_o2_pct 0.016
+  miss d_co2_pct 0.062
+  miss co_final_ppm 0.070
+  groups pi 6
+  groups material 4
+spice (469, 14)
+  miss flame_duration_s 0.181
+  groups Fuel 7
+saffire1 (4, 17)
+  miss Burn Time (s) 0.500
+  groups Material 3
+saffire2 (15, 24)
+  miss Burn Time (s) 0.400
+  miss ug Spread Length 0.667
+  groups Material 6
+saffire3 (2, 12)
+  miss Material 0.000
+  groups Material 1
+{'FlameDesign': 207, 'CFI-G': 179}
+{'count': 175.0, 'mean': 44.04571428571428, 'std': 64.08882280506162, 'min': 0.0, '25%': 1.0, '50%': 20.0, '75%': 52.5, 'max': 304.0}
+{'CFI-G': 154, 'FlameDesign': 120}
+{'count': 384.0, 'mean': 1657.3020833333333, 'std': 11288.904883551158, 'min': 17.0, '25%': 75.0, '50%': 105.0, '75%': 154.0, 'max': 86394.0} 34
+{'Propylene': 122, '75 % Propylene': 119, '50 % Propylene': 111, 'Propane': 50, 'Ethylene': 47, '75% Propylene': 16, 'Methane': 4}
+{('flight', 'Kapton'): 36, ('flight', 'Lampwick'): 26, ('flight', 'Pyrell'): 20, ('flight', 'Silicone'): 29, ('flight', 'Teflon'): 23, ('ground', 'Kapton'): 8, ('ground', 'Lampwick'): 8, ('ground', 'Silicone'): 9, ('ground', 'Teflon'): 8}
