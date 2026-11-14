@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 13 / 27
+- **İlerleme:** 14 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** C6 (veya B4; B4 `csv/` ister)
+- **Sıradaki adım:** D1 (veya B4; ikisi de `raw/`/`csv/` ister). Faz C tamam.
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -92,10 +92,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Test: `pytest tests/data_layer/test_store.py::test_modeling_frame`
   - Kabul: Satır sayısı `analysis/outputs/target_candidates.csv` dosyasındaki `n` ile birebir aynı (19 hedefin hepsi için). Not: alt küme mantığı yalnızca `spec.target_frame`'de; yalnızca filtre için kullanılan sütunlar (`hot_ignition`, `o2_final_anomaly_flag`…) çıktıya girmez; hedefler kaynak dtype'ında kalır, `df.attrs` (target/task/features/groups) bir kolaylıktır, sözleşme değil.
   ✔ 2026-11-14 · `python -m pytest tests -q` · 204 passed (test_frame.py: 63; 19 hedefin hepsi `target_candidates.csv`'deki n ile birebir). Negatif kontrol: alt küme uygulanmayınca 19, sızıntı sütunu eklenince 20, NaN 0'la doldurulunca 14 test düştü
-- [ ] **C6** Okuma API'sinin dokümantasyonu
+- [x] **C6** Okuma API'sinin dokümantasyonu
   - Yap: `src/data_layer/README.md` dosyasında diğer modüllerin nasıl veri okuyacağını 10 satırlık bir örnekle anlat.
   - Test: `pytest tests/data_layer/test_docs.py`. Test, README'deki kod bloğunu çalıştırır.
-  - Kabul: Örnek hatasız çalışıyor.
+  - Kabul: Örnek hatasız çalışıyor. Not: README'deki tablo ve hedef listesi koddan üretiliyor (`python -m src.data_layer.docs_table`), elle yazılmadı; test üretilen bloğun güncel olduğunu kontrol eder. Örnek 10 satır ve kendi `assert`'lerini içerir.
+  ✔ 2026-11-14 · `python -m pytest tests -q` · 209 passed (test_docs.py: 5). Örnek `/tmp`'den elle de çalıştırıldı (`268 mm`). Negatif kontrol: bozuk fonksiyon adı, yanlış assert, tablodan silinen hedef ve var olmayan fonksiyon adı testi düşürdü
 
 ## Faz D — Metadata DB
 
