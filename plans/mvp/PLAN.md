@@ -5,10 +5,10 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 ## Durum
 
-- İlerleme: 12/16 (S1–S9, R1, L1 ve R2 tamam; Faz 2: R3–R6 bekliyor)
+- İlerleme: 13/16 (S1–S9, R1, L1, R2 ve R3 tamam; Faz 2: R4–R6 bekliyor)
 - Son güncelleme: 2026-11-15 (R1 tamam: PR #7 risk motoru `src/risk/` altına Feature Store üzerinden taşındı; önceki: S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
 - Güncelleme (2026-11-14): `design/` v4 (FlameSense koyu render + render_top) uygulandı; Explore taşma/çakışma düzeltildi (liste kendi içinde kaydırılır); Explore (ölçülmüş noktalar, Feature Store) ve Scenario (FLEX tepki eğrisi) grafikleri gerçek veriyle geri geldi.
-- Sıradaki adım: Faz 2 — R3 → R4, R5 ve R6 sonda
+- Sıradaki adım: Faz 2 — R4, R5 (R3 hazır) ve R6 sonda
 - Açık sorunlar (R1): `Anchors.from_feature_store` yayılma (PSI-39) katsayısını gömülü değerle aynı üretemiyor — Feature Store `cfi` tablosu deney tablosunun 87 satırından 79'unu içerir; k_hot'lu satır 66 (gömülü n=74), üs 0.319 (gömülü 0.454, fark 0.135 > orijinal ±0.10 tolerans). Fark `tests/risk/test_engine.py::test_spread_embedded_vs_refit_difference_is_reported` ile ölçülüp raporlanır; karar (2026-11-15, orkestratör): indekste gömülü 0.454 değişmeden kullanılır; provenance kaydı ikisini de taşır. Diğerleri (yanma süresi n=175, tutuşma n=333, PMMA n=98/93) gömülü değerlerle aynı.
 - Açık sorunlar: EVREN LLM ucu yanıt vermiyor (ReadTimeout) → fallback çalışıyor; push kimlik bilgisi bekliyor; tarayıcıda görsel doğrulama yapılmadı; bkz. "Açık noktalar".
 
@@ -150,7 +150,8 @@ Onaylı plan: LLM soru-cevabını sağlamlaştır ve kapatılmış PR #7'deki (y
   - Kabul testi: `$PY -m pytest tests/risk/test_provenance.py -q`.
   - Bağımlılık: R1.
 
-- [ ] **R3 · Veri köprüsüne risk dışa aktarımı**
+- [x] **R3 · Veri köprüsüne risk dışa aktarımı**
+  ✔ 2026-11-15 · `$PY scripts/build_site_data.py && node --check app/data/site_data.js && $PY -m pytest tests/delivery/test_build_site_data.py -q` · 16 passed; smoke_explore_scenario, smoke_equipment, e2e_check OK; hızlı set 716 passed, 6 deselected; ızgara 51 O2 × 14 basınç × 11 malzeme = 7854 hücre, site_data.js 83.7 KB → 811.6 KB
   - Amaç: `window.FF.site.risk`: malzeme listesi, eşikler/ağırlıklar, provenance tablosu ve ön hesaplanmış ızgara (O2 15–40 %, 0,5 adım × basınç 50–101,3 kPa, 5 kPa adım + 56,5 ve 70,3 kPa hazır ayarları × tüm malzemeler); hücre başına indeks, seviye, 6 bileşen, tutuşma olasılığı, yanma süresi, marj, uyarılar. Deterministik, NaN yok, eksikler `null`; mevcut `site` anahtarları değişmez.
   - Dosyalar: `scripts/build_site_data.py`, `tests/delivery/test_build_site_data.py` (yalnız ekleme).
   - Kabul testi: `$PY scripts/build_site_data.py && node --check app/data/site_data.js && $PY -m pytest tests/delivery/test_build_site_data.py -q`.
