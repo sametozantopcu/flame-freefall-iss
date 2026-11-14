@@ -1,0 +1,22 @@
+column,dtype,unit,n,missing_pct,n_unique,top,top_pct,min,median,max,mean,std,skew,kurtosis,zero_pct,outlier_iqr_pct,outlier_robustz_pct
+Sample Number,str,unit_unknown,15,0.0,15,2-1,6.7,,,,,,,,,,
+Material,str,unit_unknown,15,40.0,6,Silicone,44.4,,,,,,,,,,
+Samle Thickness,str,unit_unknown,15,40.0,7,037 mm,33.3,,,,,,,,,,
+Sample Length,str,unit_unknown,15,40.0,2,29 cm,88.9,,,,,,,,,,
+Sample Width (cm),str,cm,15,40.0,1,5 cm,100.0,,,,,,,,,,
+Air Flow (cm/s),str,cm/s,15,40.0,1,20 cm/s,100.0,,,,,,,,,,
+Percent O2 (Note 1),str,Note 1,15,40.0,4,~ 22.1,66.7,,,,,,,,,,
+Ignition Power (W),str,W,15,40.0,2,80 W,77.8,,,,,,,,,,
+Ignition Time (s),str,s,15,40.0,2,9.2 s,77.8,,,,,,,,,,
+Burn Time (s),str,s,15,40.0,6,Insignificant,44.4,,,,,,,,,,
+Flow Direction,str,unit_unknown,15,40.0,2,Concurrent,88.9,,,,,,,,,,
+ug Burn Length,str,unit_unknown,15,40.0,5,~ 0,44.4,,,,,,,,,,
+ug Spread Length,str,unit_unknown,15,66.7,4,Note 4,40.0,,,,,,,,,,
+1-g Burn Length,str,unit_unknown,15,40.0,4,Complete,66.7,,,,,,,,,,
+1-g Spread Rate,str,unit_unknown,15,46.7,4,Acceleratory,62.5,,,,,,,,,,
+Camera 1,str,unit_unknown,15,53.3,7,S1C1,14.3,,,,,,,,,,
+Camera 2,str,unit_unknown,15,60.0,6,S1C2,16.7,,,,,,,,,,
+thickness_mm,float64,mm,15,40.0,7,,,0.27,1.03,37.0,13.306666666666665,17.82421807541638,0.6888025361461472,-1.502583048963483,0.0,0.0,44.4
+o2_pct_approx,float64,%,15,40.0,3,,,21.5,22.1,22.1,22.022222222222226,0.19860625479688357,-2.3547586774374865,3.7453878198771164,0.0,22.2,0.0
+spread_rate_1g_mm_s,float64,mm/s (1-g),15,86.7,2,,,0.6,0.8999999999999999,1.2,0.8999999999999999,0.4242640687119285,,,0.0,0.0,0.0
+spread_rate_note,str,unit_unknown,15,0.0,1,1-g ölçümü (mikrogravite DEĞİL),100.0,,,,,,,,,,

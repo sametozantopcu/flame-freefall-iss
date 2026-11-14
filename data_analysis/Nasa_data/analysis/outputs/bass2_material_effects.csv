@@ -1,0 +1,8 @@
+material,geometry,n,d_o2_median,d_co2_median,co_final_median,d_co_median
+Nomex,fabric,3,0.0,0.005,42.0,-10.5
+PMMA,film,21,-0.1,0.065,22.5,16.0
+PMMA,rod,52,-0.5,0.42,159.0,87.0
+PMMA,slab,20,-1.1,0.88,357.0,335.0
+PMMA,sphere_section,2,-0.3,0.275,126.5,79.5
+SIBAL,fabric,25,0.0,0.02,41.0,20.0
+Wax candle,candle,1,0.0,0.1,56.0,34.0

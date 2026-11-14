@@ -1,0 +1,58 @@
+table,column,levels,majority,imbalance_ratio,minority_pct
+acme_normal,experiment,2,FlameDesign,1.16,46.4
+acme_normal,tfp,2,No,8.94,10.1
+acme_normal,fuel_base,4,ethylene,4.56,10.6
+acme_normal,ext_mode,2,SE,3.29,23.3
+acme_normal,cool_flame,2,yes,7.0,12.5
+acme_inverse,experiment,2,CFI-G,1.28,43.8
+acme_inverse,tfp,2,No,11.83,7.8
+acme_inverse,fuel_base,4,ethylene,2.79,15.7
+acme_inverse,ignition_class,3,yes,16.38,5.2
+acme_inverse,ext_mode,2,SE,1.4,41.7
+acme_inverse,flame_color,3,blue,5.9,11.0
+acme_inverse,color_hit_limit,2,False,3.97,20.1
+flex,fuel,2,Methanol,1.34,42.7
+flex,test_end,3,Extinction,6.89,9.9
+flex,burn_time_approx,2,False,136.0,0.7
+flex,diluent,3,CO2,2.46,18.2
+bass2,pi,6,T'ien,7.25,3.1
+bass2,co_init_ppm_overrange,2,False,128.0,0.8
+bass2,co_final_ppm_overrange,2,False,31.25,3.1
+bass2,material,4,PMMA,98.0,0.8
+bass2,geometry,6,rod,54.0,0.8
+bass2,rod_color,2,clear,1.08,48.1
+bass2,one_sided,2,False,24.8,3.9
+bass2,air_display_multi,2,True,3.3,23.3
+smoke,flight_code,3,2,4.36,15.0
+smoke,material,5,Kapton,2.2,12.0
+smoke,campaign,3,SAME-R,4.36,15.0
+smoke,gravity,2,flight,4.06,19.8
+cfi,fiber,2,Yes,1.87,34.8
+cfi,completed_analysis,2,Yes,1.8,35.7
+cfi,fuel,4,n-dodecane,1.82,19.4
+cfi,diluent,2,N2,3.37,22.9
+cfi,in_experimental_table,2,False,1.87,34.8
+saffire1,Sample Number,4,S1,1.0,25.0
+saffire1,Material,3,SIBAL Fabric,2.0,25.0
+saffire1,Percent O2,2,21.5 - 21.7,1.0,50.0
+saffire1,Flow Direction,2,Concurrent,1.0,50.0
+saffire1,Camera 1,2,S1C1,1.0,50.0
+saffire1,Camera 2,2,S1C2,1.0,50.0
+saffire2,Sample Number,15,2-1,1.0,6.7
+saffire2,Material,6,Silicone,4.0,11.1
+saffire2,Samle Thickness,7,037 mm,3.0,11.1
+saffire2,Sample Length,2,29 cm,8.0,11.1
+saffire2,Percent O2 (Note 1),4,~ 22.1,6.0,11.1
+saffire2,Ignition Power (W),2,80 W,3.5,22.2
+saffire2,Ignition Time (s),2,9.2 s,3.5,22.2
+saffire2,Burn Time (s),6,Insignificant,4.0,11.1
+saffire2,Flow Direction,2,Concurrent,8.0,11.1
+saffire2,ug Burn Length,5,~ 0,4.0,11.1
+saffire2,ug Spread Length,4,Note 4,2.0,20.0
+saffire2,1-g Burn Length,4,Complete,6.0,11.1
+saffire2,1-g Spread Rate,4,Acceleratory,5.0,12.5
+saffire2,Camera 1,7,S1C1,1.0,14.3
+saffire2,Camera 2,6,S1C2,1.0,16.7
+spice,Fuel,7,Propylene,30.5,0.9
+spice,dup_of_previous,2,False,12.79,7.2
+acme_testdays,experiment,4,CLD Flame,1.78,18.0

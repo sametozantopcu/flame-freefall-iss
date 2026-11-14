@@ -1,0 +1,15 @@
+column,dtype,unit,n,missing_pct,n_unique,top,top_pct,min,median,max,mean,std,skew,kurtosis,zero_pct,outlier_iqr_pct,outlier_robustz_pct
+Sample Number,str,unit_unknown,4,0.0,4,S1,25.0,,,,,,,,,,
+Material,str,unit_unknown,4,0.0,3,SIBAL Fabric,50.0,,,,,,,,,,
+Sample Thickness (cm),Float64,cm,4,50.0,1,,,0.37,0.37,0.37,0.37,0.0,,,0.0,0.0,0.0
+Sample Length (cm),Float64,cm,4,50.0,1,,,40.6,40.6,40.6,40.6,0.0,,,0.0,0.0,0.0
+Sample Width (cm),Float64,cm,4,50.0,1,,,94.0,94.0,94.0,94.0,0.0,,,0.0,0.0,0.0
+Air Flow (cm/s),Float64,cm/s,4,50.0,1,,,20.0,20.0,20.0,20.0,0.0,,,0.0,0.0,0.0
+Percent O2,str,unit_unknown,4,50.0,2,21.5 - 21.7,50.0,,,,,,,,,,
+Ignition Power (W),Float64,W,4,50.0,1,,,182.0,182.0,182.0,182.0,0.0,,,0.0,0.0,0.0
+Ignition Time (s),Float64,s,4,50.0,1,,,8.0,8.0,8.0,8.0,0.0,,,0.0,0.0,0.0
+Burn Time (s),Float64,s,4,50.0,2,,,70.0,245.0,420.0,245.0,247.48737341529164,,,0.0,0.0,0.0
+Flow Direction,str,unit_unknown,4,50.0,2,Concurrent,50.0,,,,,,,,,,
+Camera 1,str,unit_unknown,4,50.0,2,S1C1,50.0,,,,,,,,,,
+Camera 2,str,unit_unknown,4,50.0,2,S1C2,50.0,,,,,,,,,,
+o2_pct_approx,float64,%,4,50.0,1,,,21.5,21.5,21.5,21.5,0.0,,,0.0,0.0,0.0

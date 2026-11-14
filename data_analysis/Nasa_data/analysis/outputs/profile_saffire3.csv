@@ -1,0 +1,10 @@
+column,dtype,unit,n,missing_pct,n_unique,top,top_pct
+Sample Number,str,unit_unknown,2,0.0,2,S1,50.0
+Material,str,unit_unknown,2,0.0,1,SIBAL Fabric,100.0
+Sample Thickness,str,unit_unknown,2,0.0,1,.33 cm,100.0
+Sample Length,str,unit_unknown,2,0.0,1,94 cm,100.0
+Sample Width,str,unit_unknown,2,0.0,1,40.6 cm,100.0
+Air Flow,str,unit_unknown,2,0.0,1,30 cm/s,100.0
+Direction,str,unit_unknown,2,0.0,2,Concurrent ,50.0
+Camera 1,str,unit_unknown,2,0.0,2,S1C1,50.0
+Camera 2,str,unit_unknown,2,0.0,2,S1C2,50.0

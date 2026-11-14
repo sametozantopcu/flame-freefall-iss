@@ -1,0 +1,4 @@
+column,dtype,unit,n,missing_pct,n_unique,top,top_pct,min,median,max,mean,std,skew,kurtosis,zero_pct,outlier_iqr_pct,outlier_robustz_pct
+experiment,str,unit_unknown,100,0.0,4,CLD Flame,32.0,,,,,,,,,,
+fuel_bottle,str,unit_unknown,100,11.0,47,100% C2H4,16.9,,,,,,,,,,
+flames_ignited,float64,count,100,11.0,21,,,0.0,11.0,23.0,11.730337078651685,4.643578275777059,0.18841414042460045,0.06909459549143815,1.1,0.0,0.0
