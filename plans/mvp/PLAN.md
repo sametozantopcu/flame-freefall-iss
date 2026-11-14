@@ -5,12 +5,12 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 ## Durum
 
-- İlerleme: 14/16 (S1–S9, R1, L1, R2, R3 ve R4 tamam; Faz 2: R5–R6 bekliyor)
+- İlerleme: 16/16 (S1–S9, L1, R1–R6 tamam)
 - Son güncelleme: 2026-11-15 (R1 tamam: PR #7 risk motoru `src/risk/` altına Feature Store üzerinden taşındı; önceki: S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
 - Güncelleme (2026-11-14): `design/` v4 (FlameSense koyu render + render_top) uygulandı; Explore taşma/çakışma düzeltildi (liste kendi içinde kaydırılır); Explore (ölçülmüş noktalar, Feature Store) ve Scenario (FLEX tepki eğrisi) grafikleri gerçek veriyle geri geldi.
-- Sıradaki adım: Faz 2 — R5 (R3 hazır) ve R6 sonda
+- Sıradaki adım: yok; `risk-engine` dalından `main`'e PR (insan incelemesi)
 - Açık sorunlar (R1): `Anchors.from_feature_store` yayılma (PSI-39) katsayısını gömülü değerle aynı üretemiyor — Feature Store `cfi` tablosu deney tablosunun 87 satırından 79'unu içerir; k_hot'lu satır 66 (gömülü n=74), üs 0.319 (gömülü 0.454, fark 0.135 > orijinal ±0.10 tolerans). Fark `tests/risk/test_engine.py::test_spread_embedded_vs_refit_difference_is_reported` ile ölçülüp raporlanır; karar (2026-11-15, orkestratör): indekste gömülü 0.454 değişmeden kullanılır; provenance kaydı ikisini de taşır. Diğerleri (yanma süresi n=175, tutuşma n=333, PMMA n=98/93) gömülü değerlerle aynı.
-- Açık sorunlar: EVREN LLM ucu yanıt vermiyor (ReadTimeout) → fallback çalışıyor; push kimlik bilgisi bekliyor; tarayıcıda görsel doğrulama yapılmadı; bkz. "Açık noktalar".
+- Açık sorunlar (R6, bilinen sınırlar): risk indeksi kalibre değil (ağırlıklar, 35/65 eşikleri, 0.35 basınç üssü varsayım); yalnız PMMA sınırı BASS-II verisinden; yayılma bileşeni R² 0.044 (gömülü 0.454, n=74; Feature Store 0.319, n=66); yerçekimi ve akış girdi değil; indeks 0 "yanmaz" demek değil; canlı LLM yanıtı ~26 s sürebilir (zaman aşımı 45 s, bir yeniden deneme), uç yanıt vermezse kartlara düşer; 390 px ekran görüntüsünde sohbet düğmesi sabit konumlu olduğundan tam boy görüntüde metnin üstüne biner (yalnız görüntü artefaktı); push/PR durumu için PR gövdesine bakın.
 
 ## Kritik yol ve paralellik
 
@@ -171,7 +171,8 @@ Onaylı plan: LLM soru-cevabını sağlamlaştır ve kapatılmış PR #7'deki (y
   - Kabul testi: `$PY -m pytest tests/delivery/test_server.py -q` (risk sorusunda bağlamda risk parçası var, sınır aşılmıyor).
   - Bağımlılık: L1, R3.
 
-- [ ] **R6 · Doküman, uçtan uca, PR**
+- [x] **R6 · Doküman, uçtan uca, PR**
+  ✔ 2026-11-15 · `bash scripts/e2e_check.sh && $PY -m pytest tests -m "not needs_raw and not slow and not live" -q -rs` · E2E OK; 721 passed, 0 skipped, 6 deselected; build deterministik (`git status app/data` temiz); 3 smoke ALL PASSED; ekran görüntüleri `.orchestrator/reports/screens/v4/`, konsol hatası 0
   - Amaç: `MVP_SPEC.md`, `Architecture.md`, `README.md` (Limits), `plans/mvp/PLAN.md`, `plans/README.md` risk modülü, dayanak tablosu, PR #7 ve yazarına atıfla güncellenir; `scripts/e2e_check.sh`'e risk smoke eklenir; dört ekranın ekran görüntüsü alınıp çakışma/konsol hatası kontrol edilir; `risk-engine` dalından `main`'e PR.
   - Dosyalar: `MVP_SPEC.md`, `Architecture.md`, `README.md`, `plans/mvp/PLAN.md`, `plans/README.md`, `scripts/e2e_check.sh`.
   - Kabul testi: `bash scripts/e2e_check.sh` (E2E OK) + `$PY -m pytest tests -m "not needs_raw and not slow and not live" -q`.

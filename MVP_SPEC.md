@@ -1,6 +1,6 @@
 # MVP_SPEC — Flame in Freefall
 
-Son güncelleme: 2026-11-14. Bu belge `.orchestrator/decisions.md` kararlarına dayanır; çelişirse decisions.md geçerlidir. Uygulama adımları: `plans/mvp/PLAN.md`.
+Son güncelleme: 2026-11-15. Bu belge `.orchestrator/decisions.md` kararlarına dayanır; çelişirse decisions.md geçerlidir. Uygulama adımları: `plans/mvp/PLAN.md`.
 
 ## 1. Ürün tanımı
 
@@ -25,8 +25,9 @@ Flame in Freefall, NASA Physical Sciences Informatics (PSI) yanma deneylerini (2
 | M1 Keşif & Sıralama | 24 investigation, koşul zarfı + ön üretilmiş metin, açıklanabilir ağırlıklı skor | TF-IDF/semantik arama, kullanıcı ağırlık ayarı |
 | M2 Tahmin | FLEX `burn_rate_K_mm2_s`, Ridge, GroupKFold, leakage dışarıda, tarayıcıda what-if (katsayı veya ızgara) | cfi, acme, smoke, bass2 modelleri; belirsizlik aralığı; kNN; sunucu tarafı model |
 | M3 Ekipman | 4 sayı kaynaklı bulgu için DOI atıflı kartlar | Yeni EDA, ek bulgu |
+| Malzeme risk indeksi (Faz 2) | Kapatılmış PR #7'deki risk motoru (yazar: sametozantopcu) `src/risk/` altında; Scenario ekranında bağıl indeks, 6 bileşen, her bileşen için dayanak etiketi (data/literature/assumption/mixed), ön hesaplanmış ızgara (O2 15–40 %, 51 değer × 14 basınç × 11 malzeme) | Mutlak yangın olasılığı, kalibrasyon, kullanıcı ayarlı ağırlıklar, yerçekimi/akış girdisi |
 | FlameSense | Render görselleri (küçültülmüş) + konsept metni, "concept / not built" | Simülasyon, donanım, canlı sensör, MQTT |
-| LLM soru-cevap | Yerel Python sunucusu `/api/ask`, EVREN API, statik kart bağlamı, kartlara zarif düşüş | Sohbet geçmişi, akış (streaming), kaynak alıntı doğrulama |
+| LLM soru-cevap | Yerel Python sunucusu `/api/ask`, EVREN API, statik kart bağlamı (en fazla ~2000 karakter; sıralama, risk ve FlameSense parçaları soruya göre eklenir), bir yeniden deneme, kartlara zarif düşüş | Sohbet geçmişi, akış (streaming), kaynak alıntı doğrulama |
 | Teslim | Yerel demo, tek komut | Deploy, video/mp4 (ekip çeker), teslim kuralları adımı (sonra sorulacak) |
 
 ## 4. Kritik yol
@@ -86,6 +87,12 @@ M2 özellikleri: `d0_mm, p_atm, x_o2, x_he, x_co2, fuel, diluent` (yalnızca `ro
 - FlameSense yalnızca konsepttir; cihaz yapılmadı, ölçüm yok.
 - LLM cevapları yalnızca verilen kartlara dayanmalıdır; bağlam dışı soruda "not in the cards" denir.
 - `data_analysis/Nasa_data/raw/` ve `csv/` değiştirilmez.
+- Malzeme risk indeksi bağıl bir ölçektir: 0 = %21 O2 / 1 atm, 100 = %40 O2. Mutlak yangın olasılığı değildir.
+- Bileşen ağırlıkları (0.15/0.25/0.15/0.10/0.25/0.10) ve 35/65 seviye eşikleri kalibre edilmemiş varsayımdır.
+- Yalnızca PMMA'nın sınır O2 değeri (%13.5) ISS/BASS-II (PSI-25) verisindendir; diğer malzemeler literatür LOI değerlerinden türetilmiştir.
+- Yerçekimi ve akış hızı indeksin girdisi değildir; Ay/Mars yerçekimi modellenmez. İndeks FLEX modelinden bağımsızdır.
+- Yayılma bileşeni (PSI-39) çok zayıf bir uyumdur: R² 0.044 (n=74). Feature Store üzerinde yeniden uyumda üs 0.319 (n=66, R² 0.030); gömülü üs 0.454 (n=74). Motor gömülü değeri kullanır; ikisi de dayanak tablosunda gösterilir.
+- İndeks 0, "yanmaz" demek değildir (0 = "Dünya havası kadar riskli"). Bu yüzden ekranda ayrı bir "Flammable at this condition?" okuması vardır (O2 − malzemenin sınır O2'si).
 - spice `flame_duration` aykırıları (max 86394 s) ve ground eşlemesi doğrulanmadığı için kullanılmaz.
 
 ## 8. Sonra (MVP dışı)
