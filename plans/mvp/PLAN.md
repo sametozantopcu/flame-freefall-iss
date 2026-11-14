@@ -5,9 +5,10 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 ## Durum
 
-- İlerleme: 16/16 (S1–S9, L1, R1–R6 tamam)
+- İlerleme: 17/17 (S1–S9, L1, L2, R1–R6 tamam)
 - Son güncelleme: 2026-11-15 (R1 tamam: PR #7 risk motoru `src/risk/` altına Feature Store üzerinden taşındı; önceki: S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
 - Güncelleme (2026-11-14): `design/` v4 (FlameSense koyu render + render_top) uygulandı; Explore taşma/çakışma düzeltildi (liste kendi içinde kaydırılır); Explore (ölçülmüş noktalar, Feature Store) ve Scenario (FLEX tepki eğrisi) grafikleri gerçek veriyle geri geldi.
+- Güncelleme (2026-11-15, L2): canlı soru-cevap varlık eşlemeli bağlam (4500 karakter), sentez istemi, LRU önbellek; açık: canlı yanıt süresi 10–100 s oynuyor (model gecikmesi).
 - Sıradaki adım: yok; `risk-engine` dalından `main`'e PR (insan incelemesi)
 - Açık sorunlar (R1): `Anchors.from_feature_store` yayılma (PSI-39) katsayısını gömülü değerle aynı üretemiyor — Feature Store `cfi` tablosu deney tablosunun 87 satırından 79'unu içerir; k_hot'lu satır 66 (gömülü n=74), üs 0.319 (gömülü 0.454, fark 0.135 > orijinal ±0.10 tolerans). Fark `tests/risk/test_engine.py::test_spread_embedded_vs_refit_difference_is_reported` ile ölçülüp raporlanır; karar (2026-11-15, orkestratör): indekste gömülü 0.454 değişmeden kullanılır; provenance kaydı ikisini de taşır. Diğerleri (yanma süresi n=175, tutuşma n=333, PMMA n=98/93) gömülü değerlerle aynı.
 - Açık sorunlar (R6, bilinen sınırlar): risk indeksi kalibre değil (ağırlıklar, 35/65 eşikleri, 0.35 basınç üssü varsayım); yalnız PMMA sınırı BASS-II verisinden; yayılma bileşeni R² 0.044 (gömülü 0.454, n=74; Feature Store 0.319, n=66); yerçekimi ve akış girdi değil; indeks 0 "yanmaz" demek değil; canlı LLM yanıtı ~26 s sürebilir (zaman aşımı 45 s, bir yeniden deneme), uç yanıt vermezse kartlara düşer; 390 px ekran görüntüsünde sohbet düğmesi sabit konumlu olduğundan tam boy görüntüde metnin üstüne biner (yalnız görüntü artefaktı); push/PR durumu için PR gövdesine bakın.
@@ -177,3 +178,9 @@ Onaylı plan: LLM soru-cevabını sağlamlaştır ve kapatılmış PR #7'deki (y
   - Dosyalar: `MVP_SPEC.md`, `Architecture.md`, `README.md`, `plans/mvp/PLAN.md`, `plans/README.md`, `scripts/e2e_check.sh`.
   - Kabul testi: `bash scripts/e2e_check.sh` (E2E OK) + `$PY -m pytest tests -m "not needs_raw and not slow and not live" -q`.
   - Bağımlılık: R4, R5, L1.
+
+- [x] **L2 · Soru-cevap kalitesi: varlık eşleme, sentez istemi, önbellek**
+  ✔ 2026-11-15 · `$PY -m pytest tests/delivery -q; $PY -m pytest tests -m "not needs_raw and not slow and not live" -q; node --check app/ui/ask.js; 3 smoke; bash scripts/e2e_check.sh` · delivery 64 passed; hızlı set 740 passed, 0 skipped; smoke ALL PASSED; E2E OK; 6 canlı soru 6/6 mode:llm
+  - Amaç: Soruda adı/PSI kimliği geçen araştırmalar (yazım toleranslı, veriden türetilmiş) tam kayıtla (özet `qa_text`, koşul zarfı, skor, kart, seri) bağlama girer; risk/sıralama/FlameSense/model parçaları yalnız ilgiliyse; alt puan eşiği; bağlam 4500 karakter; sentez istemi (prototype cümlesi yok); `max_tokens` 500, `LLM_TIMEOUT` 60 sn, 64 kayıtlık LRU önbellek (yalnız `mode: llm`), ret/boş cevap loglanır.
+  - Dosyalar: `app/server.py`, `app/ui/ask.js` (yalnız iptal süresi 130 sn), `scripts/build_site_data.py` (+`qa_text` ≤1200, yalnız ekleme), `tests/delivery/test_server.py`, `tests/delivery/test_build_site_data.py`, `app/data/site_data.{js,json}`.
+  - Bağımlılık: L1, R5.

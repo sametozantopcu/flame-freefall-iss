@@ -48,6 +48,7 @@ from src.risk import provenance as risk_prov  # noqa: E402
 
 OUT = REPO / "app" / "data"
 SUMMARY_CHARS = 420
+QA_TEXT_CHARS = 1200  # longer text used only by the live Q&A context (never shown on screens)
 
 FLAMESENSE = {
     "concept": True, "built": False, "dimensions_mm": [140, 90, 45], "mcu": "ESP32-S3",
@@ -114,6 +115,16 @@ def _summary(title, objective) -> str | None:
         return None
     s = " ".join(s.split())
     return s if len(s) <= SUMMARY_CHARS else s[:SUMMARY_CHARS].rsplit(" ", 1)[0] + "..."
+
+
+def _qa_text(objective, approach) -> str | None:
+    """Objective + approach from the Metadata table, whitespace-normalised and cut at <= QA_TEXT_CHARS (Q&A only)."""
+    parts = [f"{lab}: {' '.join(v.split())}" for lab, v in (("Objective", objective), ("Approach", approach))
+             if isinstance(v, str) and v.strip()]
+    if not parts:
+        return None
+    s = " ".join(parts)
+    return s if len(s) <= QA_TEXT_CHARS else s[:QA_TEXT_CHARS - 3].rsplit(" ", 1)[0] + "..."
 
 
 # Measured (x, y) series for the Explore chart, read from the Feature Store only. One pair per investigation that has a
@@ -211,6 +222,7 @@ def build() -> dict:
             "components": {k: r[k] for k in ranking.COMPONENTS},
             "n_components_known": r["n_components_known"], "missing_components": list(r["missing_components"]),
             "rationale": r["rationale"], "summary": _summary(title, a["objective"]),
+            "qa_text": _qa_text(a["objective"], a["approach"]),
             "envelope": _envelope(r["psi_id"], env, text),
         })
     model = fit_flex()

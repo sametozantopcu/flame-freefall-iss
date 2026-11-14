@@ -146,10 +146,22 @@ def test_existing_site_keys_unchanged(built):
     import subprocess as sp
     old = json.loads(sp.check_output(["git", "show", "HEAD:app/data/site_data.json"], cwd=REPO))
     old.pop("risk", None)  # present once R3 is committed; every other key must stay byte-for-value identical
-    for k in ("generated", "meta", "investigations", "model", "cards", "flamesense", "series"):
+    for k in ("generated", "meta", "model", "cards", "flamesense", "series"):
         assert built[k] == old[k], k
+    # L2 adds only the Q&A-only `qa_text` field to investigations; every pre-existing field stays identical
+    strip = lambda rows: [{k: v for k, v in r.items() if k != "qa_text"} for r in rows]  # noqa: E731
+    assert strip(built["investigations"]) == strip(old["investigations"])
     assert set(old) <= set(built)
 
 
 def test_site_data_size_limit(built):
     assert JS.stat().st_size < 1_000_000
+
+
+def test_qa_text_added_and_bounded(built):
+    for inv in built["investigations"]:
+        qa = inv["qa_text"]
+        assert qa is None or (isinstance(qa, str) and 0 < len(qa) <= 1200)
+        if qa and inv["summary"]:
+            assert len(qa) >= len(inv["summary"]) - 3
+    assert sum(1 for i in built["investigations"] if i["qa_text"]) >= 20
