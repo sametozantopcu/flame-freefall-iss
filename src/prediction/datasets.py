@@ -16,6 +16,12 @@ Rules
   for a target (xo2_final, peak temperatures, comments, ...) never enter. Targets of the same family are leakage for
   each other; they are present but explicitly marked as targets.
 - Nothing is filled or transformed: missing stays missing (CFI has no x_co2 column -> empty, never 0).
+- Censoring labels (step A2), nullable boolean, NA whenever unknown (never False by default). They are labels for
+  survival / truncation-aware models, not features:
+    gas_flame.burn_time_censored  = ext_mode == 'FT' (flow terminated -> burn time right-censored), on burn_time rows
+                                    whose ext_mode is SE or FT
+    droplet.burn_time_truncated   = test_end != 'Completion' (extinction / disruption cut the burn short), on FLEX
+                                    burn_time rows with a known test_end; CFI has no test_end -> NA
 """
 from __future__ import annotations
 
@@ -42,6 +48,23 @@ DATASETS = {
     "smoke": dict(sources={"smoke": "campaign != 'ground'"}, shared=[], cv_group=["material"]),
     "solid_atm": dict(sources={"bass2": None}, shared=[], cv_group=["pi"]),
 }
+
+
+LABELS = {"gas_flame": ["burn_time_censored"], "droplet": ["burn_time_truncated"]}
+
+
+def _labels(name: str, df: pd.DataFrame) -> pd.DataFrame:
+    if name == "gas_flame":
+        flag = pd.Series(pd.NA, index=df.index, dtype="boolean")
+        known = df[MASK + "burn_time_s"] & df["ext_mode"].isin(["FT", "SE"])
+        flag[known] = df.loc[known, "ext_mode"].eq("FT")
+        df["burn_time_censored"] = flag
+    elif name == "droplet":
+        flag = pd.Series(pd.NA, index=df.index, dtype="boolean")
+        known = df["source_table"].eq("flex") & df[MASK + "burn_time_s"] & df["test_end"].notna()
+        flag[known] = df.loc[known, "test_end"].ne("Completion")
+        df["burn_time_truncated"] = flag
+    return df
 
 
 def targets_of(name: str) -> list[str]:
@@ -86,6 +109,7 @@ def build_dataset(name: str, con=None) -> pd.DataFrame:
     df = pd.concat(parts, ignore_index=True)
     for c in [c for c in df.columns if c.startswith(MASK)]:
         df[c] = df[c].astype("boolean").fillna(False).astype(bool)   # target not defined for that source -> False
+    df = _labels(name, df)
     masks = [c for c in df.columns if c.startswith(MASK)]
     return df[[c for c in df.columns if c not in masks] + masks]
 

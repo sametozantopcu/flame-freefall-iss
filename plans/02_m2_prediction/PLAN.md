@@ -4,12 +4,13 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
 
 ## Durum
 
-- **İlerleme:** 1 / 26
+- **İlerleme:** 2 / 26
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A2 (genel sıra 2: veri setleri A2–A4; modeller B–H genel sıra 4)
+- **Sıradaki adım:** A3 (genel sıra 2: veri setleri A3–A4; modeller B–H genel sıra 4)
 - **Açık sorunlar:**
   - Smoke ground eşlemesi doğrulanmadı. Bu yüzden smoke modeli yalnızca flight verisiyle kurulur (A1).
   - FLEX'te Extinction/Disruption ile biten testlerin yanma süresi kesilmiş; Completion testleriyle aynı şekilde modellenemez (D3).
+  - Veri sürprizi (A2, D4/D5 için): acme_normal PSI-159 source_row 37'de `hot_ignition_raw`="No" ama ext_mode=FT ve burn_time_s=22. acme_inverse'de 8 satır (source_row 4, 6, 7, 8, 10, 11, 13, 44) `hot_ignition_raw`="flash", ext_mode=SE, burn_time_s=1.0. Bu 9 satır burn_time alt kümesi dışında, bayrakları NA. "flash"in tutuşma sayılıp sayılmayacağı modelleme kararı.
 
 ## Hedef
 
@@ -38,12 +39,13 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
     - İz sütunları ve grup sütunu dolu.
     - Satır sayıları `target_candidates.csv` ile tutarlı. Not: duman yalnızca uçuş (134 satır), bu yüzden amd/dusttrak 153/148 değil 131/133 (zemin satırları düşülmüş, bağımsız hesaplandı). Damlacık hedefleri birleştirilmedi (FLEX `burn_rate_K_mm2_s` ≠ CFI `k_hot_mm2_s`; yakıtlar kesişmiyor); yalnızca aynı fiziksel büyüklükler ortak adlı (`shared` listesi, bildirilmeyen ad çakışması hata verir). Gaz alevinde `flame_type` kaynaktan (Normal/Inverse), farklı O2 büyüklükleri (`xo2_init` / `xo2`) ayrı. Hedef başına `in_subset__<hedef>` maskesi; filtre sütunları sette yok. CV anahtarları (`cv_group`) tam dolu; diğer grup boşlukları gerçek ve sabit (FLEX `year`: 50/274). Çıktılar `data/modeling/` (gitignore, commit edilmez; `python -m src.prediction.datasets build`).
   ✔ 2026-11-14 · `python -m pytest tests/prediction/test_datasets.py -q` · 9 passed; tüm set 376 passed, 0 skipped. Satırlar: damlacık 501, gaz alevi 333, duman 134, katı 129; her hedefin sayısı target_candidates ile birebir (duman: n − zemin); her değer kaynakla aynı; maskeyle seçilen satırlar get_modeling_frame ile aynı. İlk turda iki gerçek bulgu: FLEX `year` 50 testte boş (doldurulmadı, CV anahtarı değil) ve ACME'de zaten bir `flame_type` sütunu var (uydurduğum etiket yerine kaynaktaki kullanıldı). Negatif kontrol (7, baz çizgisi yeşil): zemin dahil duman, FlameDesign dahil gaz alevi, `xo2_final` sızıntısı, NaN→0, FLEX/CFI K birleştirme, alt kümesiz maske, uydurulmuş etiket hepsi yakalandı
-- [ ] **A2** Sansür bayrakları
+- [x] **A2** Sansür bayrakları
   - Yap:
     - `gas_flame`: `burn_time_censored` (FT testleri = sağdan sansürlü).
     - `droplet`: `burn_time_truncated` (test_end ≠ Completion).
-  - Test: `pytest tests/prediction/test_datasets.py::test_censor_flags`
-  - Kabul: Bayrak sayıları EDA sayılarıyla eşit.
+  - Test: `pytest tests/prediction/test_censor_flags.py` (bağımsız analiz ajanı yazar, uygulamayı görmeden)
+  - Kabul: Bayrak sayıları EDA sayılarıyla eşit. Not: bayraklar nullable boolean ve yalnızca hedefin (burn_time) alt kümesinde, sonlanma biçimi biliniyorsa dolu; bilinmeyen = NA, asla False. EDA sayıları ext_mode/test_end alt kümesinden sayıldığı için tam eşitlik yalnızca alt küme içindeki satırlarda; fark tam olarak alt küme dışındaki satırlar (acme_normal 1 FT, acme_inverse 8 SE, flex 6 boş burn_time) ve test bunu ayrıca sabitliyor.
+  ✔ 2026-11-14 · `python -m pytest tests/prediction/test_censor_flags.py -q` · 10 passed (testleri bağımsız analiz ajanı uygulamayı görmeden yazdı; aynı sayıları bağımsız hesapladı); tüm set 386 passed, 0 skipped. gas_flame burn_time_censored: Normal 30 FT / 102 SE / 47 NA, Inverse 58 / 73 / 23; droplet burn_time_truncated: flex 241 / 27 / 6, cfi 227 NA. Negatif kontrol (6, baz çizgisi yeşil): bilinmeyeni False yapmak, alt küme dışında bayrak, ters bayrak, CFI'yi False yapmak, object dtype, yanlış Completion tanımı hepsi yakalandı
 - [ ] **A3** Veri kartları (`.md` + `.json`)
   - Yap: Her kartta şunlar olsun: sütun birimleri, `assumptions.md` içindeki ilgili maddeler, leakage listesi, sansür bilgisi, DOI'ler, satır sayısı, veri hash'i.
   - Test: `pytest tests/prediction/test_datasets.py::test_cards`

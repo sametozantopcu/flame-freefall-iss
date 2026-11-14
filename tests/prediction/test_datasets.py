@@ -47,7 +47,8 @@ def test_build(sets, con):
         cfg = D.DATASETS[name]
         assert len(df) == ROWS[name], name
         targets = set(targets_of(name))
-        allowed = set(TRACE) | {"source_table"} | set(cfg.get("extra", [])) | targets | {MASK + t for t in targets}
+        allowed = (set(TRACE) | {"source_table"} | set(cfg.get("extra", [])) | targets | {MASK + t for t in targets}
+                   | set(D.LABELS.get(name, [])))
         leak = set()
         for table in cfg["sources"]:
             s = SPEC[table]

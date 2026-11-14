@@ -19,4 +19,4 @@ Bu repo bir NASA Space Apps 2026 projesi: "Flame in Freefall". Mimari için `Arc
 - Modüller veriyi yalnızca Feature Store veya Metadata katmanından okur (`plans/00_data_layer`).
 - Doğrulama her zaman grup bazlı yapılır (GroupKFold); leakage listesi uygulanır.
 - Dokümanlar Türkçe yazılır; kod ve kod yorumları İngilizce olabilir.
-- Commit veya push yapmadan önce ekip üyesine sor.
+- Commit ve push: testlerle doğrulanmış her adımdan sonra otomatik yapılır (kullanıcı kararı, 2026-11-14). Her commit/push, commit kimliği, adım ve CI sonucuyla birlikte Claude'un kalıcı hafızasındaki commit günlüğüne yazılır. Doğrulanmamış iş commit edilmez.
