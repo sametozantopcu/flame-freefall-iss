@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 4 / 27
+- **İlerleme:** 7 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** B1
+- **Sıradaki adım:** B4
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -31,20 +31,26 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
 
 ## Faz B — Mevcut çıktılar için regresyon testleri
 
-- [ ] **B1** Parquet şema testi
+- [x] **B1** Parquet şema testi
   - Yap: 11 tablonun var olduğunu, her tabloda `psi_id`, `source_file` ve `source_row` sütunlarının bulunduğunu ve boş olmadığını kontrol et.
   - Test: `pytest tests/data_layer/test_parquet_schema.py`
   - Kabul: 11 tablo; iz sütunlarında %0 eksik; satır sayıları `analysis/outputs/load_report.md` ile aynı.
-- [ ] **B2** "Asla 0 ile doldurma" değişmez kuralı
+  ✔ 2026-11-14 · `python -m pytest tests/data_layer/test_parquet_schema.py -q` · 13 passed (11 tablo, iz sütunları %0 eksik, satır sayıları load_report ile eşit)
+
+- [x] **B2** "Asla 0 ile doldurma" değişmez kuralı
   - Yap: Ölçüm sütunlarında yapay 0 olmadığını test et.
     smoke (`amd_um`, `sample_temp_c`, çap sütunları) ve CFI çapları, 0 yerine NaN içermeli.
     `_flag` sütunları bool olmalı.
   - Test: `pytest tests/data_layer/test_no_zero_fill.py`
   - Kabul: Listelenen sütunlarda `== 0` sayısı 0; `_flag` sütunlarının dtype'ı bool.
-- [ ] **B3** Katalog tutarlılığı
+  ✔ 2026-11-14 · `python -m pytest tests/data_layer/test_no_zero_fill.py -q` · 18 passed. Not: `flex.d_ext_mm`=0 kaynakta var (8 satır: 4 Completion, 4 Disruption), doldurma değil; ayrı kuralla test edildi (yalnızca Completion/Disruption'da olabilir). Bayrak kuralı iki türlü: bool göstergeler (`any_ramp_flag`, `co_negative_flag`, `o2_final_anomaly_flag`) ve string token bayrakları (değer varken token olamaz)
+
+- [x] **B3** Katalog tutarlılığı
   - Yap: `_common.SPEC` içindeki her hedef katalogda `role=target` olmalı. Hiçbir leakage sütunu `role=feature` olmamalı.
   - Test: `pytest tests/data_layer/test_catalog.py`
   - Kabul: 19 hedef bulunuyor; feature ∩ leakage = ∅.
+  ✔ 2026-11-14 · `python -m pytest tests/data_layer/test_catalog.py -q` · 39 passed (19 hedef role=target; hiçbir leakage sütunu feature değil)
+
 - [ ] **B4** İdempotentlik
   - Yap: `01_load_core.py` iki kez çalıştırılınca parquet dosyalarının içerik hash'i aynı kalmalı.
   - Test: `pytest tests/data_layer/test_idempotent.py -m needs_raw`
