@@ -1,0 +1,13 @@
+# 00 — Ortak Veri Katmanı (minimum)
+pandas>=2.2
+numpy>=1.26
+pyarrow>=15
+duckdb>=1.0
+requests>=2.31          # ingest/psi_all.py
+openpyxl>=3.1           # Excel → CSV (ingest)
+scipy>=1.11             # EDA script'leri + B5 fizik testleri
+statsmodels>=0.14       # EDA: VIF, FDR
+scikit-learn>=1.4       # EDA: mutual information
+matplotlib>=3.8         # EDA figürleri
+tabulate>=0.9           # markdown tabloları
+pytest>=8
