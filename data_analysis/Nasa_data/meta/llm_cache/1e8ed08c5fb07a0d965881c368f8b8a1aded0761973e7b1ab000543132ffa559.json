@@ -1,0 +1,43 @@
+{
+ "model": "deepseek-v4.1-flash",
+ "answer": {
+  "facts": [
+   {
+    "field": "fuel_or_material",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "methane",
+    "section": "approach",
+    "source_span": "several fuels such as methane, ethylene, and nitrogen-diluted mixtures"
+   },
+   {
+    "field": "fuel_or_material",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "ethylene",
+    "section": "approach",
+    "source_span": "several fuels such as methane, ethylene, and nitrogen-diluted mixtures"
+   },
+   {
+    "field": "diluent",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "nitrogen",
+    "section": "approach",
+    "source_span": "nitrogen-diluted mixtures"
+   },
+   {
+    "field": "gravity",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "microgravity",
+    "section": "objective",
+    "source_span": "laminar diffusion flames in microgravity"
+   }
+  ]
+ }
+}

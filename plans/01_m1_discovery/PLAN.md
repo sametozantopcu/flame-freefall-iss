@@ -4,12 +4,13 @@ Mimari: [Architecture.md §2](../../Architecture.md) · Kod: `src/discovery/` ·
 
 ## Durum
 
-- **İlerleme:** 1 / 21
+- **İlerleme:** 2 / 21
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A2 (LLM ile metinden zarf; genel sıra 3: 03 ve 05/E1, E3 ile birlikte)
+- **Sıradaki adım:** A3 (metinden gelen zarfların kontrolü; genel sıra 3)
 - **Açık sorunlar:**
   - LLM adımları (A2, E1–E4) EVREN API anahtarını kök `.env`'den okur; EVREN kullanım şartları hesap sahibince onaylanmış olmalı.
   - Veri sürprizi (A1): PSI-21 `fuel_bottle` değerleri tablo programı otomatik doldurma artığı gibi (`100% C2H5…C2H11`, `40% CH5…CH14`; 30 farklı değer), PSI-23'te `45% CH4 with N3`. Zarf bunları olduğu gibi tutar; skorlama `material_class` kullanmalı, ileride bir temizlik adımı gerekebilir.
+  - A3'te karara bağlanacak (A2 çıktısında alıntı kuralını geçen ama anlamı şüpheli satırlar): PSI-142 basınç 20 atm sayısal modelleme koşulu (ISS deneyi değil); PSI-26 'nitrogen' söndürücü (seyreltici değil); PSI-68 'diluent gas' adı yok; PSI-117 'ozone' katkı (seyreltici değil, çalışma CFD); PSI-47 'GN2' aerosol taşıyıcı (yanma deneyi değil); PSI-142 'DME' iki kez; PSI-62/115/117 'normal-gravity'/'Earth gravity' modelleme bağlamı; PSI-60 hiç satır üretmedi (A4'te unknown). Modelleme/analiz çalışmaları (PSI-60, 62, 115, 117, 142) zarfta ayrı işaretlenmeli.
   - SAFFIRE-I `Percent O2` metni "21.5 - 21.7" ama `o2_pct_approx` 21.5; zarf `o2_pct_approx`'u kullanır.
 
 ## Hedef
@@ -38,11 +39,12 @@ Her sıranın gerekçesi gösterilir ve kaynaklara atıf yapılır.
     - Hiçbir satırda min > max yok.
     - Birimler O2 için %, basınç için atm. Not: `src/discovery/envelope.py` → `envelope_from_tables()`: table_map'te kapsamı table/inferred olan her (investigation, tablo) için bir satır (17). O2'nin anlamı `o2_basis` ile belirtilir (ACME ters alevde oksitleyici akımı; BASS-II başlangıç kabin O2'si); O2 sütunu olmayan tablolarda %21 varsayılmaz. p ≤ 0 (FLEX PSI-69 source_row 113, p_mmHg=0) ve negatif akış (SPICE, 8 değer) zarfa katılmaz, sayılır.
   ✔ 2026-11-14 · `python -m pytest tests/discovery/test_envelope.py -q` · 28 passed (bağımsız ajan uygulamayı görmeden yazdı; sözleşmedeki '16 satır' hatamı kendi hesabıyla yakaladı, doğrusu 17); tüm set 501 passed, 0 skipped. ACME O2 ve basınç min/max'ı her (psi_id, tablo) için parquet ×100 ile birebir. Negatif kontrol (7, koda uygulandı, baz çizgisi yeşil): ters alevi 'ambient' saymak, 0 atm'yi tutmak, çıkarımsal PSI-102'ye tüm satırları vermek, %21 varsaymak, 'Pre-test' satırlarını malzeme saymak, metin akışlarını ayrıştırmamak, boş sütunlardan etiket üretmek hepsi yakalandı
-- [ ] **A2** Metinden zarf çıkarımı (tablosu olmayanlar için, LLM)
+- [x] **A2** Metinden zarf çıkarımı (tablosu olmayanlar için, LLM)
   - Yap: Parquet tablosu olmayan investigation'lar için (00/D4 `table_map`'te `coverage='none'`, bugün 9 investigation) amaç, yaklaşım ve etkiler metninden O2, basınç, seyreltici, yakıt/malzeme sınıfı, yerçekimi ve olgu etiketlerini LLM ile çıkar (`src/discovery/llm.py`, aşağıdaki LLM kuralları).
     Her değer için `source=text` olsun ve kaynak metinden **birebir alıntı** (`source_span`) saklansın.
-  - Test: `pytest tests/discovery/test_envelope.py::test_text_spans`. LLM mock'lanır. Test, her `source_span` değerinin kaynak metinde birebir geçtiğini kontrol eder.
-  - Kabul: Alıntısı kaynakta bulunmayan satır reddediliyor; çıktı bir kez üretilip kaydediliyor (A4 ile dışa aktarılır), uygulama LLM çağırmıyor.
+  - Test: `pytest tests/discovery/test_text_envelope.py::test_text_spans` (+ dosyanın tamamı; bağımsız analiz ajanı yazar). LLM mock'lanır. Test, her `source_span` değerinin kaynak metinde birebir geçtiğini kontrol eder.
+  - Kabul: Alıntısı kaynakta bulunmayan satır reddediliyor; çıktı bir kez üretilip kaydediliyor (A4 ile dışa aktarılır), uygulama LLM çağırmıyor. Not: `src/discovery/llm.py` (EVREN istemcisi, anahtar yalnız `.env`'den, hiçbir çıktıda/hatada görünmez) ve `src/discovery/text_envelope.py`. LLM yalnızca öneri verir; her sayı alıntıda geçmeli, birim dönüşümü kodda yapılır (mole fraction ×100 dahil); reddedilenler nedeniyle saklanır. Üretim bir kez yapıldı (9 çağrı, 226 sn): `meta/inv_envelope_text.parquet` (33 olgu: 31 kabul, 2 red) ve `meta/llm_cache/` (9 yanıt) commit edildi; yeniden üretim önbellekten API'siz.
+  ✔ 2026-11-14 · `python -m pytest tests/discovery/test_text_envelope.py -q` · 92 passed (bağımsız ajan yazdı; '20-40 atm'deki tireyi eksi sanan sayı ayrıştırma hatasını yakaladı ve 'mole fraction' birimi eksikliğini gösterdi, ikisi de düzeltildi); tüm set 593 passed, 0 skipped. Commit edilen dosyalarda API anahtarı bulunmadığı ayrıca doğrulandı. Negatif kontrol (8, koda uygulandı, baz çizgisi yeşil): alıntı kontrolünü kaldırmak, boşluk normalleştirmesini kaldırmak, sayı-alıntıda kontrolünü kaldırmak, eski tire regex'i, mole fraction ×1, anahtarı hata mesajına koymak, yeniden denemeyi kapatmak, thinking=true hepsi yakalandı
 - [ ] **A3** Metinden gelen zarfların kontrolü
   - Yap: Text kaynaklı bütün satırları kaynak metinle tek tek karşılaştır (geliştirici yapar; ekip üyesi rastgele birkaçını kontrol edebilir) ve sonucu `docs/evidence/envelope_review.md` dosyasına yaz.
   - Test: `pytest tests/discovery/test_envelope.py::test_review_evidence`

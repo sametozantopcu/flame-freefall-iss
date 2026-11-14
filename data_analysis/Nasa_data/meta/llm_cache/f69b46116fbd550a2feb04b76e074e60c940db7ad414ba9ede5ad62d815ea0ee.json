@@ -1,0 +1,43 @@
+{
+ "model": "deepseek-v4.1-flash",
+ "answer": {
+  "facts": [
+   {
+    "field": "fuel_or_material",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "dibutyl-phthalate (DBP)",
+    "section": "approach",
+    "source_span": "The formation and growth of dibutyl-phthalate (DBP) particles in Earth gravity and microgravity environments was simulated."
+   },
+   {
+    "field": "gravity",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "microgravity",
+    "section": "approach",
+    "source_span": "The formation and growth of dibutyl-phthalate (DBP) particles in Earth gravity and microgravity environments was simulated."
+   },
+   {
+    "field": "gravity",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "Earth gravity",
+    "section": "approach",
+    "source_span": "The formation and growth of dibutyl-phthalate (DBP) particles in Earth gravity and microgravity environments was simulated."
+   },
+   {
+    "field": "flow",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "two cross-flow velocities of sufficiently low speed",
+    "section": "approach",
+    "source_span": "This study considered two cross-flow velocities of sufficiently low speed that buoyancy cannot be neglected in the presence of gravity."
+   }
+  ]
+ }
+}

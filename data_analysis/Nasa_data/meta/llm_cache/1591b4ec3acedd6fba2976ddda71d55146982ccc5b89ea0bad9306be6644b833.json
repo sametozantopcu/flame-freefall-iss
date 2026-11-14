@@ -1,0 +1,34 @@
+{
+ "model": "deepseek-v4.1-flash",
+ "answer": {
+  "facts": [
+   {
+    "field": "fuel_or_material",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "n-alkane",
+    "section": "approach",
+    "source_span": "n-alkane droplet cool flames in microgravity"
+   },
+   {
+    "field": "gravity",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "microgravity",
+    "section": "approach",
+    "source_span": "n-alkane droplet cool flames in microgravity"
+   },
+   {
+    "field": "diluent",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "ozone",
+    "section": "approach",
+    "source_span": "ambient composition (including ozone-assisted cases)"
+   }
+  ]
+ }
+}
