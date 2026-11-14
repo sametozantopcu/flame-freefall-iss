@@ -163,3 +163,80 @@ def test_real_videos_are_listed(real):
 @needs_raw
 def test_raw_detail_files_untouched(real):
     assert real["before"] == real["after"] and len(real["before"]) == 24
+
+
+# ---------------------------------------------------------------- D2: export / connect_meta
+def _fixture_raw(tmp_path) -> Path:
+    raw = tmp_path / "raw" / "PSI-25"
+    raw.mkdir(parents=True, exist_ok=True)
+    (raw / "detail.json").write_text(FIX.read_text())
+    return tmp_path / "raw"
+
+
+def test_export_roundtrip_from_fixture(tmp_path):
+    out = tmp_path / "meta"
+    paths = metadata.export(out, _fixture_raw(tmp_path))
+    assert [p.name for p in paths] == ["investigations.parquet", "publications.parquet", "files.parquet"]
+    tables = load_all(_fixture_raw(tmp_path))
+    for name, df, p in zip(metadata.META_TABLES, tables, paths):
+        pd.testing.assert_frame_equal(df, pd.read_parquet(p))            # values, dtypes (Int64, string, datetime), NA
+    assert [len(t) for t in tables] == [1, 3, 7]
+
+
+def test_export_is_byte_deterministic(tmp_path):
+    raw = _fixture_raw(tmp_path)
+    a, b = metadata.export(tmp_path / "a", raw), metadata.export(tmp_path / "b", raw)
+    assert [x.read_bytes() for x in a] == [y.read_bytes() for y in b]
+
+
+def test_size_budget_on_committed_export():
+    total = sum((metadata.META_DIR / f"{n}.parquet").stat().st_size for n in metadata.META_TABLES)
+    assert 0 < total < 5_000_000, f"{total / 1e6:.2f} MB exceeds the 5 MB commit budget"
+
+
+def test_connect_meta_missing_export_is_a_clear_error(monkeypatch, tmp_path):
+    monkeypatch.setattr(metadata, "META_DIR", tmp_path)
+    with pytest.raises(FileNotFoundError, match="metadata export missing"):
+        metadata.connect_meta()
+
+
+def test_connect_meta_works_without_raw_and_from_any_cwd(monkeypatch, tmp_path):
+    """The acceptance criterion: readable without raw/ (RAW_DIR pointed at an empty folder, cwd elsewhere)."""
+    monkeypatch.setattr(metadata, "RAW_DIR", tmp_path / "no_raw_here")
+    monkeypatch.chdir(tmp_path)
+    con = metadata.connect_meta()
+    n = {t: con.execute(f"SELECT count(*) FROM {t}").fetchone()[0] for t in metadata.META_TABLES}
+    assert n == {"investigations": 24, "publications": 352, "files": 27076}
+    assert con.execute("SELECT count(*) FROM investigations WHERE doi IS NULL").fetchone()[0] == 0
+    assert con.execute("SELECT count(*) FROM publications WHERE doi IS NULL").fetchone()[0] == 68
+    assert con.execute("SELECT count(*) FROM files WHERE status='added' AND ext='.mp4'").fetchone()[0] == 855
+    types = {r[0]: r[1] for r in con.execute("DESCRIBE investigations").fetchall()}
+    assert types["start_date"].startswith("TIMESTAMP") and types["total_file_size"] == "BIGINT"
+
+
+def test_build_meta_file_is_idempotent_and_ignored_by_git(tmp_path):
+    out = metadata.build_meta(tmp_path / "meta.duckdb")
+    assert metadata.build_meta(out) == out
+    with duckdb_read(out) as c:
+        assert c.execute("SELECT count(*) FROM files").fetchone()[0] == 27076
+    assert "*.duckdb" in (REPO / ".gitignore").read_text()                 # the .duckdb file is never committed
+
+
+def duckdb_read(p):
+    import duckdb
+    return duckdb.connect(str(p), read_only=True)
+
+
+@needs_raw
+def test_committed_export_equals_fresh_export_from_raw(tmp_path):
+    fresh = metadata.export(tmp_path / "fresh")
+    for name, p in zip(metadata.META_TABLES, fresh):
+        pd.testing.assert_frame_equal(pd.read_parquet(metadata.META_DIR / f"{name}.parquet"), pd.read_parquet(p))
+    assert sum(p.stat().st_size for p in fresh) < 5_000_000
+
+
+@needs_raw
+def test_export_does_not_touch_raw(tmp_path):
+    before = {p: hashlib.md5(p.read_bytes()).hexdigest() for p in sorted(RAW.glob("PSI-*/detail.json"))}
+    metadata.export(tmp_path / "m")
+    assert before == {p: hashlib.md5(p.read_bytes()).hexdigest() for p in sorted(RAW.glob("PSI-*/detail.json"))}

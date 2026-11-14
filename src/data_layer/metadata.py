@@ -13,9 +13,13 @@ import re
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+import duckdb
 import pandas as pd
 
 RAW_DIR = Path(__file__).resolve().parents[2] / "data_analysis" / "Nasa_data" / "raw"
+META_DIR = RAW_DIR.parent / "meta"                  # committed export: investigations/publications/files .parquet
+META_DB = RAW_DIR.parent / "meta.duckdb"            # built on demand, git-ignored
+META_TABLES = ["investigations", "publications", "files"]
 DATE_FORMATS = {"mdy": "%m-%d-%Y", "dMy": "%d-%b-%Y"}      # investigation start/end vs release/submission/modified
 INV_TEXT = {"acronym": "investigationAcronym", "title": "title", "objective": "objective", "approach": "approach",
             "hypothesis": "hypothesis", "research_impacts": "researchImpacts", "doi": "doi",
@@ -111,9 +115,60 @@ def load_all(raw_dir: str | Path = RAW_DIR):
     for p in paths:
         inv, pb, fl = parse_detail(json.loads(p.read_text()), p.parent.name, f"raw/{p.parent.name}/detail.json")
         invs.append(inv), pubs.append(pb), files.append(fl)
+    pubs_df, files_df = pd.concat(pubs, ignore_index=True), pd.concat(files, ignore_index=True)
+    # explicit dtype contract (an investigation without publications yields an empty frame that would turn
+    # source_row into object after concat; datetime resolution is pinned to ms = what parquet round-trips to)
+    pubs_df["source_row"] = pubs_df["source_row"].astype("int64")
+    files_df = files_df.astype({"source_row": "int64", "date_created": "datetime64[ms]", "date_modified": "datetime64[ms]"})
     inv_df = pd.DataFrame(invs)
     text = [c for c in inv_df.columns if c in INV_TEXT or c in ("psi_id", "source_file")]
     inv_df = inv_df.astype({**{c: "string" for c in text}, "total_file_size": "Int64"})
     for c in INV_DATES:
-        inv_df[c] = pd.to_datetime(inv_df[c])
-    return inv_df, pd.concat(pubs, ignore_index=True), pd.concat(files, ignore_index=True)
+        inv_df[c] = pd.to_datetime(inv_df[c]).astype("datetime64[ms]")
+    inv_df = inv_df.astype({"source_row": "int64", "version": "int64"})
+    return inv_df, pubs_df, files_df
+
+
+# ---------------------------------------------------------------- export (D2): the committed artefact is the parquet
+def export(out_dir: str | Path = META_DIR, raw_dir: str | Path = RAW_DIR) -> list[Path]:
+    """Write the three tables as zstd parquet (deterministic order). raw/ is only read."""
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    paths = []
+    for name, df in zip(META_TABLES, load_all(raw_dir)):
+        p = out_dir / f"{name}.parquet"
+        df.to_parquet(p, index=False, compression="zstd")
+        paths.append(p)
+    return paths
+
+
+def connect_meta(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
+    """DuckDB with views investigations / publications / files over meta/*.parquet (absolute paths). Never touches raw/."""
+    missing = [n for n in META_TABLES if not (META_DIR / f"{n}.parquet").exists()]
+    if missing:
+        raise FileNotFoundError(f"metadata export missing in {META_DIR}: {missing} "
+                                "(run: python -m src.data_layer.metadata export)")
+    con = duckdb.connect(str(db_path) if db_path else ":memory:")
+    for n in META_TABLES:
+        con.execute(f"CREATE OR REPLACE VIEW {n} AS SELECT * FROM read_parquet('{(META_DIR / f'{n}.parquet').as_posix()}')")
+    return con
+
+
+def build_meta(out_path: str | Path = META_DB) -> Path:
+    """Write meta.duckdb (views over the parquet) for external SQL tools. Git-ignored, idempotent."""
+    out = Path(out_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    connect_meta(out).close()
+    return out
+
+
+if __name__ == "__main__":
+    import sys
+    cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    if cmd == "export":
+        for p in export(*sys.argv[2:3]):
+            print(f"wrote {p} ({p.stat().st_size / 1e6:.2f} MB)")
+    elif cmd == "build":
+        print(f"wrote {build_meta(*sys.argv[2:3])}")
+    else:
+        sys.exit("usage: python -m src.data_layer.metadata export [out_dir] | build [out.duckdb]")

@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 16 / 27
+- **İlerleme:** 17 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** D2 (`meta/` dışa aktarımı, 5 MB sınırı: `files` 27 bin satır, boyut ölçülmeli). Faz B ve C tamam.
+- **Sıradaki adım:** D3 (DOI doğrulama, `doi_flag`). Faz B ve C tamam.
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -109,10 +109,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Test: `pytest tests/data_layer/test_metadata.py`. Testte `tests/fixtures/detail_PSI-25.json` kullanılır (küçük, gerçek bir dosyadan kesilmiş).
   - Kabul: Fixture'dan beklenen satırlar çıkıyor. Gerçek veriyle tam 24 investigation çıkıyor. Not (plandan sapmalar): `publications`'ta yıl sütunu yok (kaynakta yok, uydurulmadı); `contacts` (e-posta/telefon) alınmadı; `files` tablosu `added` + `removed` içerir (`status` sütunu); `removed`'da 3.023 yinelenen yol gerçek veridir, tekilleştirilmedi (`source_row` added+removed sırasındaki konumdur, anahtar benzersiz kalır). Tablolar henüz dosyaya yazılmıyor (D2).
   ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 231 passed, 0 skipped (test_metadata.py: 16; fixture `tests/fixtures/detail_PSI-25.json`, 14 KB, kişisel veri yok). Gerçek veri: 24 investigation (DOI'leri kalıba uygun), 352 yayın (68 DOI'siz), 16.354 added + 10.722 removed dosya, 855 mp4; 24 `detail.json`'un md5'i değişmedi. Negatif kontrol (6): tarih biçimi, boş DOI, contacts sızıntısı, eksik yayın, tekilleştirme, float yuvarlama hepsi yakalandı
-- [ ] **D2** `meta.duckdb` ve parquet dışa aktarımı
+- [x] **D2** `meta.duckdb` ve parquet dışa aktarımı
   - Yap: Üç tabloyu `data_analysis/Nasa_data/meta/` klasörüne yaz. Toplam boyut 5 MB'ın altında kalmalı ki commit edilebilsin.
   - Test: `pytest tests/data_layer/test_metadata.py::test_export`
-  - Kabul: Dosyalar var ve 5 MB'ın altında; `raw/` olmadan da okunabiliyor.
+  - Kabul: Dosyalar var ve 5 MB'ın altında; `raw/` olmadan da okunabiliyor. Not: commit edilen asıl artefakt 3 parquet (`meta/`, zstd, ~0,76 MB); `meta.duckdb` `connect_meta()`/`build_meta()` ile üretilir ve `*.duckdb` gitignore'da olduğu için commit edilmez (Architecture'daki ad ve yapı korunur). Metadata görünümleri şimdilik `store.connect()`'ten ayrı; D4'te birleştirme önerilecek. `publications.authors` yayın künyesidir (kamuya açık), kişisel iletişim bilgisi değil.
+  ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 239 passed, 0 skipped (test_metadata.py: 24). Gerçek export: 24 / 352 / 27.076 satır, toplam 0,76 MB (< 5 MB); commit'li `meta/` `raw/`'dan yeniden üretilenle içerik olarak aynı; `RAW_DIR` boş klasöre yönlendirilmişken `connect_meta()` çalışıyor; iki export bayt olarak aynı; 24 `detail.json` md5'i değişmedi. Bu adımda D1 kodunda dtype sözleşmesi sabitlendi (`source_row` int64, tarihler datetime64[ms]). Negatif kontrol (5): kısaltılmış parquet, zaman damgalı export, 5 MB aşımı, gizli `raw/` bağımlılığı, eksik `meta/` yakalandı
 - [ ] **D3** DOI doğrulama
   - Yap: Her DOI `^10\.\d{4,9}/\S+$` kalıbına uymalı. Uymayanlar `doi_flag` ile işaretlensin, silinmesin.
   - Test: `pytest tests/data_layer/test_metadata.py::test_doi`
