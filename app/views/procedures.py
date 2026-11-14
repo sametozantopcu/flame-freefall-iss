@@ -1,4 +1,4 @@
-"""Suppression Protocol — ISS BASS-II adımlarının etkileşimli yürütücüsü + donanım araçları."""
+"""Suppression Protocol — interactive executor of the ISS BASS-II steps plus hardware tools."""
 from __future__ import annotations
 
 import time
@@ -24,8 +24,8 @@ UI.header(t("eyebrow.ops"), t("proc.title"), t("proc.subtitle"),
           [UI.badge(t("badge.scenario", o2=sc.o2_pct, u=sc.flow_cm_s), T.MUTED)])
 
 # --------------------------------------------------------------------------- #
-# Durum — olay kaydı (MET, adım, not anahtarı) olarak tutulur ve çizim anında
-# çevrilir; dil değiştirildiğinde geçmiş kayıtlar da yeni dilde görünür.
+# State is kept as an event log (MET, step, note key) and translated at render
+# time; when the language changes, past entries appear in the new language too.
 # --------------------------------------------------------------------------- #
 if "proc" not in st.session_state:
     st.session_state.proc = {"step": "standby", "t_step": None, "t_start": None, "log": []}
@@ -131,7 +131,7 @@ with c_side:
                 unsafe_allow_html=True)
 
 # --------------------------------------------------------------------------- #
-# Donanım araçları
+# Hardware tools
 # --------------------------------------------------------------------------- #
 UI.section(t("proc.sec_tools"))
 t1, t2 = st.columns(2, gap="large")
@@ -157,7 +157,7 @@ with t1:
     f.add_vrect(x0=0, x1=C.FAN_CAL_RESTRICTOR_2[0][0], fillcolor=T.BLUE, opacity=0.08, line_width=0,
                 annotation=dict(text=t("fan.zero_band"), font=dict(color=T.MUTED, size=11)),
                 annotation_position="top left")
-    # Ölçüm aralığı bandı (xlsx'teki min–maks)
+    # Measurement-range band (min–max from the xlsx)
     f.add_trace(go.Scatter(x=np.r_[pots, pots[::-1]], y=np.r_[hi, lo[::-1]], fill="toself",
                            fillcolor="rgba(57,135,229,0.16)", line=dict(width=0), hoverinfo="skip",
                            name=t("fan.band")))

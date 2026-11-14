@@ -1,23 +1,23 @@
-"""Model kayıt defteri: models/ klasöründeki eğitilmiş modelleri keşfeder ve yükler.
+"""Model registry: discovers and loads the trained models in the models/ folder.
 
-Sözleşme (veri bilimi ekibi için)
+Contract (for the data-science team)
 --------------------------------
-models/ içine şu biçimlerden biri bırakılabilir:
+One of the following forms may be placed in models/:
 
-* ``<ad>.joblib`` / ``.pkl`` — tek bir sklearn uyumlu tahminci (veya Pipeline),
-* aynı dosyada bir **liste** — fold modelleri; tahminler ortalanır,
-* aynı dosyada bir **sözlük** — ``{"model": est | [est...], "feature_cols": [...], ...}``.
+* ``<name>.joblib`` / ``.pkl`` — a single sklearn-compatible estimator (or Pipeline),
+* a **list** in the same file — fold models; the predictions are averaged,
+* a **dictionary** in the same file — ``{"model": est | [est...], "feature_cols": [...], ...}``.
 
-İsteğe bağlı yan dosya ``<ad>.json``:
+Optional sidecar file ``<name>.json``:
 ``{"feature_cols": [...], "target": "Extinction", "task": "classification",
    "description": "...", "metrics": {"oof_auc": 0.91}}``
 
-Özellik listesi şu sırayla çözülür: meta veri -> ``feature_names_in_`` ->
-src/train.py ile aynı kural (features.add_physics_features çıktısındaki tüm
-sayısal kolonlar, hedef/grup/fold hariç).
+The feature list is resolved in this order: metadata -> ``feature_names_in_`` ->
+the same rule as src/train.py (all numeric columns in the output of
+features.add_physics_features, excluding target/group/fold).
 
-Hiç model yoksa, mevcut veriyle (gerçek veya simülasyon) src/cv.py'nin
-GroupKFold kurgusu kullanılarak bir **vekil (surrogate) model** eğitilir.
+If no model exists, a **surrogate model** is trained on the available data
+(real or simulated) using the GroupKFold scheme of src/cv.py.
 """
 from __future__ import annotations
 
@@ -45,12 +45,12 @@ IGNORE = {C.TARGET_COL, C.GROUP_COL, "fold"}
 
 
 def team_feature_frame(df: pd.DataFrame) -> pd.DataFrame:
-    """Ekibin özellik mühendisliğini (src/features.py) uygular."""
+    """Applies the team feature engineering (src/features.py)."""
     return team_features.add_physics_features(df)
 
 
 def default_feature_cols() -> list[str]:
-    """src/train.py'deki kuralı ham şema üzerinde yeniden üretir."""
+    """Reproduces the src/train.py rule on the raw schema."""
     probe = pd.DataFrame([{c: 1.0 for c in C.REQUIRED_COLS}])
     return [c for c in team_feature_frame(probe).columns if c not in IGNORE]
 
@@ -65,7 +65,7 @@ class ModelBundle:
     task: str = "classification"
     description: str = ""
     metrics: dict[str, float] = field(default_factory=dict)
-    oof: pd.DataFrame | None = None              # vekil model için OOF tahminleri
+    oof: pd.DataFrame | None = None              # OOF predictions for the surrogate model
 
     def _features(self, df: pd.DataFrame) -> pd.DataFrame:
         X = team_feature_frame(df)
@@ -75,7 +75,7 @@ class ModelBundle:
         return X[self.feature_cols]
 
     def predict_proba(self, df: pd.DataFrame) -> np.ndarray:
-        """Pozitif sınıf (Extinction = 1, alev söner) olasılığı."""
+        """Probability of the positive class (Extinction = 1, the flame goes out)."""
         X = self._features(df)
         preds = []
         for est in self.estimators:
@@ -100,7 +100,7 @@ class ModelBundle:
 
 
 # --------------------------------------------------------------------------- #
-# Keşif ve yükleme
+# Discovery and loading
 # --------------------------------------------------------------------------- #
 def discover(models_dir: Path = C.MODELS_DIR) -> list[Path]:
     if not models_dir.exists():
@@ -143,7 +143,7 @@ def load_bundle(path: Path) -> ModelBundle:
 
 
 def train_surrogate(df: pd.DataFrame, n_splits: int = 5, seed: int = 42) -> ModelBundle:
-    """src/train.py ile aynı hat: add_physics_features -> create_folds -> RF."""
+    """Same pipeline as src/train.py: add_physics_features -> create_folds -> RF."""
     base = df[[C.GROUP_COL, *C.REQUIRED_COLS, C.TARGET_COL]].copy().reset_index(drop=True)
     feats = team_feature_frame(base)
     feature_cols = [c for c in feats.columns if c not in IGNORE]
@@ -172,7 +172,7 @@ def train_surrogate(df: pd.DataFrame, n_splits: int = 5, seed: int = 42) -> Mode
     metrics["accuracy@0.5"] = float(((oof >= 0.5).astype(int) == folded[C.TARGET_COL]).mean())
 
     return ModelBundle(
-        name="surrogate_rf",                      # görüntü etiketi: app/i18n.py
+        name="surrogate_rf",                      # display label: app/i18n.py
         estimators=[final],
         feature_cols=feature_cols,
         source="surrogate",
@@ -183,12 +183,12 @@ def train_surrogate(df: pd.DataFrame, n_splits: int = 5, seed: int = 42) -> Mode
 
 
 def resolve(df: pd.DataFrame, models_dir: Path = C.MODELS_DIR) -> tuple[ModelBundle, list[str]]:
-    """Kullanılacak modeli seçer; yüklenemeyen dosyalar için uyarı döner."""
-    notes: list[tuple[str, dict]] = []    # (i18n anahtarı, parametreler)
+    """Selects the model to use; returns a warning for files that fail to load."""
+    notes: list[tuple[str, dict]] = []    # (i18n key, parameters)
     for path in discover(models_dir):
         try:
             bundle = load_bundle(path)
-            bundle.predict_proba(df.head(3))  # duman testi: şema uyumu
+            bundle.predict_proba(df.head(3))  # smoke test: schema compatibility
             return bundle, notes
         except Exception as exc:  # noqa: BLE001
             notes.append(("warn.model_unusable", {"name": path.name, "err": f"{type(exc).__name__}: {exc}"}))

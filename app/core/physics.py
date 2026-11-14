@@ -1,14 +1,13 @@
-"""Mikro-yerçekimi yanma fiziği: saf, test edilebilir fonksiyonlar (Streamlit bağımsız).
+"""Microgravity combustion physics: pure, testable functions (Streamlit-independent).
 
 Kaynaklar
 ---------
-* Olson, S. L. — BASS-II Summary Report: U-şekilli yanabilirlik sınırı.
-* Huggett, C. (1980) — oksijen tüketim kalorimetrisi, 13.1 kJ / g O2.
+* Olson, S. L. — BASS-II Summary Report: U-shaped flammability limit.
+* Huggett, C. (1980) — oxygen-consumption calorimetry, 13.1 kJ / g O2.
 
-"Sezgisel" (heuristic) olarak işaretli fonksiyonlar, BASS-II'nin iki ana
-gözlemine (230 s'ye varan tutuşma gecikmesi, sınır yakınında ~10x CO) kalibre
-edilmiş yüzey modelleridir; birinci prensip modeli değildir ve arayüzde bu
-şekilde etiketlenir.
+Functions marked "heuristic" are surface models calibrated to two key BASS-II
+observations (ignition delays of up to 230 s, ~10x CO near the limit); they are
+not first-principles models and are labelled as such in the interface.
 """
 from __future__ import annotations
 
@@ -20,10 +19,10 @@ ArrayLike = float | np.ndarray
 
 
 # --------------------------------------------------------------------------- #
-# Olson U-eğrisi
+# Olson U-curve
 # --------------------------------------------------------------------------- #
 def strain_rate(u_cm_s: ArrayLike, r_cm: ArrayLike) -> ArrayLike:
-    """Gerilme hızı a [1/s] = 1.5 (U/r) (r/0.318)^0.5."""
+    """Strain rate a [1/s] = 1.5 (U/r) (r/0.318)^0.5."""
     u = np.asarray(u_cm_s, dtype=float)
     r = np.maximum(np.asarray(r_cm, dtype=float), 1e-6)
     a = 1.5 * (u / r) * np.sqrt(r / C.R_REF_CM)
@@ -31,7 +30,7 @@ def strain_rate(u_cm_s: ArrayLike, r_cm: ArrayLike) -> ArrayLike:
 
 
 def olson_limit(a: ArrayLike) -> ArrayLike:
-    """Sınır O2 mol yüzdesi X_O2 = 6 exp(-0.5a) + 0.0167a + 13.4."""
+    """Limit O2 mole percent X_O2 = 6 exp(-0.5a) + 0.0167a + 13.4."""
     a = np.asarray(a, dtype=float)
     x = C.OLSON_A * np.exp(-C.OLSON_B * a) + C.OLSON_C * a + C.OLSON_D
     return x if x.ndim else float(x)
@@ -42,7 +41,7 @@ def limit_vs_velocity(u_cm_s: ArrayLike, r_cm: float) -> ArrayLike:
 
 
 def optimal_strain_rate() -> float:
-    """U-eğrisinin minimumu: dX/da = 0  ->  a* = (1/B) ln(A·B / C)."""
+    """Minimum of the U-curve: dX/da = 0  ->  a* = (1/B) ln(A·B / C)."""
     return float(np.log(C.OLSON_A * C.OLSON_B / C.OLSON_C) / C.OLSON_B)
 
 
@@ -51,30 +50,30 @@ def minimum_limit() -> float:
 
 
 def velocity_for_strain(a: float, r_cm: float) -> float:
-    """a'yı veren akış hızı (strain_rate'in tersi)."""
+    """Flow velocity that produces a (inverse of strain_rate)."""
     return float(a * r_cm / (1.5 * np.sqrt(r_cm / C.R_REF_CM)))
 
 
 def most_dangerous_velocity(r_cm: float) -> float:
-    """Sınırın en düşük olduğu, yani alevin en dirençli olduğu akış hızı."""
+    """Flow velocity at which the limit is lowest, i.e. the flame is most robust."""
     return velocity_for_strain(optimal_strain_rate(), r_cm)
 
 
 def regime(a: float) -> str:
-    """U-eğrisinin hangi kolunda olduğumuz (dilden bağımsız kod)."""
+    """Which branch of the U-curve we are on (language-independent code)."""
     a_star = optimal_strain_rate()
     if a < 0.15 * a_star:
-        return "quiescent"       # neredeyse sıfır akış: O2 difüzyonu + radyasyon kaybı
+        return "quiescent"       # near-zero flow: O2 diffusion + radiative loss
     if a < a_star:
-        return "radiative"       # sol kol: radyasyon kaybı / O2 taşınım sınırı
-    return "blowoff"             # sağ kol: kalış süresi kısa, alev üflenir (blow-off)
+        return "radiative"       # left branch: radiative loss / O2 transport limit
+    return "blowoff"             # right branch: short residence time, flame blows off
 
 
 # --------------------------------------------------------------------------- #
 # Huggett kalorimetrisi
 # --------------------------------------------------------------------------- #
 def gas_molar_density(p_kpa: float = C.STD_P_KPA, t_k: float = C.STD_T_K) -> float:
-    """İdeal gaz mol yoğunluğu [mol/L]."""
+    """Ideal-gas molar density [mol/L]."""
     return (p_kpa * 1e3) / (C.R_GAS * t_k) / 1e3
 
 
@@ -84,7 +83,7 @@ def o2_mass_consumed_g(
     p_kpa: float = C.STD_P_KPA,
     t_k: float = C.STD_T_K,
 ) -> ArrayLike:
-    """Kapalı hacimde O2 mol yüzdesindeki düşüşe karşılık gelen tüketilen O2 kütlesi [g]."""
+    """O2 mass consumed [g] corresponding to a drop in O2 mole percent in a closed volume."""
     d = np.asarray(delta_o2_pct, dtype=float) / 100.0
     m = d * gas_molar_density(p_kpa, t_k) * volume_l * C.M_O2_G_MOL
     return m if m.ndim else float(m)
@@ -97,7 +96,7 @@ def hrr_watts(
     p_kpa: float = C.STD_P_KPA,
     t_k: float = C.STD_T_K,
 ) -> ArrayLike:
-    """Ortalama ısı salınım hızı [W] = 13.1 kJ/g · ṁ_O2."""
+    """Average heat release rate [W] = 13.1 kJ/g · ṁ_O2."""
     m = np.asarray(o2_mass_consumed_g(delta_o2_pct, volume_l, p_kpa, t_k))
     dt = np.maximum(np.asarray(duration_s, dtype=float), 1e-6)
     q = C.HUGGETT_KJ_PER_G_O2 * 1e3 * m / dt
@@ -105,32 +104,32 @@ def hrr_watts(
 
 
 def o2_drop_for_hrr(hrr_w: ArrayLike, duration_s: ArrayLike, **kw) -> ArrayLike:
-    """hrr_watts'ın tersi: verilen HRR ve süre için beklenen O2 düşüşü [% puan]."""
-    per_pct = hrr_watts(1.0, 1.0, **kw)  # 1 puanlık düşüş / 1 s -> W
+    """Inverse of hrr_watts: expected O2 drop [% points] for a given HRR and duration."""
+    per_pct = hrr_watts(1.0, 1.0, **kw)  # 1 point drop / 1 s -> W
     return np.asarray(hrr_w, dtype=float) * np.asarray(duration_s, dtype=float) / per_pct
 
 
 # --------------------------------------------------------------------------- #
-# Sezgisel yüzey modelleri (BASS-II çapa noktalarına kalibre)
+# Heuristic surface models (calibrated to the BASS-II anchor points)
 # --------------------------------------------------------------------------- #
 def flame_probability(margin_pct: ArrayLike, width: float = 0.5) -> ArrayLike:
-    """Sınıra uzaklığa göre yanmanın sürme olasılığı (lojistik geçiş)."""
+    """Probability that combustion persists versus distance from the limit (logistic)."""
     p = 1.0 / (1.0 + np.exp(-np.asarray(margin_pct, dtype=float) / width))
     return p if p.ndim else float(p)
 
 
 def ignition_delay_s(margin_pct: ArrayLike) -> ArrayLike:
-    """Sezgisel: sınırdan uzakta ~10 s, sınıra yaklaşırken 230 s'ye yükselir."""
+    """Heuristic: ~10 s far from the limit, rising to 230 s as the limit is approached."""
     m = np.maximum(np.asarray(margin_pct, dtype=float), 0.0)
     t = 10.0 + (C.BASS2_MAX_IGNITION_S - 10.0) * np.exp(-m / 1.2)
     return t if t.ndim else float(t)
 
 
 def co_enhancement(margin_pct: ArrayLike, u_cm_s: ArrayLike) -> ArrayLike:
-    """Sezgisel: Dünya'ya göre CO çarpanı (1x … 10x).
+    """Heuristic: CO multiplier versus Earth (1x … 10x).
 
-    Eksik yanma sınıra yakın ve düşük akışta (O2 taşınımıyla sınırlı alev)
-    en yüksektir; yüksek akışta karışım iyileştiği için azalır.
+    Incomplete combustion peaks near the limit and at low flow (a
+    transport-limited flame); at high flow it decreases as mixing improves.
     """
     m = np.maximum(np.asarray(margin_pct, dtype=float), 0.0)
     u = np.asarray(u_cm_s, dtype=float)

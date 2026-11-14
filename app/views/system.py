@@ -1,4 +1,4 @@
-"""Data & Model Status — entegrasyon paneli ve ekip sözleşmesi."""
+"""Data & Model Status — integration panel and team contract."""
 from __future__ import annotations
 
 import pandas as pd

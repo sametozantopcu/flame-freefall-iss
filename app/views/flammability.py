@@ -1,4 +1,4 @@
-"""Flammability Boundary Map — Olson U-eğrisi, ISS verisinin gerilme hızı uzayında doğrulanması."""
+"""Flammability Boundary Map — Olson U-curve, validating the ISS data in strain-rate space."""
 from __future__ import annotations
 
 import numpy as np
@@ -19,7 +19,7 @@ sc = state.scenario()
 
 UI.header(t("eyebrow.analysis"), t("flam.title"), t("flam.subtitle"), [UI.data_badge(bundle)])
 
-# --- Neden Dünya testleri yetmez -------------------------------------------
+# --- Why Earth-based tests are not enough ----------------------------------
 UI.section(t("flam.sec_earth_vs_space"))
 k1, k2, k3 = st.columns(3)
 with k1:
@@ -32,7 +32,7 @@ with k3:
     UI.kpi(t("flam.kpi_co"), f"1 → {C.CO_MAX_ENHANCEMENT:.0f}", "×", t("flam.kpi_co_sub"),
            "critical", t("flam.kpi_co_st"))
 
-# --- Grafik 1: arşiv, gerilme hızı uzayında --------------------------------
+# --- Chart 1: the archive in strain-rate space -----------------------------
 UI.section(t("flam.sec_archive"))
 a_grid = np.geomspace(0.05, max(80.0, df["Strain_Rate"].max() * 1.1), 300)
 fig = CH.outcome_scatter(df, "Strain_Rate", "O2_initial", height=460, title=t("flam.scatter_title"),
@@ -62,7 +62,7 @@ with c_right:
            t("flam.kpi_blind_sub", v=C.EARTH_PMMA_LOI_PCT), "critical", t("flam.kpi_blind_st"))
     st.caption(t("flam.collapse_caption"))
 
-# --- Grafik 2: boyut etkisi + Grafik 3: marj ısı haritası -----------------
+# --- Chart 2: size effect + Chart 3: margin heat map ----------------------
 UI.section(t("flam.sec_size"))
 RADII = [0.159, 0.318, 0.476, 0.635, 0.953, 1.27]
 g1, g2 = st.columns(2, gap="large")

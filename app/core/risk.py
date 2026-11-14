@@ -1,13 +1,14 @@
-"""Senaryo risk değerlendirmesi ve yangın güvenliği çıkarım motoru.
+"""Scenario risk assessment and fire-safety insight engine.
 
-Üç bağımsız kanıt kaynağını birleştirir:
-  1. Fizik  — Olson sınırı, rejim, sezgisel tutuşma/CO modelleri
-  2. Arşiv  — fiziksel olarak en yakın ISS deneyleri (HRR, CO, sonuç)
-  3. Model  — eğitilmiş (veya vekil) ML modelinin sönme olasılığı
-Kaynaklar çeliştiğinde bu açıkça bir çıkarım olarak raporlanır.
+Combines three independent evidence sources:
+  1. Physics — Olson limit, regime, heuristic ignition/CO models
+  2. Archive — physically closest ISS experiments (HRR, CO, outcome)
+  3. Model   — extinction probability of a trained (or surrogate) ML model
+When the sources disagree this is reported explicitly as an inference.
 
-Bu modül metin üretmez: seviyeler ve çıkarımlar dilden bağımsız anahtar +
-parametre olarak döner, arayüz bunları app/i18n.py ile çevirir.
+This module produces no prose: levels and insights are returned as
+language-independent key + parameters, and the interface translates them
+with app/i18n.py.
 """
 from __future__ import annotations
 
@@ -68,10 +69,11 @@ class Assessment:
 
 
 def _model_probability(model: ModelBundle | None, sc: Scenario, nb: pd.DataFrame) -> float | None:
-    """Modelin senaryo için sönme olasılığı.
+    """Extinction probability of the model for the scenario.
 
-    O2_final / CO / CO2 test SONRASI ölçümlerdir; ileri yönlü senaryoda bilinmezler.
-    Bu yüzden en yakın arşiv deneylerinin medyanıyla doldurulur (kNN atama).
+    O2_final / CO / CO2 are POST-test measurements and are unknown in a forward
+    scenario, so they are filled with the median of the nearest archive tests
+    (kNN assignment).
     """
     if model is None or nb.empty:
         return None
@@ -105,7 +107,7 @@ def assess(sc: Scenario, archive: pd.DataFrame, model: ModelBundle | None = None
     ref = burning_nb if len(burning_nb) >= 2 else nb
     hrr = float(np.nanmedian(ref["HRR_W"])) if ref["HRR_W"].notna().any() else float("nan")
     co_ppm = float(np.nanmedian(ref["CO_ppm"]))
-    # Basınç etkisi: kalorimetri O2 kütlesine bağlıdır; arşiv 1 atm'de ölçüldü
+    # Pressure effect: calorimetry depends on O2 mass; the archive was measured at 1 atm
     hrr_scaled = hrr * sc.pressure_kpa / C.STD_P_KPA * p_flame if np.isfinite(hrr) else float("nan")
 
     p_ext = _model_probability(model, sc, nb)
@@ -162,7 +164,7 @@ def build_insights(asm: Assessment) -> list[Insight]:
     if abs(sc.pressure_kpa - C.STD_P_KPA) > 5:
         out.append(Insight("warning", "low_pressure", dict(ppo2=sc.o2_pct / 100 * sc.pressure_kpa)))
 
-    # Arşiv --------------------------------------------------------------------
+    # Archive ------------------------------------------------------------------
     nb = asm.neighbors
     out.append(Insight("info", "neighbors",
                        dict(n=len(nb), n_burn=int((nb["Extinction"] == 0).sum()),

@@ -1,7 +1,8 @@
-"""Görsel dil: koyu "görev kontrol" teması, doğrulanmış renk paleti, Plotly şablonu.
+"""Visual language: dark "mission control" theme, validated palette, Plotly template.
 
-Renkler role göre atanır (kimlik / büyüklük / durum). Kategorik paletin ilk üç
-slotu koyu yüzeyde tüm çiftler için CVD doğrulamasından geçmiştir.
+Colours are assigned by role (identity / magnitude / status). The first three
+slots of the categorical palette passed CVD validation on the dark surface for
+every pair.
 """
 from __future__ import annotations
 
@@ -9,7 +10,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 import streamlit as st
 
-# Yüzeyler ve mürekkep
+# Surfaces and ink
 PAGE = "#0d0d0d"
 SURFACE = "#1a1a19"
 SURFACE_2 = "#232321"
@@ -20,21 +21,21 @@ GRID = "#2c2c2a"
 AXIS = "#383835"
 BORDER = "rgba(255,255,255,0.10)"
 
-# Kategorik (kimlik) — sabit sıra
+# Categorical (identity) — fixed order
 BLUE = "#3987e5"     # slot 1
 ORANGE = "#d95926"   # slot 2
 AQUA = "#199e70"     # slot 3
 SERIES = [BLUE, ORANGE, AQUA]
 
-# Sonuç kodlaması: renk + sembol (renk tek başına anlam taşımaz)
+# Outcome encoding: colour + symbol (colour alone carries no meaning)
 OUTCOME_COLOR = {"burning": ORANGE, "extinguished": BLUE}
 OUTCOME_SYMBOL = {"burning": "circle", "extinguished": "x-thin-open"}
 
-# Durum (rezerve — seri rengi olarak kullanılmaz), daima ikon + etiketle
+# Status (reserved — never used as a series colour), always with icon + label
 STATUS = {"good": "#0ca30c", "warning": "#fab219", "serious": "#ec835a", "critical": "#d03b3b", "info": "#898781"}
 STATUS_ICON = {"good": "✓", "warning": "!", "serious": "▲", "critical": "✕", "info": "i"}
 
-# Iraksak (Olson marjı: negatif = güvenli/mavi, pozitif = yanıcı/kırmızı, 0 = nötr gri)
+# Diverging (Olson margin: negative = safe/blue, positive = flammable/red, 0 = neutral grey)
 DIVERGING = [
     [0.0, "#104281"], [0.25, "#3987e5"], [0.5, "#383835"], [0.75, "#e66767"], [1.0, "#a32b2b"],
 ]

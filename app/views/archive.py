@@ -1,4 +1,4 @@
-"""ISS Test Archive — BASS-II testlerinin filtrelenmesi, incelenmesi ve telemetri yeniden yapılandırması."""
+"""ISS Test Archive — filtering, inspecting and telemetry reconstruction of the BASS-II tests."""
 from __future__ import annotations
 
 import numpy as np
@@ -17,7 +17,7 @@ df = bundle.df
 
 UI.header(t("eyebrow.analysis"), t("arch.title"), t("arch.subtitle"), [UI.data_badge(bundle)])
 
-# --- Filtreler (tek satır; değerler dilden bağımsız kodlar) -----------------
+# --- Filters (single row; values are language-independent codes) ------------
 FLAGS = {"hrr": "Flag_HRR_100W", "co": "Flag_CO_Sat", "blind": "Flag_Earth_Safe_Space_Burn",
          "ign": "Flag_Ign_Over_25s"}
 o2_lo, o2_hi = float(np.floor(df["O2_initial"].min())), float(np.ceil(df["O2_initial"].max()))
@@ -38,7 +38,7 @@ flag_col = FLAGS.get(flag)
 if flag_col and flag_col in view:
     view = view[view[flag_col]]
 
-# --- Özet ------------------------------------------------------------------
+# --- Summary ---------------------------------------------------------------
 k = st.columns(5)
 with k[0]:
     UI.kpi(t("arch.kpi_tests"), f"{len(view)}", f"/ {len(df)}", t("arch.kpi_tests_sub"))
@@ -88,7 +88,7 @@ event = st.dataframe(
 st.download_button(t("arch.download"), view.to_csv(index=False).encode("utf-8"),
                    "bass2_filtered.csv", "text/csv", icon=":material/download:")
 
-# --- Tek test detayı -----------------------------------------------------
+# --- Single-test detail ----------------------------------------------------
 rows = event.selection.rows if event and event.selection else []
 if rows:
     row = view.iloc[rows[0]]
@@ -143,7 +143,7 @@ if rows:
 else:
     st.info(t("arch.select_hint"), icon=":material/touch_app:")
 
-# --- Dağılımlar ----------------------------------------------------------
+# --- Distributions ---------------------------------------------------------
 UI.section(t("arch.sec_dist"))
 h1, h2 = st.columns(2, gap="large")
 with h1:

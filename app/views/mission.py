@@ -1,4 +1,4 @@
-"""Mission Control — kabin atmosferi + malzeme senaryosu için anlık yangın riski."""
+"""Mission Control — live fire risk for a cabin-atmosphere + material scenario."""
 from __future__ import annotations
 
 import numpy as np
@@ -19,7 +19,7 @@ UI.header(t("mission.eyebrow"), t("mission.title"), t("mission.subtitle"),
           [UI.data_badge(bundle), UI.model_badge(model)])
 
 # --------------------------------------------------------------------------- #
-# Senaryo girdileri (widget değerleri dilden bağımsız kodlardır)
+# Scenario inputs (widget values are language-independent codes)
 # --------------------------------------------------------------------------- #
 KEYS = ["w_atm", "w_o2", "w_p", "w_flowmode", "w_u", "w_pot", "w_v", "w_mat", "w_geo", "w_r", "w_th"]
 d = Scenario()
@@ -89,7 +89,7 @@ st.session_state.scenario = sc
 asm = assess(sc, bundle.df, model)
 
 # --------------------------------------------------------------------------- #
-# Sonuç
+# Result
 # --------------------------------------------------------------------------- #
 with right:
     UI.banner(asm.level, asm.status, asm.score)

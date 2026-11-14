@@ -1,12 +1,12 @@
-"""Veri erişim katmanı.
+"""Data access layer.
 
-Öncelik sırası:
-  1. data/processed/bass2_clean.csv varsa -> okunur, şemaya uyarlanır.
-  2. Yoksa (veya okunamazsa) -> fizik-bilgili simülasyon arşivi üretilir.
+Priority order:
+  1. If data/processed/bass2_clean.csv exists -> read and adapted to the schema.
+  2. Otherwise (or if unreadable) -> a physics-aware simulated archive is built.
 
-Kolon adları esnek eşlenir (büyük/küçük harf, alt çizgi, yaygın eş anlamlılar),
-birimler sezgisel olarak tespit edilir ve tüm türetilmiş fiziksel büyüklükler
-(gerilme hızı, Olson marjı, HRR, uyarı bayrakları) tek bir yerde hesaplanır.
+Column names are matched flexibly (case, underscores, common synonyms), units
+are detected heuristically, and every derived physical quantity (strain rate,
+Olson margin, HRR, warning flags) is computed in one place.
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ from app import config as C
 from app.core import physics as P
 from app.core import simulator
 
-# Kanonik ad -> kabul edilen eş anlamlılar (normalize edilmiş: küçük harf, yalnız alfanumerik)
+# Canonical name -> accepted synonyms (normalised: lower case, alphanumeric only)
 ALIASES: dict[str, list[str]] = {
     "Test_ID": ["testid", "test", "run", "runid", "testno", "experiment", "expid"],
     "Sample_No": ["sampleno", "sample", "sampleid", "samplenumber", "specimen"],
@@ -44,7 +44,7 @@ ALIASES: dict[str, list[str]] = {
 }
 
 
-# Uyarılar dilden bağımsız (anahtar, parametreler) çiftleridir; metinler app/i18n.py'de.
+# Warnings are language-independent (key, parameters) pairs; the texts live in app/i18n.py.
 Msg = tuple[str, dict]
 
 
@@ -59,7 +59,7 @@ class DataBundle:
     path: Path | None
     warnings: list[Msg] = field(default_factory=list)
     column_map: dict[str, str] = field(default_factory=dict)  # kanonik <- orijinal
-    signature: str = ""               # önbellek anahtarı (dosya mtime/boyut)
+    signature: str = ""               # cache key (file mtime/size)
 
     @property
     def is_real(self) -> bool:
@@ -67,7 +67,7 @@ class DataBundle:
 
 
 def file_signature(path: Path = C.DATA_PATH) -> str:
-    """Dosya değiştiğinde önbelleği geçersiz kılmak için kullanılır."""
+    """Used to invalidate the cache when the file changes."""
     if not path.exists():
         return "simulated"
     st = path.stat()
@@ -87,7 +87,7 @@ def harmonize_columns(raw: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, str]]:
 
 
 def enrich(df: pd.DataFrame, warnings: list[Msg] | None = None) -> pd.DataFrame:
-    """Türetilmiş fiziksel büyüklükleri ve operasyonel bayrakları ekler."""
+    """Adds the derived physical quantities and operational flags."""
     w = warnings if warnings is not None else []
     df = df.copy()
 
@@ -165,7 +165,7 @@ def load(path: Path = C.DATA_PATH) -> DataBundle:
     if path.exists():
         try:
             return load_real(path)
-        except Exception as exc:  # noqa: BLE001 — arayüz çökmemeli, sebebi gösterilmeli
+        except Exception as exc:  # noqa: BLE001 — the UI must not crash; show the cause
             sim = load_simulated()
             sim.warnings.insert(0, ("warn.csv_fallback", {"name": path.name, "err": str(exc)}))
             return sim
@@ -178,7 +178,7 @@ def load_simulated() -> DataBundle:
 
 
 def nearest_tests(df: pd.DataFrame, o2: float, u: float, r: float, k: int = 7) -> pd.DataFrame:
-    """Senaryoya fiziksel olarak en yakın arşiv deneyleri (marj + gerilme hızı uzayında)."""
+    """Archive experiments physically closest to the scenario (in margin + strain-rate space)."""
     a = P.strain_rate(u, r)
     margin = o2 - P.olson_limit(a)
     d = np.sqrt(((df["O2_Margin"] - margin) / 1.0) ** 2 + ((np.log1p(df["Strain_Rate"]) - np.log1p(a)) / 0.5) ** 2)

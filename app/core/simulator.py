@@ -1,9 +1,9 @@
-"""Fizik-bilgili sentetik BASS-II arşivi (gerçek veri gelene kadar yer tutucu).
+"""Physics-aware synthetic BASS-II archive (placeholder until real data arrives).
 
-Üretilen tablo, src/features.py'nin beklediği şemayla birebir uyumludur; böylece
-aynı özellik/eğitim hattı hem simülasyonda hem gerçek veride çalışır.
-Sonuçlar Olson sınırı ve Huggett kalorimetrisinden türetilir, gürültü eklenir.
-Arayüzde her zaman "SİMÜLASYON" olarak etiketlenir.
+The generated table matches the schema expected by src/features.py exactly, so
+the same feature/training pipeline runs on both the simulation and real data.
+The results are derived from the Olson limit and Huggett calorimetry, with noise.
+It is always labelled "SIMULATION" in the interface.
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from app.core import physics as P
 def generate(n_tests: int = C.N_ISS_TESTS, n_samples: int = 38, seed: int = 2026) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
 
-    # --- Numune kataloğu: her numune birkaç farklı koşulda test edilir -------
+    # --- Sample catalogue: each sample is tested under several conditions -----
     mat_p = [0.62, 0.14, 0.12, 0.12]
     samples = pd.DataFrame({
         "Sample_No": np.arange(1, n_samples + 1),
@@ -35,7 +35,7 @@ def generate(n_tests: int = C.N_ISS_TESTS, n_samples: int = 38, seed: int = 2026
         rng.choice([0.1, 0.2, 0.5], size=n_samples),
         samples["Radius_cm"] * 2,
     )
-    # Malzeme başına sınır kayması (PMMA referans). Simülasyona çeşitlilik katar.
+    # Per-material limit shift (PMMA reference). Adds variety to the simulation.
     mat_shift = {"PMMA": 0.0, "Delrin (POM)": -0.4, "Ultem 1000": 4.5, "Cotton/Fiberglass fabric": 0.8}
 
     idx = rng.integers(0, n_samples, size=n_tests)
@@ -43,18 +43,18 @@ def generate(n_tests: int = C.N_ISS_TESTS, n_samples: int = 38, seed: int = 2026
     df.insert(0, "Test_ID", [f"BASS2-{i:03d}" for i in range(1, n_tests + 1)])
     df["Run_Date"] = pd.Timestamp("2014-01-15") + pd.to_timedelta(np.sort(rng.integers(0, 620, n_tests)), unit="D")
 
-    # --- Kontrol değişkenleri ------------------------------------------------
+    # --- Control variables ----------------------------------------------------
     df["Fan_Pot"] = np.round(rng.choice(
         [0.2, 0.5, 0.8, 1.0, 1.5, 2.0, 3.0, 4.0], size=n_tests, p=[0.1, 0.1, 0.15, 0.15, 0.15, 0.15, 0.12, 0.08]
     ) + rng.normal(0, 0.03, n_tests), 2)
-    # Gerçek kalibrasyon tablosu + tablodaki ölçüm aralığı içinde rastgele sapma
+    # Real calibration table + random deviation within the table measurement range
     readings = [H.from_pot(p) for p in df["Fan_Pot"]]
     df["Flow_Vel"] = np.round([rng.uniform(r.range_lo, r.range_hi) if r.range_hi > r.range_lo else r.velocity_cm_s
                                for r in readings], 3) + np.abs(rng.normal(0, 0.05, n_tests))
     df["O2_initial"] = np.round(np.where(rng.random(n_tests) < 0.15, 21.0, rng.uniform(13.0, 19.0, n_tests)), 2)
     df["Pressure_kPa"] = 101.3
 
-    # --- Fiziksel sonuç ------------------------------------------------------
+    # --- Physical outcome -----------------------------------------------------
     a = P.strain_rate(df["Flow_Vel"].to_numpy(), df["Radius_cm"].to_numpy())
     limit = P.olson_limit(a) + df["Material"].map(mat_shift).to_numpy()
     margin = df["O2_initial"].to_numpy() - limit
@@ -62,7 +62,7 @@ def generate(n_tests: int = C.N_ISS_TESTS, n_samples: int = 38, seed: int = 2026
     burning = rng.random(n_tests) < p_burn
     df["Extinction"] = (~burning).astype(int)
 
-    # Isı salınımı: marj ve numune boyutuyla artar; ölçek ~M5 (~100 W) üst ucu
+    # Heat release: grows with margin and sample size; scaled to the ~M5 (~100 W) upper end
     size = (df["Radius_cm"].to_numpy() / C.R_REF_CM) ** 0.8
     hrr = np.where(
         burning,
@@ -74,7 +74,7 @@ def generate(n_tests: int = C.N_ISS_TESTS, n_samples: int = 38, seed: int = 2026
     drop = P.o2_drop_for_hrr(hrr, burn_time)
     df["O2_final"] = np.round(df["O2_initial"] - drop, 3)
 
-    # Tutuşma gecikmesi: sınıra yaklaştıkça 230 s'ye kadar uzar
+    # Ignition delay: stretches up to 230 s as the limit is approached
     df["Ignition_Time"] = np.round(
         np.clip(P.ignition_delay_s(margin + 0.6) * rng.lognormal(0, 0.15, n_tests), 3, C.BASS2_MAX_IGNITION_S), 1
     )
@@ -84,6 +84,6 @@ def generate(n_tests: int = C.N_ISS_TESTS, n_samples: int = 38, seed: int = 2026
     co_frac = 0.07 * P.co_enhancement(np.maximum(margin, 0), df["Flow_Vel"].to_numpy())
     df["CO2"] = np.round(co2_pct, 4)                                  # % hacim
     df["CO"] = np.round(co2_pct * 1e4 * co_frac * rng.lognormal(0, 0.2, n_tests), 1)  # ppm
-    df["CO"] = df["CO"].clip(upper=C.CO_SENSOR_SAT_PPM * 1.0)       # sensör doyumu
+    df["CO"] = df["CO"].clip(upper=C.CO_SENSOR_SAT_PPM * 1.0)       # sensor saturation
 
     return df

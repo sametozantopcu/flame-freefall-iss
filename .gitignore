@@ -4,3 +4,18 @@ data_analysis/Nasa_data/csv
 data_analysis/Nasa_data/raw
 data_analysis/Nasa_data/analysis/logs/
 *_log.txt
+# Cline, AI ve Gecici Klasorler
+.agents/
+.claude/
+.pytest_cache/
+.streamlit/
+plans/
+audit/
+csv/
+CLAUDE.md
+
+# Kok dizindeki gecici scriptler
+audit_csv.py
+dedup.py
+drilldown.py
+psi_all.py

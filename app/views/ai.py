@@ -1,4 +1,4 @@
-"""AI Insights — model kartı, açıklanabilirlik, ne-olur-eğer analizi, toplu tahmin."""
+"""AI Insights — model card, explainability, what-if analysis, batch prediction."""
 from __future__ import annotations
 
 import numpy as np
@@ -23,7 +23,7 @@ sc = state.scenario()
 UI.header(t("eyebrow.analysis"), t("ai.title"), t("ai.subtitle"), [UI.data_badge(bundle), UI.model_badge(model)])
 UI.warnings(notes)
 
-# --- Model kartı -----------------------------------------------------------
+# --- Model card ------------------------------------------------------------
 trained = model.source == "trained"
 name = UI.model_name(model)
 m1, m2, m3, m4 = st.columns(4)
@@ -44,7 +44,7 @@ with m4:
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 st.info(t("ai.leakage_body"), title=t("ai.leakage_title"), icon=":material/science:")
 
-# --- Açıklanabilirlik ----------------------------------------------------
+# --- Explainability -------------------------------------------------------
 UI.section(t("ai.sec_explain"))
 e1, e2 = st.columns(2, gap="large")
 with e1:
@@ -62,7 +62,7 @@ with e2:
         fpr, tpr, _ = roc_curve(model.oof["y"], model.oof["p"])
         title = t("ai.roc_oof", auc=model.metrics.get("oof_auc", float("nan")))
     else:
-        # Eğitilmiş model: mevcut arşiv üzerinde uyum (eğitim verisi olabilir)
+        # Trained model: fit on the current archive (may be the training data)
         try:
             fpr, tpr, _ = roc_curve(bundle.df[C.TARGET_COL], model.predict_proba(bundle.df))
             title = t("ai.roc_archive")
@@ -78,7 +78,7 @@ with e2:
         f.update_layout(height=380, title=title, xaxis_title=t("axis.fpr"), yaxis_title=t("axis.tpr"))
         st.plotly_chart(f, config=CH.CFG, width="stretch")
 
-# --- Ne olur eğer ----------------------------------------------------------
+# --- What if ---------------------------------------------------------------
 UI.section(t("ai.sec_whatif", r=sc.radius_cm, u=sc.flow_cm_s, o2=sc.o2_pct))
 nb = D.nearest_tests(bundle.df, sc.o2_pct, sc.flow_cm_s, sc.radius_cm, k=9)
 

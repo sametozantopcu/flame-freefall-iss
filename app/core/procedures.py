@@ -1,10 +1,11 @@
-"""ISS BASS-II yangın söndürme ve temizlik prosedürü (durum makinesi).
+"""ISS BASS-II fire suppression and cleanup procedure (state machine).
 
-Adım kodları ve komutlar BASS-II operasyon prosedüründen alınmıştır:
-  Step 9.6   — FAN FLOW = 0.00 (akışı kes) -> sönmezse GN2 ENA -> ON (azotla boğ)
-  Step 10.4  — AIR CIRC purge, 3 dk (Freon kaynaklı HCl / CO temizliği)
-  Step 10.5  — 6 dk soğutma
-Bu modül Streamlit'ten bağımsızdır; arayüz yalnızca durumu gösterir/ilerletir.
+Step codes and commands are taken from the BASS-II operations procedure:
+  Step 9.6   — FAN FLOW = 0.00 (cut the flow) -> if not extinguished: GN2 ENA -> ON (nitrogen purge)
+  Step 10.4  — AIR CIRC purge, 3 min (removal of Freon-derived HCl / CO)
+  Step 10.5  — 6 min cooldown
+This module is independent of Streamlit; the interface only displays/advances
+the state.
 """
 from __future__ import annotations
 
@@ -17,16 +18,17 @@ from app.core import physics as P
 
 @dataclass(frozen=True)
 class Step:
-    """Prosedür adımı. Başlık/gerekçe metinleri app/i18n.py: step.<key>.title / .why.
+    """Procedure step. Title/reason texts live in app/i18n.py: step.<key>.title / .why.
 
-    `command` ISS konsol komutudur (FAN FLOW, GN2 ENA, AIR CIRC); dilden bağımsızdır
-    ve çevrilmez. None ise i18n'deki step.<key>.cmd kullanılır.
+    `command` is the ISS console command (FAN FLOW, GN2 ENA, AIR CIRC); it is
+    language-independent and is not translated. When None, step.<key>.cmd from
+    i18n is used.
     """
     key: str
     code: str
     command: str | None = None
-    duration_s: float | None = None   # zamanlı adım ise süre
-    decision: bool = False            # operatör "söndü mü?" kararı bekleniyor mu
+    duration_s: float | None = None   # duration if this is a timed step
+    decision: bool = False            # is an operator "did it go out?" decision pending
 
 
 STEPS: dict[str, Step] = {
@@ -43,7 +45,7 @@ ORDER = ["standby", "fire", "fan_off", "gn2", "purge", "cool", "safe"]
 
 
 def next_step(current: str, extinguished: bool | None = None) -> str:
-    """Durum geçişleri. Karar adımlarında `extinguished` gerekir."""
+    """State transitions. Decision steps require `extinguished`."""
     if current == "standby":
         return "fire"
     if current == "fire":
@@ -60,17 +62,17 @@ def next_step(current: str, extinguished: bool | None = None) -> str:
 
 
 def quiescent_limit() -> float:
-    """Sıfır akışta (a -> 0) Olson sınırı: 6 + 13.4 = %19.4."""
+    """Olson limit at zero flow (a -> 0): 6 + 13.4 = 19.4 %."""
     return float(P.olson_limit(0.0))
 
 
 def fan_off_sufficient(o2_pct: float, safety_pct: float = 0.5) -> bool:
-    """Yalnız akışı kesmenin fiziksel olarak yeterli olması beklenir mi?"""
+    """Is cutting the flow alone expected to be physically sufficient?"""
     return o2_pct < quiescent_limit() - safety_pct
 
 
 def gn2_volume_l(o2_pct: float, target_pct: float | None = None, volume_l: float = C.MSG_VOLUME_L) -> float:
-    """İyi karışmış, sabit basınçlı (tahliyeli) seyreltme: X = X0 exp(-V_N2 / V)."""
+    """Well-mixed, constant-pressure (vented) dilution: X = X0 exp(-V_N2 / V)."""
     target = target_pct if target_pct is not None else quiescent_limit() - 1.0
     if o2_pct <= target:
         return 0.0

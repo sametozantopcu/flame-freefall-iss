@@ -1,4 +1,4 @@
-"""Paylaşılan Plotly figürleri."""
+"""Shared Plotly figures."""
 from __future__ import annotations
 
 import numpy as np
@@ -29,7 +29,7 @@ def ucurve(r_cm: float, o2: float, u: float, status: str, u_max: float = 12.0, h
     fig.add_vrect(x0=lo, x1=hi, fillcolor=T.ORANGE, opacity=0.08, line_width=0,
                   annotation=dict(text=t("chart.goldilocks"), font=dict(color=T.INK_2, size=11)),
                   annotation_position="top left")
-    # Yanıcı bölge: eğrinin üstü
+    # Flammable region: above the curve
     fig.add_trace(go.Scatter(x=us, y=np.full_like(us, y_top), mode="lines", line=dict(width=0),
                              hoverinfo="skip", showlegend=False))
     fig.add_trace(go.Scatter(x=us, y=lim, mode="lines", fill="tonexty", fillcolor="rgba(217,89,38,0.10)",

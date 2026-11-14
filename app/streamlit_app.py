@@ -1,6 +1,6 @@
-"""FLAME·FREEFALL — Mikro-yerçekimi yangın güvenliği karar destek sistemi.
+"""FLAME·FREEFALL — microgravity fire-safety decision-support system.
 
-Çalıştırma (proje kökünden):
+Run it (from the project root):
     streamlit run app/streamlit_app.py
 """
 from __future__ import annotations
@@ -24,8 +24,8 @@ from app.ui import state, theme  # noqa: E402
 theme.inject()
 
 # --------------------------------------------------------------------------- #
-# Dil seçici — sol menünün en üstünde. Sayfa başlıkları dahil tüm metinler bu
-# değerden okunur; ?lang=tr URL parametresiyle paylaşılabilir.
+# Language selector — at the top of the left menu. All text, including page
+# titles, is read from this value; it can be shared via the ?lang=tr URL parameter.
 # --------------------------------------------------------------------------- #
 with st.sidebar:
     st.segmented_control(
@@ -48,8 +48,8 @@ pages = {
         st.Page("views/system.py", title=t("page.system"), icon=":material/settings_input_component:"),
     ],
 }
-# Yerleşik menü dil seçicinin üstüne çizileceği için gizlenir; menü aşağıda
-# aynı st.Page nesneleriyle (aynı URL'ler) çizilir.
+# The built-in menu is hidden because it would be drawn above the language
+# selector; the menu is rendered below with the same st.Page objects (same URLs).
 nav = st.navigation(pages, position="hidden")
 
 with st.sidebar:

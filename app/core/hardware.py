@@ -1,4 +1,4 @@
-"""MSG fan potansiyometre / voltaj -> akış hızı kalibrasyonu (Restrictor 2)."""
+"""MSG fan potentiometer / voltage -> flow-velocity calibration (Restrictor 2)."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,7 +15,7 @@ class FanReading:
     extrapolated: bool
     pot: float
     volts: float
-    range_lo: float = 0.0     # kalibrasyon ölçüm aralığı (belirsizlik bandı)
+    range_lo: float = 0.0     # calibration measurement range (uncertainty band)
     range_hi: float = 0.0
 
     @property
@@ -31,7 +31,7 @@ def table() -> dict[str, np.ndarray]:
 
 
 def _interp_extrap(x: float, xs: np.ndarray, ys: np.ndarray) -> float:
-    """Çapalar arası doğrusal; aralık dışında uç segmentin eğimiyle ekstrapolasyon."""
+    """Linear between anchors; outside the range, extrapolate with the end-segment slope."""
     if x < xs[0]:
         slope = (ys[1] - ys[0]) / (xs[1] - xs[0])
         return float(ys[0] + slope * (x - xs[0]))
@@ -42,7 +42,7 @@ def _interp_extrap(x: float, xs: np.ndarray, ys: np.ndarray) -> float:
 
 
 def _reading(x: float, key: str, t: dict[str, np.ndarray]) -> FanReading:
-    """`key` ekseninde (pot / volts / vel) verilen x için tüm büyüklükleri çözer."""
+    """Resolve all quantities for the given x along the `key` axis (pot / volts / vel)."""
     xs = t[key]
     zero = key != "vel" and x <= xs[0]
     vals = {k: max(_interp_extrap(x, xs, t[k]), 0.0) for k in ("pot", "volts", "vel", "lo", "hi")}
@@ -62,11 +62,11 @@ def from_volts(v: float) -> FanReading:
 
 
 def to_setpoint(u_cm_s: float) -> FanReading:
-    """İstenen akış hızı için gereken pot / voltaj ayarı."""
+    """Potentiometer / voltage setting required for the requested flow velocity."""
     if u_cm_s <= 0:
         return FanReading(0.0, True, False, 0.0, 0.0)
     t = table()
-    # Sıfır akış platosunu (aynı hız, farklı pot) atla: interpolasyon monoton olmalı
+    # Skip the zero-flow plateau (same speed, different pot): the interpolation must be monotonic
     keep = np.r_[True, np.diff(t["vel"]) > 0]
     return _reading(u_cm_s, "vel", {k: v[keep] for k, v in t.items()})
 

@@ -1,4 +1,4 @@
-"""Yeniden kullanılabilir arayüz bileşenleri (HTML + Streamlit)."""
+"""Reusable interface components (HTML + Streamlit)."""
 from __future__ import annotations
 
 import html
@@ -68,7 +68,7 @@ def banner(level: str, status: str, score: float) -> None:
 
 
 def insight(ins) -> None:
-    """risk.Insight (anahtar + parametre) nesnesini aktif dilde çizer."""
+    """Render a ``risk.Insight`` (key + parameters) object in the active language."""
     title = t(f"ins.{ins.key}.title", **ins.params)
     body = t(f"ins.{ins.key}.body", **ins.params)
     st.markdown(
@@ -79,7 +79,7 @@ def insight(ins) -> None:
 
 
 def warnings(msgs) -> None:
-    """(anahtar, parametre) uyarı listesini aktif dilde gösterir."""
+    """Show a list of (key, parameters) warnings in the active language."""
     for key, params in msgs:
         st.warning(t(key, **params), icon=":material/warning:")
 

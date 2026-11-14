@@ -1,8 +1,8 @@
-"""Önbellekli veri/model erişimi ve sayfalar arası paylaşılan senaryo durumu.
+"""Cached data/model access and the scenario state shared between pages.
 
-Önbellek anahtarları dosya imzalarıdır (mtime + boyut): ekip
-data/processed/bass2_clean.csv veya models/*.joblib eklediğinde/güncellediğinde
-uygulama yeniden başlatılmadan bir sonraki etkileşimde yeni dosyaları kullanır.
+Cache keys are file signatures (mtime + size): when the team adds or updates
+data/processed/bass2_clean.csv or models/*.joblib, the app picks up the new
+files on the next interaction without a restart.
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def _model(data_sig: str, models_sig: str, _df) -> tuple[M.ModelBundle, list[tup
 
 
 def data() -> D.DataBundle:
-    # Önbellek içeriği dilden bağımsızdır; yalnızca bekleme mesajı aktif dilde gösterilir.
+    # The cache content is language-independent; only the wait message follows the active language.
     with st.spinner(t("spinner.data")):
         return _data(D.file_signature(C.DATA_PATH))
 
@@ -49,9 +49,9 @@ def scenario() -> Scenario:
 
 
 # --------------------------------------------------------------------------- #
-# Sayfa değişiminde kaybolmayan widget değerleri
-# Streamlit, görüntülenmeyen widget'ların anahtarlarını siler; bu yardımcılar
-# değerleri kalıcı bir sözlükte tutar ve sayfaya dönüldüğünde geri yükler.
+# Widget values that survive page changes
+# Streamlit deletes the keys of widgets that are not rendered; these helpers
+# keep the values in a persistent dictionary and restore them on return.
 # --------------------------------------------------------------------------- #
 def bind(key: str, default):
     store = st.session_state.setdefault("_persist", {})
