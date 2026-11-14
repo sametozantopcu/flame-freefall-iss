@@ -1,4 +1,4 @@
-/* Giriş noktası (repodaki app/streamlit_app.py'nin karşılığı): bölümleri çizer ve
+/* Giriş noktası (statik site): bölümleri çizer ve
  * adres çubuğundaki #bölüm değerine göre ilgili görünümü çalıştırır.
  * Adresler İngilizce (#explore, #scenario, #equipment, #live); eski Türkçe adresler de çalışır.
  * Giriş animasyonu (.enter) yalnızca bölüm değişince oynar; ekran içindeki seçimlerde oynamaz.
@@ -19,7 +19,7 @@
   function render() {
     var page = current(), view = page[1];
     var root = document.getElementById('view');
-    var keep = location.search; // ?lang=tr gibi ayarlar bölüm bağlantılarında korunur
+    var keep = location.search; // query settings are kept in section links
     document.title = FF.t('app.title') + ' · ' + FF.t('nav.' + view);
     document.getElementById('nav').innerHTML = PAGES.map(function (p, i) {
       return '<a href="' + keep + '#' + p[0] + '"' + (p[1] === view ? ' aria-current="page"' : '') + '>'
@@ -40,4 +40,6 @@
   document.getElementById('brand-name').textContent = FF.t('app.title');
   document.getElementById('brand-sub').textContent = FF.t('app.event');
   render();
+  // Connection point for the assistant panel (S8): ui/ask.js sets FF.mountAsk; absent file is harmless.
+  if (typeof FF.mountAsk === 'function') FF.mountAsk(document.getElementById('ask') || document.body);
 })(window.FF = window.FF || {});

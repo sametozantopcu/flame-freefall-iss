@@ -10,21 +10,19 @@ Explore (Keşif), Scenario (Senaryo), Equipment (Ekipman), Live (Canlı). Kurulu
 
 ## Dil
 
-Arayüz varsayılan olarak **İngilizce**. Türkçe için adresin sonuna `?lang=tr` ekle
-(örneğin `index.html?lang=tr#scenario`); bölüm bağlantıları bu ayarı korur. Sayılar dile göre biçimlenir:
-İngilizcede `17.0%`, Türkçede `17,0 %`. Metinlerin hepsi `i18n.js` içinde; iki dilin anahtar listesi aynı.
+Arayüz yalnız **İngilizce**; dil seçimi yok. Metinlerin hepsi `i18n.js` içinde.
 Kod yorumları ve bu README Türkçe kaldı.
 
 ## Düzen
 
-Repodaki Streamlit uygulamasının (`flame-freefall-iss/app/`) düzenini izler: iş mantığı arayüzden ayrıdır,
+Eski Python arayüzünün düzenini izler: iş mantığı arayüzden ayrıdır,
 sabitler tek dosyadadır, metinler ayrı tutulur.
 
 | Dosya | Repodaki karşılığı | İçerik |
 |---|---|---|
-| `index.html`, `app.js` | `app/streamlit_app.py` | Giriş noktası; bölümleri çizer, `#bölüm` değerine göre görünümü çalıştırır |
+| `index.html`, `app.js` | (eski giriş dosyası) | Giriş noktası; bölümleri çizer, `#bölüm` değerine göre görünümü çalıştırır |
 | `config.js` | `app/config.py` | Tüm sabitler: Olson katsayıları, bulgu değerleri, seçenekler, örnek sensör değerleri |
-| `i18n.js` | `app/i18n.py` | Arayüz metinleri (`FF.t`) ve sayı biçimi (`FF.num`). İngilizce (varsayılan) ve Türkçe |
+| `i18n.js` | `app/i18n.py` | Arayüz metinleri (`FF.t`) ve sayı biçimi (`FF.num`); yalnız İngilizce |
 | `core/physics.js` | `app/core/physics.py` | Olson U-eğrisi. Metin üretmez; `regime()` kod döndürür |
 | `core/data.js` | `app/core/data.py` | 24 deneyin listesi ve BASS-II'nin 129 testi. `veriseti/` klasöründen üretildi |
 | `ui/theme.css` | `app/ui/theme.py` | Halo tokenları ve temel sınıflar |

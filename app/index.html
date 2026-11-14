@@ -26,6 +26,8 @@
 </div>
 
 <!-- Sıra önemli: sabitler, metinler, çekirdek, arayüz, görünümler, giriş. -->
+<!-- data/site_data.js (S5) is optional: a 404 is harmless, app.js and core/data.js fall back to mock data. -->
+<script src="data/site_data.js"></script>
 <script src="config.js"></script>
 <script src="i18n.js"></script>
 <script src="core/physics.js"></script>
@@ -36,6 +38,8 @@
 <script src="views/senaryo.js"></script>
 <script src="views/ekipman.js"></script>
 <script src="views/canli.js"></script>
+<!-- ui/ask.js (S8) is optional and sets window.FF.mountAsk. -->
+<script src="ui/ask.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
