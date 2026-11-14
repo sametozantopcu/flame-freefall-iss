@@ -4,12 +4,12 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 20 / 23
+- **İlerleme:** 19 / 22
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** F1 (tek komutla yeniden üretim). Faz B, C, D tamam; Faz E (video) iptal.
+- **Sıradaki adım:** F1 (tek komutla yeniden üretim). Faz B, C, D tamam; Faz E (video) tamamen iptal.
 - **Açık sorunlar:**
   - Dosya listesi eksik (7 investigation, toplam ≈7,2 TB): PSI-20, 21, 22, 68, 69, 99, 106 için `detail.json`'da dosya listesi yok/boş ya da 1 dosya, oysa `totalFileSize` 17 GB – 2 TB. Listelenen boyut toplam boyutla tüm diğer investigation'larda birebir tutuyor, bunlarda tutmuyor. Bu investigation'lar için dosya düzeyinde bilgi bu repoda yok. Veri kapsamı değerlendirmesinde (01/C5) bilinmeli.
-  - D1'in `files` tablosu yalnızca `added`/`removed` listelerini alıyor; `detail.json`'daki ayrı `experimentalTable` (22 dosya) ve `images` listeleri `files`'a girmedi. Videolar `added`'de olduğu için Faz E etkilenmiyor. Eklemek D1/D2'nin sabit sayılarını (27.076) değiştirir; ayrı küçük bir adım olarak karar verilecek.
+  - D1'in `files` tablosu yalnızca `added`/`removed` listelerini alıyor; `detail.json`'daki ayrı `experimentalTable` (22 dosya) ve `images` listeleri `files`'a girmedi. Eklemek D1/D2'nin sabit sayılarını (27.076) değiştirir; ayrı küçük bir adım olarak karar verilecek.
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
 
@@ -127,13 +127,13 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Kabul: Her parquet tablosundaki her psi_id değerinin bir eşlemesi var. Not: `table_map` verinin kendisinden üretilir (`src/data_layer/table_map.py`), `store.connect_all()` ile Feature Store + metadata + table_map tek bağlantıda (`connect()` değişmedi, 12 görünüm). PSI-102 ↔ smoke bağlantısı `relation='inferred'` (smoke `campaign='SAME'` = PSI-102'nin kısaltması; 25 satır, çıkarım olarak işaretli); `ground` satırları hiçbir investigation'a bağlanmadı. 9 investigation eşlemesiz: 4 `no_experimental_table` (PSI-60/62/115/117), 5 `experimental_table_not_loaded` (PSI-26/47/68/106/142); neden `investigations.n_experimental_tables`'tan (yeni sütun, `raw/` ile çapraz doğrulandı: toplam 22) türetilir.
   ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 287 passed, 0 skipped (test_table_map.py: 21; test_metadata.py::test_table_map). 11 tablonun her `(psi_id, tablo)` çifti eşlenmiş ve tablo başına `n_rows` toplamı tablo satır sayısına eşit; yetim yok; `flex ⋈ investigations` 274 satır. Negatif kontrol (6, baz çizgisi 72 yeşil): atlanan tablo, kendi acronym'ine çıkarımsal bağ, sabit neden, `connect()`'e sızan görünüm, sabit n_experimental_tables, eski şemalı meta/ hepsi yakalandı
 
-## Faz E — Video indeksi (İPTAL: yalnızca E1 yapıldı, E2–E5 iptal)
+## Faz E — Video indeksi (İPTAL: E1–E5 hepsi iptal)
 
-- [x] **E1** Video listesi (kapsam notu 2026-11-14: E2–E5 iptal edildi; `src/data_layer/video_index.py` yalnızca bilgi amaçlıdır, hiçbir adım ona bağlı değildir; kalıp kalmayacağı ekibin kararı)
-  - Yap: `files` tablosundan `.mp4/.avi/.mov/.zip` dosyalarını al. Ad ve boyut yeterli; **hiçbir video indirilmez**.
-  - Test: `pytest tests/data_layer/test_video_index.py::test_list`
-  - Kabul: Fixture'daki videolar listeleniyor; test sırasında ağ çağrısı yapılmıyor (mock ile doğrulanır). Not (plandan sapmalar, gerçek veriye göre): `.ts` dahil (773 ACME videosu; planın listesinde yoktu), `.zip` yalnızca adında `video`/`movie` geçiyorsa `video_archive` (141 arşiv; 5.186 zip'in çoğu veri, 588'i görüntü dizisi; 'avi' aranmaz: `avionics_package.zip` tuzağı), yalnızca `status='added'` (735 removed video dışarıda), `kind` sütunu eklendi. Listelenen videolar yalnızca 9 investigation'da. DÜZELTME (2026-11-14): FLEX (PSI-69), FLEX-2 (PSI-68) ve SAFFIRE-II (PSI-99) için `detail.json` dosya listesi boş ama `totalFileSize` 924 / 1.225 / 17 GB → dosyalar var, yalnızca listelenmemiş ('video yok' değil, 'listede yok'); SAFFIRE-I/III yalnızca zip/pdf/xlsx listeliyor. `.ts` tarayıcıda oynatılamaz (02/G4 ffmpeg gerekir). Arşiv kuralı sezgisel; kaçırdıkları E4'te elle bakılacak.
-  ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 314 passed, 0 skipped (test_video_index.py: 27). Gerçek veri (commit'li meta/, raw/ gerekmez): 1.629 video (855 .mp4, 773 .ts, 1 .avi) + 141 video_archive = 1.770 satır, 9 investigation, toplam 341,7 + 39,1 GB, remote_path benzersiz, removed yok. Ağ yok: soketler engellenip çalıştırıldı + modülde ağ import'u yok (ast). Negatif kontrol (8, baz çizgisi yeşil): .ts çıkarma, tüm zip'ler, 'avi' gevşetmesi, removed dahil, image zip, ağ import'u, sıralamasız, alfabetik sıralama; ilk turda sıralamasız kontrol GEÇİYORDU (zayıf karıştırma testi), çok satırlı testle düzeltildi
+- ~~[x] **E1** Video listesi~~ — **İPTAL (2026-11-14):** video işi kapsam dışı; kod ve testleri kaldırıldı (geri almak için git: `a68717d`), bkz. `docs/decisions/002-video-out-of-scope.md`. Aşağıdaki kanıt satırı geçmiş olarak kalır.
+  - ~~Yap: `files` tablosundan `.mp4/.avi/.mov/.zip` dosyalarını al. Ad ve boyut yeterli; **hiçbir video indirilmez**.~~
+  - ~~Test: `pytest tests/data_layer/test_video_index.py::test_list`~~
+  - ~~Kabul: Fixture'daki videolar listeleniyor; test sırasında ağ çağrısı yapılmıyor (mock ile doğrulanır). Not (plandan sapmalar, gerçek veriye göre): `.ts` dahil (773 ACME videosu; planın listesinde yoktu), `.zip` yalnızca adında `video`/`movie` geçiyorsa `video_archive` (141 arşiv; 5.186 zip'in çoğu veri, 588'i görüntü dizisi; 'avi' aranmaz: `avionics_package.zip` tuzağı), yalnızca `status='added'` (735 removed video dışarıda), `kind` sütunu eklendi. Listelenen videolar yalnızca 9 investigation'da. DÜZELTME (2026-11-14): FLEX (PSI-69), FLEX-2 (PSI-68) ve SAFFIRE-II (PSI-99) için `detail.json` dosya listesi boş ama `totalFileSize` 924 / 1.225 / 17 GB → dosyalar var, yalnızca listelenmemiş ('video yok' değil, 'listede yok'); SAFFIRE-I/III yalnızca zip/pdf/xlsx listeliyor. `.ts` tarayıcıda oynatılamaz (02/G4 ffmpeg gerekir). Arşiv kuralı sezgisel; kaçırdıkları E4'te elle bakılacak.~~
+  ~~✔ 2026-11-14 · `python -m pytest tests -q -rs` · 314 passed, 0 skipped (test_video_index.py: 27). Gerçek veri (commit'li meta/, raw/ gerekmez): 1.629 video (855 .mp4, 773 .ts, 1 .avi) + 141 video_archive = 1.770 satır, 9 investigation, toplam 341,7 + 39,1 GB, remote_path benzersiz, removed yok. Ağ yok: soketler engellenip çalıştırıldı + modülde ağ import'u yok (ast). Negatif kontrol (8, baz çizgisi yeşil): .ts çıkarma, tüm zip'ler, 'avi' gevşetmesi, removed dahil, image zip, ağ import'u, sıralamasız, alfabetik sıralama; ilk turda sıralamasız kontrol GEÇİYORDU (zayıf karıştırma testi), çok satırlı testle düzeltildi~~
 - ~~[ ] **E2** Aileye özel test-ID regex'leri~~ — **İPTAL (2026-11-14):** video işi kapsam dışı: her deneyin videosu yok ve 7 investigation'ın dosya listesi `detail.json`'da eksik; M2 'en yakın deney' videosuz devam ediyor
   - ~~Yap: Kalıplar:~~
     - ~~ACME: `\d{5}[A-Z]\d` (ör. 19115B1)~~
