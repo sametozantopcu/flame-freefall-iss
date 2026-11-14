@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 9 / 27
+- **İlerleme:** 10 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** C2 (veya B4; B4 `csv/` ister)
+- **Sıradaki adım:** C3 (veya B4; B4 `csv/` ister)
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -72,10 +72,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Test: `pytest tests/data_layer/test_spec.py` ve `09_build_report.py` sonrasında `REPORT.md` dosyasının değişmemesi
   - Kabul: `REPORT.md` farkı boş; SPEC tek bir yerde tanımlı.
   ✔ 2026-11-14 · `python -m pytest tests -q` · 95 passed (test_spec.py: 22). `analysis/scripts/00–09` yeniden çalıştırıldı: `REPORT.md` + `outputs/figures/data` altındaki 147 dosyanın md5'i taşıma öncesiyle birebir aynı. Negatif kontrol: bozulmuş SPEC sütunu ve script'te yeniden tanım testi düşürdü
-- [ ] **C2** `feature_store.duckdb` oluşturucu
+- [x] **C2** `feature_store.duckdb` oluşturucu
   - Yap: `src/data_layer/store.py build` komutu, her parquet tablosu için bir görünüm (view) oluştursun. Parquet yolları göreli olmalı.
   - Test: `pytest tests/data_layer/test_store.py::test_views`
-  - Kabul: 11 görünüm var; görünümlerin satır sayıları parquet ile eşit.
+  - Kabul: 11 görünüm var; görünümlerin satır sayıları parquet ile eşit. Not: `connect()` görünümleri her çağrıda mutlak yolla kurar, çünkü DuckDB'de göreli yollu görünüm başka klasörden açılınca bozuluyor (doğrulandı). `.duckdb` dosyası git'e girmez.
+  ✔ 2026-11-14 · `python -m pytest tests -q` · 110 passed (test_store.py: 15). `python -m src.data_layer.store build` /tmp'den iki kez çalıştı (11 görünüm, hata yok). Negatif kontrol: eksik parquet → net FileNotFoundError; kısaltılmış flex → tam set 3 testle yakaladı (görünüm testi tek başına yakalamaz, satır sayısını B1 korur)
 - [ ] **C3** Katalog ve birim görünümleri
   - Yap: `catalog` (feature_catalog.csv) ve `units` (UNITS + `unit_unknown`) görünümlerini ekle.
   - Test: `pytest tests/data_layer/test_store.py::test_catalog_units`
