@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 19 / 22
+- **İlerleme:** 20 / 22
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** F1 (tek komutla yeniden üretim). Faz B, C, D tamam; Faz E (video) tamamen iptal.
+- **Sıradaki adım:** F2 (veri katmanı kullanım kuralı testi). Faz B, C, D tamam; Faz E (video) tamamen iptal.
 - **Açık sorunlar:**
   - Dosya listesi eksik (7 investigation, toplam ≈7,2 TB): PSI-20, 21, 22, 68, 69, 99, 106 için `detail.json`'da dosya listesi yok/boş ya da 1 dosya, oysa `totalFileSize` 17 GB – 2 TB. Listelenen boyut toplam boyutla tüm diğer investigation'larda birebir tutuyor, bunlarda tutmuyor. Bu investigation'lar için dosya düzeyinde bilgi bu repoda yok. Veri kapsamı değerlendirmesinde (01/C5) bilinmeli.
   - D1'in `files` tablosu yalnızca `added`/`removed` listelerini alıyor; `detail.json`'daki ayrı `experimentalTable` (22 dosya) ve `images` listeleri `files`'a girmedi. Eklemek D1/D2'nin sabit sayılarını (27.076) değiştirir; ayrı küçük bir adım olarak karar verilecek.
@@ -157,10 +157,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
 
 ## Faz F — Kapanış
 
-- [ ] **F1** Tek komutla yeniden üretim
+- [x] **F1** Tek komutla yeniden üretim
   - Yap: `python -m src.data_layer.build_all` komutu sırasıyla C2, C3 ve D1–D4 adımlarını çalıştırsın (E adımları iptal; E1'in çıktısı yok).
   - Test: `pytest tests/data_layer/test_build_all.py`
-  - Kabul: Komut temiz bir çalışma kopyasında hatasız bitiyor (raw gerektiren adımlar `--skip-raw` ile atlanabiliyor).
+  - Kabul: Komut temiz bir çalışma kopyasında hatasız bitiyor (raw gerektiren adımlar `--skip-raw` ile atlanabiliyor). Not: `build_all` yalnızca orkestra eder (store/metadata/table_map'in mantığını çağırır) ve değişmezleri doğrular (satır sayıları parquet ile eşit, units = toplam sütun, table_map satır toplamı, investigation kümesi). E adımları iptal olduğu için zincirde yok. `raw/` varken commit'li `meta/`'nın üzerine yazmaz (taze export `--out/meta`'ya gider, içerik karşılaştırılır); fark = uyarı (çıkış 0), `--update-meta` ile bilinçli güncelleme. Çıktılar `Nasa_data/build/` (gitignore). Repo kökünden çalışır (`src` isim alanı paketi).
+  ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 298 passed, 0 skipped (test_build_all.py: 11). Temiz kopya (git ls-files, raw/csv yok, PYTHONPATH yok): `--skip-raw` çıkış 0, 6 adım OK, 11 görünüm, 24 investigation, 26 satırlık table_map; yalnızca `--out`a yazıyor; iki çalıştırma aynı; eksik parquet/katalog/meta adıyla hata; raw'sız `--skip-raw` olmadan net hata. raw varken: rapor 'AYNI', commit'li meta/ ve 24 detail.json değişmedi; bozulmuş meta/ bayraksız KORUNUR, `--update-meta` ile düzelir. Negatif kontrol (7, baz çizgisi yeşil): ignore edilen klasöre gizli bağımlılık, --skip-raw'ı yok sayma, varsayılanda meta/ üzerine yazma, hatada çıkış 0, zaman damgalı çıktı, --out dışına yazma, investigation-kümesi değişmezini silme
 - [ ] **F2** Veri katmanı kullanım kuralının testi
   - Yap: `src/` (data_layer hariç), `backend/` ve `app/` klasörlerinde `raw/` veya `csv/` yoluna geçen her referansı bulan bir test yaz.
   - Test: `pytest tests/data_layer/test_no_raw_access.py`

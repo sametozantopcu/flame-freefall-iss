@@ -69,6 +69,19 @@ Alt küme: o hedef için hangi satırların tanımlı olduğu (`get_modeling_fra
 
 Tier-2 tabloları (`saffire1/2/3`, `spice`, `acme_testdays`) görünümlerde vardır ama hedefleri yoktur; `get_features` ve `get_modeling_frame` onlara `ValueError` verir.
 
+## Yeniden üretim (tek komut)
+
+Repo kökünden çalıştırın (`src` bir isim alanı paketidir; başka klasörden `PYTHONPATH` gerekir):
+
+```bash
+python -m src.data_layer.build_all --skip-raw      # raw/ olmadan: commit'li meta/ ve parquet'lerle
+python -m src.data_layer.build_all                 # raw/ varsa: metadata'yı yeniden üretip commit'li meta/ ile karşılaştırır
+python -m src.data_layer.build_all --update-meta   # yalnızca bilinçli olarak: fark varsa commit'li meta/'nın üzerine yazar
+```
+
+Çıktılar `data_analysis/Nasa_data/build/` altına yazılır (git'e girmez; `--out` ile değişir). İlk hatada durur, çıkış kodu 1.
+`raw/` varken varsayılan davranış commit'li `meta/`'ya **yazmaz**: fark çıkarsa uyarı verir (çıkış 0), güncellemek için `--update-meta` gerekir.
+
 ## Bilinmesi gerekenler
 
 - `connect()` her çağrıda görünümleri yeniden kurar. Döngüde her seferinde çağırmayın; tek bir `con` verin.
