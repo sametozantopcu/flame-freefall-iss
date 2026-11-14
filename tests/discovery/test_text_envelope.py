@@ -734,6 +734,6 @@ def test_app_never_calls_llm():
     assert app.is_dir()
     pat = re.compile(r"discovery\.llm|discovery import llm|chat_json|extract_text_envelope|load_settings|"
                      r"evren-llmapi|API_KEY")
-    hits = [f"{p.relative_to(REPO)}:{i}" for p in app.rglob("*.py")
+    hits = [f"{p.relative_to(REPO)}:{i}" for p in app.rglob("*.py") if p.name != "server.py"  # plans/mvp S8: the local server is the one allowed LLM caller
             for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1) if pat.search(line)]
     assert hits == [], hits

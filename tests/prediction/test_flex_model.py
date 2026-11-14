@@ -46,7 +46,7 @@ def test_cv_scores(model):
 
 
 def test_export_predict_matches_pipeline(model):
-    df = get_modeling_frame("flex", fm.TARGET)
+    df = fm._clean(get_modeling_frame("flex", fm.TARGET))
     pipe = fm._pipeline().fit(df[fm.FEATURES], df[fm.TARGET])
     ref = pipe.predict(df[fm.FEATURES])
     rows = [{k: (None if (isinstance(v, float) and math.isnan(v)) else v) for k, v in r.items()}
@@ -61,3 +61,10 @@ def test_export_json_safe_and_complete(model):
               "fuels", "diluents"):
         assert k in model
     assert len(model["known_combos"]) == 6 and model["n"] > 200
+
+
+def test_zero_pressure_treated_as_missing(model):
+    assert model["ranges"]["p_atm"]["min"] > 0.3 and model["impute"]["p_atm"] > 0
+    raw = get_modeling_frame("flex", fm.TARGET)
+    assert (raw["p_atm"] <= 0).sum() == 1          # PSI-69 source_row 113 placeholder
+    assert fm._clean(raw)["p_atm"].isna().sum() == 1

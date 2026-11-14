@@ -1,46 +1,51 @@
-/* Ekipman: yangın güvenliği ekipmanı için bulgular. Kart yok; her bulgu numaralı bir satır grubu.
- * Işıklı öğe: mikro yerçekimi sönme sınırı çizgisi (Dünya çizgisi aynı ışığın soluk hali).
+/* Equipment: four data-backed insight cards (window.FF.site.cards), each with finding, number, unit, n,
+ * habitat equipment implication, caveat and DOI link. No site data: a plain empty state, no crash.
  */
 (function (FF) {
-  var C = FF.config, P = FF.physics, t = FF.t, num = FF.num;
+  var t = FF.t, num = FF.num;
+
+  function esc(s) { return FF.ui.components.esc(s); }
+
+  function card(c, i) {
+    var doi = c.doi ? '<a href="https://doi.org/' + esc(c.doi) + '" target="_blank" rel="noopener">DOI ' + esc(c.doi) + '</a>'
+      : '<span class="xs-none">' + esc(t('equipment.no_doi')) + '</span>';
+    var big = (c.value === null || c.value === undefined) ? t('equipment.na') : num(c.value, 2);
+    return '<article class="xs-card">'
+      + '<div class="xs-head"><span class="idx">0' + (i + 1) + '</span><span class="xs-psi">' + esc(c.psi_id || '') + '</span></div>'
+      + '<h3>' + esc(c.title) + '</h3>'
+      + '<div class="xs-num"><span class="xs-big">' + esc(big) + '</span>'
+      + '<span class="xs-unit">' + esc(c.unit || '') + '</span><span class="xs-n">n = ' + esc(c.n) + '</span></div>'
+      + '<p class="xs-finding">' + esc(c.finding) + '</p>'
+      + '<div class="xs-block"><b>' + esc(t('equipment.implication')) + '</b><p>' + esc(c.equipment_implication) + '</p></div>'
+      + '<div class="xs-block xs-caveat"><b>' + esc(t('equipment.caveat')) + '</b><p>' + esc(c.caveat) + '</p></div>'
+      + '<div class="xs-doi">' + doi + '</div>'
+      + '</article>';
+  }
 
   function render(root) {
-    var U = FF.ui.components, CH = FF.ui.charts;
-    var dim = { dim: true };
-
-    var list = U.text(t('ekipman.f1'), { index: '01' })
-      + U.row(t('ekipman.f1_earth'), t('unit.pct', { v: num(C.EARTH_PMMA_LOI_PCT) }), dim)
-      + U.row(t('ekipman.f1_microg'), t('unit.pct', { v: num(C.MICROG_PMMA_LIMIT_PCT) }), dim)
-      + U.rule()
-      + U.text(t('ekipman.f2'), { index: '02' })
-      + U.row(t('ekipman.f2_std'), t('unit.s', { v: C.STD6001_IGNITION_S }), dim)
-      + U.row(t('ekipman.f2_max'), t('unit.s', { v: C.BASS2_MAX_IGNITION_S }), dim)
-      + U.rule()
-      + U.text(t('ekipman.f3'), { index: '03' })
-      + U.row(t('ekipman.f3_band'), t('ekipman.f3_band_value', { lo: C.GOLDILOCKS_CM_S[0], hi: C.GOLDILOCKS_CM_S[1] }), dim)
-      + U.row(t('ekipman.f3_min'), t('unit.cm_s', { v: num(P.mostDangerousVelocity(C.R_REF_CM)) }), dim)
-      + U.rule()
-      + U.text(t('ekipman.f4'), { index: '04' })
-      + U.row(t('ekipman.f4_ratio'), t('ekipman.f4_ratio_value', { v: C.CO_MAX_ENHANCEMENT }), dim)
-      + U.row(t('ekipman.f4_sat'), t('unit.ppm', { v: C.CO_SENSOR_SAT_PPM }), dim);
-
-    var gap = C.EARTH_PMMA_LOI_PCT - C.MICROG_PMMA_LIMIT_PCT;
-    var stage = CH.limitLines({
-      earth: C.EARTH_PMMA_LOI_PCT, microg: C.MICROG_PMMA_LIMIT_PCT, air: C.AIR_O2_PCT,
-      gapLabel: t('unit.pts', { v: num(gap) }),
-      aria: t('ekipman.chart_aria', { earth: num(C.EARTH_PMMA_LOI_PCT), microg: num(C.MICROG_PMMA_LIMIT_PCT), air: C.AIR_O2_PCT })
-    }) + '<div class="list takeaway">' + U.text(t('ekipman.takeaway', { v: num(gap) })) + '</div>'
-      // FlameSense satırları sahnede: sol sütun ekran yüksekliğine sığsın.
-      + '<div class="list">' + U.rule()
-      + U.row(t('ekipman.device'), t('ekipman.device_state'))
-      + U.text(t('ekipman.device_text'), dim) + '</div>';
-
-    root.innerHTML = U.screen({
-      listLabel: t('ekipman.eyebrow_list'), list: list,
-      stageLabel: t('ekipman.chart_title'), stage: stage,
-      note: t('ekipman.note')
-    });
+    var U = FF.ui.components;
+    var cards = (FF.site && FF.site.cards) || [];
+    var body = cards.length
+      ? '<div class="xs-grid">' + cards.map(card).join('') + '</div>'
+      : '<p class="xs-empty">' + esc(t('equipment.empty')) + '</p>';
+    root.innerHTML = '<style>' + STYLE + '</style><div class="xs-scroll">'
+      + U.eyebrow(t('equipment.eyebrow')) + body + '</div>' + U.note(t('equipment.note'));
   }
+
+  var STYLE = '.xs-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:8px}'
+    + '.xs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:var(--space-gutter)}'
+    + '.xs-card{display:flex;flex-direction:column;gap:10px;padding:18px 20px;border-top:1px solid var(--hairline);background:linear-gradient(180deg,var(--halo),var(--halo-edge));border-radius:var(--radius-row)}'
+    + '.xs-card h3{margin:0;font:inherit;font-weight:600;color:var(--ink)}'
+    + '.xs-head{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.08em;color:var(--ink-ghost)}'
+    + '.xs-num{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}'
+    + '.xs-big{font-size:2.2em;font-weight:600;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}'
+    + '.xs-unit,.xs-n{color:var(--ink-muted);font-size:var(--fs-label)}'
+    + '.xs-finding{margin:0;color:var(--ink-soft)}'
+    + '.xs-block p{margin:2px 0 0;color:var(--ink-muted);font-size:var(--fs-label);line-height:var(--lh-label)}'
+    + '.xs-block b{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--ink-faint)}'
+    + '.xs-caveat p{color:var(--ink-soft)}'
+    + '.xs-doi{margin-top:auto;font-size:var(--fs-label)}.xs-doi a{color:var(--ink);text-underline-offset:4px}'
+    + '.xs-none,.xs-empty{color:var(--ink-faint)}';
 
   FF.views = FF.views || {};
   FF.views.ekipman = { render: render };

@@ -67,8 +67,16 @@ def _cv(df: pd.DataFrame, groups: pd.Series) -> dict:
                 n_groups=int(groups.nunique()), groups=sorted(map(str, groups.unique())))
 
 
+def _clean(df: pd.DataFrame) -> pd.DataFrame:
+    """Treat ambient pressure <= 0 as missing: a burning droplet at 0 atm is impossible and the raw row
+    (PSI-69 FLEX test 114, 0.0 mmHg between ~535 mmHg neighbours) is a placeholder. Source tables stay untouched."""
+    df = df.copy()
+    df.loc[df["p_atm"] <= 0, "p_atm"] = np.nan
+    return df
+
+
 def fit_flex() -> dict:
-    df = get_modeling_frame(TABLE, TARGET)
+    df = _clean(get_modeling_frame(TABLE, TARGET))
     catalog = get_features(TABLE, TARGET)
     assert not set(LEAKAGE) & set(FEATURES) and set(FEATURES) <= set(catalog)
     combo = df["fuel"].astype(str) + "|" + df["diluent"].astype(str)

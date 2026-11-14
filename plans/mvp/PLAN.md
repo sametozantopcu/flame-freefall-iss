@@ -5,10 +5,10 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 ## Durum
 
-- İlerleme: 4/9 (S1–S4 tamam)
-- Son güncelleme: 2026-11-14 (S1–S4 doğrulandı)
-- Sıradaki adım: S5
-- Açık sorunlar: bkz. "Açık noktalar"
+- İlerleme: 8/9 (S1–S8 tamam)
+- Son güncelleme: 2026-11-14 (S5–S8 doğrulandı; FLEX p_atm=0 satırı eksik sayıldı)
+- Sıradaki adım: S9
+- Açık sorunlar: bkz. "Açık noktalar"; EVREN ucu canlı denemede 90/170 sn ReadTimeout verdi (fallback çalışıyor).
 
 ## Kritik yol ve paralellik
 
@@ -62,7 +62,8 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
   - Bağımlılıklar: yok (paralel).
   - Tahmini süre: 25 dk.
 
-- [ ] **S5 · Veri köprüsü: build_site_data**
+- [x] **S5 · Veri köprüsü: build_site_data**
+  - ✔ 2026-11-14 · `$PY scripts/build_site_data.py && node --check app/data/site_data.js && $PY -m pytest tests -m "not needs_raw and not slow and not live" -q` · build OK (24 investigations, 4 cards), 622 passed
   - Amaç: S2–S4 çıktılarını ve metadata'yı siteye gömülecek tek dosyaya yazmak; mock veriyi değiştirmek için veri sözleşmesi.
   - Dokunulacak dosyalar: `scripts/build_site_data.py` (yeni), `app/data/site_data.js`, `app/data/site_data.json` (üretilir), `tests/delivery/test_build_site_data.py` (yeni).
   - Girdi: `rank_investigations()`, `fit_flex()`, `build_cards()`, `src/discovery` zarf metni, `meta/investigations.parquet` (ad, PSI, DOI). Yalnızca Feature Store/Metadata ve `src/` üzerinden okur.
@@ -71,7 +72,8 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
   - Bağımlılıklar: S2, S3, S4.
   - Tahmini süre: 30 dk.
 
-- [ ] **S6 · Explore ve Scenario ekranları gerçek veriyle**
+- [x] **S6 · Explore ve Scenario ekranları gerçek veriyle**
+  - ✔ 2026-11-14 · `node scripts/smoke_explore_scenario.mjs` · ALL PASSED (24 rows, JS==Python predict, negative -> "outside the model's valid range", p_atm min 0.692); `node --check` on all app/*.js OK
   - Amaç: Explore sıralı 24 investigation + zarf + özet + DOI; Scenario FLEX what-if (tarayıcıda tahmin) + skor + uyarı. Halo teması korunur.
   - Dokunulacak dosyalar: `app/views/kesif.js` ve `app/views/senaryo.js` (S1'den sonraki ad neyse), `app/core/data.js`, `app/core/model.js` (yeni; tahmin fonksiyonu; `index.html` S1'de etiketlenmişse, değilse adım S1'e geri not düşer ve `core/data.js` içine konur), `tests/delivery/test_site_js.js` yerine `scripts/smoke_site.mjs` (yeni).
   - Girdi: `window.FF.site` sözleşmesi (S5).
@@ -80,7 +82,8 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
   - Bağımlılıklar: S1, S5.
   - Tahmini süre: 40 dk.
 
-- [ ] **S7 · Equipment ve Live (FlameSense konsept) ekranları**
+- [x] **S7 · Equipment ve Live (FlameSense konsept) ekranları**
+  - ✔ 2026-11-14 · `node scripts/smoke_equipment.mjs` · S7 smoke OK
   - Amaç: Equipment ekranı DOI atıflı kartlarla; Live ekranı "concept / not built" konsept sayfası.
   - Dokunulacak dosyalar: `app/views/ekipman.js`, `app/views/canli.js` (ad S1'den sonrakine göre), `app/assets/flamesense/*.jpg` (yeni; `design/flamesense_box/render_assembled.png`, `render_internal.png`, `render_exploded.png`, `render_detail.png` kaynak; orijinaller dokunulmaz), `app/ui/theme.css` (yalnız görsel/etiket stilleri eklenir; S6 ve S8 bu dosyaya dokunmaz).
   - Girdi: `window.FF.site.cards`, `window.FF.site.flamesense` (S5). Görsel küçültme `$PY` + Pillow varsa (`import PIL` ile kontrol; yoksa orijinal PNG'ler kopyalanır ve "kurulum gerekmez" olarak not düşülür; her halde `matplotlib.image` yeterli değilse PNG olarak ≤800 px bırak, kurulum yapma).
@@ -89,7 +92,8 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
   - Bağımlılıklar: S1, S5.
   - Tahmini süre: 25 dk.
 
-- [ ] **S8 · Yerel sunucu ve LLM soru-cevap**
+- [x] **S8 · Yerel sunucu ve LLM soru-cevap**
+  - ✔ 2026-11-14 · `$PY -m pytest tests -m "not needs_raw and not slow and not live" -q` · 622 passed (server/fallback tests included); live EVREN call: ReadTimeout at 90 s and 170 s -> fallback (endpoint unresponsive)
   - Amaç: Tek komutla başlayan stdlib sunucusu (statik + `POST /api/ask`), arayüzde Ask paneli, anahtarsız/başarısız çağrıda statik kartlara düşüş.
   - Dokunulacak dosyalar: `app/server.py` (yeni), `app/ui/ask.js` (yeni), `tests/delivery/test_server.py` (yeni).
   - Girdi: `app/data/site_data.json`; `src/discovery/llm.py` içindeki `load_settings`, `chat_json` (mevcut; `.env` okuma ve EVREN istemcisi yeniden kullanılır; yeniden yazılmaz). Not: `chat_json` JSON döndürür; bu yüzden istem JSON `{"answer": "...", "cards": ["id", ...]}` ister.
