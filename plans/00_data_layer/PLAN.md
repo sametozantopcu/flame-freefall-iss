@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 17 / 27
+- **İlerleme:** 18 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** D3 (DOI doğrulama, `doi_flag`). Faz B ve C tamam.
+- **Sıradaki adım:** D4 (investigation ↔ parquet tablosu eşlemesi). Faz B ve C tamam.
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -114,10 +114,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Test: `pytest tests/data_layer/test_metadata.py::test_export`
   - Kabul: Dosyalar var ve 5 MB'ın altında; `raw/` olmadan da okunabiliyor. Not: commit edilen asıl artefakt 3 parquet (`meta/`, zstd, ~0,76 MB); `meta.duckdb` `connect_meta()`/`build_meta()` ile üretilir ve `*.duckdb` gitignore'da olduğu için commit edilmez (Architecture'daki ad ve yapı korunur). Metadata görünümleri şimdilik `store.connect()`'ten ayrı; D4'te birleştirme önerilecek. `publications.authors` yayın künyesidir (kamuya açık), kişisel iletişim bilgisi değil.
   ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 239 passed, 0 skipped (test_metadata.py: 24). Gerçek export: 24 / 352 / 27.076 satır, toplam 0,76 MB (< 5 MB); commit'li `meta/` `raw/`'dan yeniden üretilenle içerik olarak aynı; `RAW_DIR` boş klasöre yönlendirilmişken `connect_meta()` çalışıyor; iki export bayt olarak aynı; 24 `detail.json` md5'i değişmedi. Bu adımda D1 kodunda dtype sözleşmesi sabitlendi (`source_row` int64, tarihler datetime64[ms]). Negatif kontrol (5): kısaltılmış parquet, zaman damgalı export, 5 MB aşımı, gizli `raw/` bağımlılığı, eksik `meta/` yakalandı
-- [ ] **D3** DOI doğrulama
+- [x] **D3** DOI doğrulama
   - Yap: Her DOI `^10\.\d{4,9}/\S+$` kalıbına uymalı. Uymayanlar `doi_flag` ile işaretlensin, silinmesin.
   - Test: `pytest tests/data_layer/test_metadata.py::test_doi`
-  - Kabul: Geçersiz DOI'lerin hepsi işaretli; her investigation en az 1 DOI'ye sahip ya da `no_doi` bayrağı taşıyor.
+  - Kabul: Geçersiz DOI'lerin hepsi işaretli; her investigation en az 1 DOI'ye sahip ya da `no_doi` bayrağı taşıyor. Not: `doi_flag` ∈ ok/missing/invalid_format, hem `investigations` hem `publications` tablosunda; `investigations.pub_doi_status` ∈ ok/no_doi/no_publications (+ `n_publication_dois`, yalnızca geçerli DOI'ler sayılır). Değer asla düzeltilmez/silinmez. Gerçek veride geçersiz DOI YOK (284 ok, 68 missing); işaretleme mantığı yapay değerlerle kanıtlandı. Kopya DOI'ler (93 satır, 44 DOI birden çok investigation'da, 1 DOI PSI-21 içinde iki kez) bu adımda dokunulmadı → 06/C1'e not.
+  ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 266 passed, 0 skipped (test_metadata.py: 51). Gerçek veri: yayınlar 284 ok / 68 missing / 0 invalid; 24 investigation doi_flag=ok; pub_doi_status 22 ok, 1 no_doi (PSI-100), 1 no_publications (PSI-115). `meta/` yeni sütunlarla yeniden üretildi (0,76 MB). Negatif kontrol (5 + baz çizgisi): gevşetilmiş regex, düşürülen geçersiz yayın, missing→invalid, yanlış durum sayımı, eski şemalı meta/ hepsi yakalandı
 - [ ] **D4** Investigation ↔ parquet tablosu eşlemesi
   - Yap: `table_map` tablosu oluştur: psi_id → hangi parquet tablosu (ör. PSI-10/159 → acme_*, PSI-101 → smoke).
   - Test: `pytest tests/data_layer/test_metadata.py::test_table_map`

@@ -53,6 +53,7 @@ Jüri ve ekip, repoyu klonlayıp tek komutla sonuçları yeniden üretebilmeli. 
   - Yap: `docs/CITATIONS.md`: kullanılan her `psi_id` için DOI ve yayın bilgisi. Sayfa Metadata DB'den otomatik üretilir.
   - Test: `pytest tests/delivery/test_citations.py`
   - Kabul: Parquet'te ve kartlarda geçen her `psi_id` için en az bir DOI var.
+  - Not (00/D3'ten): 68 yayında DOI yok (`doi_flag='missing'`, uydurulmaz); PSI-100'ün yayınlarında hiç DOI yok (`pub_doi_status='no_doi'`). "Benzersiz makale" sayarken DOI'ye göre tekilleştir: 93 satır aynı DOI'yi paylaşıyor, 44 DOI birden çok investigation'da geçiyor, 1 DOI PSI-21 içinde iki kez. DOI karşılaştırması büyük/küçük harfe duyarsız yapılmalı.
 - [ ] **C2** Sınırlar listesi
   - Yap: Architecture §6'daki maddeler README'de, dashboard'da ve sunumda aynı metinle geçmeli.
   - Test: `pytest tests/delivery/test_limits.py`

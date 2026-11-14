@@ -31,6 +31,17 @@ INV_DATES = {"start_date": ("investigationStartDate", "mdy"), "end_date": ("inve
              "modified_date": ("modifiedDate", "dMy")}
 
 
+DOI_RE = re.compile(r"10\.\d{4,9}/\S+")           # plans/00 D3: ^10\.\d{4,9}/\S+$
+
+
+def doi_flag(value) -> str:
+    """'missing' (no value), 'invalid_format' (value present but not matching DOI_RE) or 'ok'.
+    The value is never altered or repaired: 'https://doi.org/10.1000/x' is flagged, not rewritten."""
+    if value is None or value is pd.NA or (isinstance(value, float) and pd.isna(value)) or str(value).strip() == "":
+        return "missing"
+    return "ok" if DOI_RE.fullmatch(str(value)) else "invalid_format"
+
+
 def _s(x):
     """Text or missing: blank/whitespace/None -> pd.NA."""
     if x is None:
@@ -88,6 +99,12 @@ def parse_detail(obj: dict, psi_id: str, source_file: str):
                           "status": _s((p.get("status") or {}).get("annotationValue"))}
                          for i, p in enumerate(pubs_in)],
                         columns=["psi_id", "source_file", "source_row", "title", "authors", "doi", "pubmed_id", "status"])
+    pubs["doi_flag"] = [doi_flag(d) for d in pubs["doi"]]
+    n_ok = int((pubs["doi_flag"] == "ok").sum())
+    # 'no_doi' = publications exist but none carries a usable (valid) DOI; 'no_publications' = nothing to cite
+    inv["doi_flag"] = doi_flag(inv["doi"])
+    inv["n_publication_dois"] = n_ok
+    inv["pub_doi_status"] = "no_publications" if not pubs_in else ("ok" if n_ok else "no_doi")
 
     rows = []
     for i, (status, f) in enumerate([("added", f) for f in added] + [("removed", f) for f in removed]):
@@ -99,7 +116,8 @@ def parse_detail(obj: dict, psi_id: str, source_file: str):
                      "date_created": _ms(f.get("date_created")), "date_modified": _ms(f.get("date_modified"))})
     files = pd.DataFrame(rows, columns=["psi_id", "source_file", "source_row", "file_name", "ext", "size_bytes", "category",
                                         "subcategory", "remote_path", "status", "date_created", "date_modified"])
-    pubs = pubs.astype({c: "string" for c in ("title", "authors", "doi", "pubmed_id", "status", "psi_id", "source_file")})
+    pubs = pubs.astype({c: "string" for c in ("title", "authors", "doi", "pubmed_id", "status", "psi_id", "source_file",
+                                              "doi_flag")})
     files = files.astype({"size_bytes": "Int64", **{c: "string" for c in
                           ("file_name", "ext", "category", "subcategory", "remote_path", "status", "psi_id", "source_file")}})
     return inv, pubs, files
@@ -118,14 +136,15 @@ def load_all(raw_dir: str | Path = RAW_DIR):
     pubs_df, files_df = pd.concat(pubs, ignore_index=True), pd.concat(files, ignore_index=True)
     # explicit dtype contract (an investigation without publications yields an empty frame that would turn
     # source_row into object after concat; datetime resolution is pinned to ms = what parquet round-trips to)
-    pubs_df["source_row"] = pubs_df["source_row"].astype("int64")
+    pubs_df = pubs_df.astype({"source_row": "int64", "doi_flag": "string"})
     files_df = files_df.astype({"source_row": "int64", "date_created": "datetime64[ms]", "date_modified": "datetime64[ms]"})
     inv_df = pd.DataFrame(invs)
     text = [c for c in inv_df.columns if c in INV_TEXT or c in ("psi_id", "source_file")]
     inv_df = inv_df.astype({**{c: "string" for c in text}, "total_file_size": "Int64"})
     for c in INV_DATES:
         inv_df[c] = pd.to_datetime(inv_df[c]).astype("datetime64[ms]")
-    inv_df = inv_df.astype({"source_row": "int64", "version": "int64"})
+    inv_df = inv_df.astype({"source_row": "int64", "version": "int64", "n_publication_dois": "int64",
+                            "doi_flag": "string", "pub_doi_status": "string"})
     return inv_df, pubs_df, files_df
 
 

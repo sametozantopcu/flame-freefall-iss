@@ -240,3 +240,83 @@ def test_export_does_not_touch_raw(tmp_path):
     before = {p: hashlib.md5(p.read_bytes()).hexdigest() for p in sorted(RAW.glob("PSI-*/detail.json"))}
     metadata.export(tmp_path / "m")
     assert before == {p: hashlib.md5(p.read_bytes()).hexdigest() for p in sorted(RAW.glob("PSI-*/detail.json"))}
+
+
+# ---------------------------------------------------------------- D3: DOI validation
+from src.data_layer.metadata import doi_flag  # noqa: E402
+
+VALID = ["10.60555/4qc4-de67", "10.1016/S0010-2180(01)00247-4", "10.1016/j.combustflame.2017.03.001",
+         "10.2514/6.2005-341", "10.1155/2012/587987", "10.123456789/abc"]
+INVALID = ["doi:10.1000/x", "https://doi.org/10.1000/x", "10.12/x", "10.1234/", "11.1000/x", "10.1000/has space",
+           "10.1000/tab\tx", " 10.1000/x", "10.1000/x ", "10.1234567890/x", "abc"]
+MISSING = [None, pd.NA, float("nan"), "", "   ", "\n"]
+
+
+@pytest.mark.parametrize("v", VALID)
+def test_doi_flag_ok(v):
+    assert doi_flag(v) == "ok"
+
+
+@pytest.mark.parametrize("v", INVALID)
+def test_doi_flag_invalid(v):
+    assert doi_flag(v) == "invalid_format"
+
+
+@pytest.mark.parametrize("v", MISSING)
+def test_doi_flag_missing_is_not_invalid(v):
+    assert doi_flag(v) == "missing"
+
+
+def test_doi_invalid_is_flagged_not_dropped_or_repaired():
+    obj = json.loads(FIX.read_text())
+    bad = "https://doi.org/10.1000/xyz"
+    obj["publications"][0]["doi"] = bad
+    obj["doi"] = "doi:10.60555/4qc4-de67"
+    inv, pubs, _ = parse_detail(obj, "PSI-25", "x")
+    assert len(pubs) == 3                                              # nothing dropped
+    assert pubs.doi.iloc[0] == bad and pubs.doi_flag.iloc[0] == "invalid_format"   # kept verbatim, not repaired
+    assert pubs.doi_flag.tolist() == ["invalid_format", "ok", "missing"]
+    assert inv["doi"] == "doi:10.60555/4qc4-de67" and inv["doi_flag"] == "invalid_format"
+    assert inv["n_publication_dois"] == 1                              # only valid DOIs count
+
+
+def test_pub_doi_status_three_states(parsed):
+    obj, (inv, _, _) = parsed
+    assert (inv["pub_doi_status"], inv["n_publication_dois"], inv["doi_flag"]) == ("ok", 2, "ok")
+    nodoi = copy.deepcopy(obj)
+    for p in nodoi["publications"]:
+        p["doi"] = ""
+    assert parse_detail(nodoi, "PSI-25", "x")[0]["pub_doi_status"] == "no_doi"
+    nopub = copy.deepcopy(obj)
+    nopub["publications"] = []
+    i3 = parse_detail(nopub, "PSI-25", "x")[0]
+    assert (i3["pub_doi_status"], i3["n_publication_dois"]) == ("no_publications", 0)
+    allbad = copy.deepcopy(obj)
+    for p in allbad["publications"]:
+        p["doi"] = "not-a-doi"
+    assert parse_detail(allbad, "PSI-25", "x")[0]["pub_doi_status"] == "no_doi"      # nothing usable to cite
+
+
+def test_doi_flags_in_committed_export_without_raw(monkeypatch, tmp_path):
+    """Readable without raw/: flags are part of the committed export."""
+    monkeypatch.setattr(metadata, "RAW_DIR", tmp_path / "no_raw_here")
+    con = metadata.connect_meta()
+    q = lambda sql: con.execute(sql).fetchall()
+    assert dict(q("SELECT doi_flag, count(*) FROM publications GROUP BY 1")) == {"ok": 284, "missing": 68}
+    assert dict(q("SELECT doi_flag, count(*) FROM investigations GROUP BY 1")) == {"ok": 24}
+    assert dict(q("SELECT pub_doi_status, count(*) FROM investigations GROUP BY 1")) == {"ok": 22, "no_doi": 1, "no_publications": 1}
+    assert q("SELECT psi_id FROM investigations WHERE pub_doi_status = 'no_doi'") == [("PSI-100",)]
+    assert q("SELECT psi_id FROM investigations WHERE pub_doi_status = 'no_publications'") == [("PSI-115",)]
+    assert q("SELECT count(*) FROM investigations WHERE pub_doi_status IS NULL OR doi_flag IS NULL")[0][0] == 0
+
+
+def test_doi(parsed):
+    """Acceptance: every investigation has >=1 usable publication DOI or carries a 'no_doi'/'no_publications' status;
+    every invalid DOI is flagged (none exist in the real data today, hence the injected cases above)."""
+    con = metadata.connect_meta()
+    inv = con.execute("SELECT psi_id, doi, doi_flag, pub_doi_status, n_publication_dois FROM investigations").df()
+    assert inv.pub_doi_status.isin(["ok", "no_doi", "no_publications"]).all()
+    assert ((inv.pub_doi_status == "ok") == (inv.n_publication_dois > 0)).all()
+    pubs = con.execute("SELECT doi, doi_flag FROM publications").df()
+    assert (pubs.doi_flag.eq("invalid_format") == (pubs.doi.notna() & ~pubs.doi.fillna("").str.fullmatch(r"10\.\d{4,9}/\S+"))).all()
+    assert (pubs.doi_flag.eq("missing") == pubs.doi.isna()).all()
