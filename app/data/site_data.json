@@ -978,9 +978,9 @@
    "name": "SLICE",
    "psi_id": "PSI-106",
    "rank": 17,
-   "rationale": "Score 100/100 from 1 known components (micro-g flight data); 5 component(s) unknown.",
-   "score": 100.0,
-   "score_status": "scored",
+   "rationale": "Low confidence: only 1 of 6 components known (micro-g flight flag); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
    "summary": "Objective: The objective of this investigation is to better understand the structure and stability of laminar diffusion flames in microgravity. Specific objectives of this investigation were: 1. To investigate the structure of laminar diffusion flames in microgravity to understand the stabilizing mechanisms at the flames base. 2. Determine the liftoff velocity limits for different fuels and burner diameters. 3....",
    "title": "Structure and Liftoff In Combustion Experiment"
   },
@@ -1021,9 +1021,9 @@
    "name": "Utilization of the Smoke Aerosol Measurement Experiment Data for Advanced Modeling and Simulation of Smoke Generation in Micro-Gravity",
    "psi_id": "PSI-115",
    "rank": 18,
-   "rationale": "Score 100/100 from 1 known components (micro-g flight data); 5 component(s) unknown.",
-   "score": 100.0,
-   "score_status": "scored",
+   "rationale": "Low confidence: only 1 of 6 components known (micro-g flight flag); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
    "summary": "The objective of this investigation was to use numerical simulation to explore the influence of gravity on pyrolysis smoke growth from a fundamental perspective. The intention of this effort is to quantify the differences between microgravity and Earth gravity smoke, and to identify the fluid dynamic mechanisms that cause the differences.",
    "title": "Utilization of the Smoke Aerosol Measurement Experiment Data for Advanced Modeling and Simulation of Smoke Generation in Micro-Gravity"
   },
@@ -1065,55 +1065,11 @@
    "name": "Effect of External Thermo-Convective Perturbation on Cool Flame Dynamics: A Multidimensional Multi-Physics CFD Analysis",
    "psi_id": "PSI-117",
    "rank": 19,
-   "rationale": "Score 100/100 from 1 known components (micro-g flight data); 5 component(s) unknown.",
-   "score": 100.0,
-   "score_status": "scored",
+   "rationale": "Low confidence: only 1 of 6 components known (micro-g flight flag); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
    "summary": "The objective of this ground investigation was to use flight data obtained from PSI through NASA’s Flame Extinguishment Experiment (FLEX) to quantify how externally imposed thermal and convective perturbations regulated the dynamics and ultimate fate of already established droplet cool flames, and to explain run-to-run variability by isolating the roles of deliberate heating and unintentional drift-induced...",
    "title": "Effect of External Thermo-Convective Perturbation on Cool Flame Dynamics: A Multidimensional Multi-Physics CFD Analysis"
-  },
-  {
-   "components": {
-    "data_volume": null,
-    "has_flight": 1.0,
-    "has_solid": null,
-    "low_flow_overlap": null,
-    "o2_overlap": null,
-    "pressure_overlap": null
-   },
-   "doi": "10.60555/e9xp-ex83",
-   "envelope": {
-    "diluents": [],
-    "flow_cm_s": null,
-    "fuels": [
-     "polymethyl methacrylate (PMMA)",
-     "wax"
-    ],
-    "gravity": [
-     "microgravity",
-     "normal-gravity"
-    ],
-    "materials": [],
-    "n_rows": null,
-    "o2_pct": null,
-    "phenomena": [],
-    "pressure_atm": null
-   },
-   "missing_components": [
-    "o2_overlap",
-    "pressure_overlap",
-    "low_flow_overlap",
-    "has_solid",
-    "data_volume"
-   ],
-   "n_components_known": 1,
-   "name": "Concurrent Flame Spread Modeling using Flamelet Generated Manifolds in Microgravity with Comparison to BASS Experiments using Two-Color Tomography",
-   "psi_id": "PSI-62",
-   "rank": 20,
-   "rationale": "Score 100/100 from 1 known components (micro-g flight data); 5 component(s) unknown.",
-   "score": 100.0,
-   "score_status": "scored",
-   "summary": "The objective of this research was to develop and validate new flamelet generated manifold (FGM) modeling techniques for concurrent flame spread in microgravity. Concurrent flame spread presented one of the greatest modeling challenges in combustion science due to the intricate coupling between heat transfer, mass transport, and chemical kinetics near the solid-vapor interface. Traditional modeling strategies often...",
-   "title": "Concurrent Flame Spread Modeling using Flamelet Generated Manifolds in Microgravity with Comparison to BASS Experiments using Two-Color Tomography"
   },
   {
    "components": {
@@ -1156,10 +1112,10 @@
    "n_components_known": 1,
    "name": "Quantitative Studies of Cool Flame Transitions at Radiation / Stretch Extinction Using Counterflow Flames",
    "psi_id": "PSI-142",
-   "rank": 21,
-   "rationale": "Score 0/100 from 1 known components (pressure overlap 0%, flight status unknown); 5 component(s) unknown.",
-   "score": 0.0,
-   "score_status": "scored",
+   "rank": 20,
+   "rationale": "Low confidence: only 1 of 6 components known (pressure overlap); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
    "summary": "By using the Flame Extinguishment (FLEX) experimental data from the Physical Sciences Informatics (PSI) system of combustion science, the purpose of this grant was to conduct new simulations and ground-based experiments using ozone-sensitized counterflow flames to: 1) Develop a new diagram of the flammability limits of diffusional cool flames affected by radiation, diffusion, and convection. 2) Bridge the knowledge...",
    "title": "Quantitative Studies of Cool Flame Transitions at Radiation / Stretch Extinction Using Counterflow Flames"
   },
@@ -1203,12 +1159,56 @@
    "n_components_known": 1,
    "name": "BASS",
    "psi_id": "PSI-26",
-   "rank": 22,
-   "rationale": "Score 0/100 from 1 known components (low-flow overlap 0%, flight status unknown); 5 component(s) unknown.",
-   "score": 0.0,
-   "score_status": "scored",
+   "rank": 21,
+   "rationale": "Low confidence: only 1 of 6 components known (low-flow overlap); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
    "summary": "The two main objectives for BASS are to: 1.) Begin to bridge the gap between the normal gravity NASA-STD-6001 Test#1 method, ground-based microgravity tests, and actual material flammability in microgravity. The relation between these can be investigated by observing flames burning for the longer times available in flight. Practical, realistic (thicker) fuels in typical geometries will be examined, including wake...",
    "title": "Burning and Suppression of Solids"
+  },
+  {
+   "components": {
+    "data_volume": null,
+    "has_flight": 1.0,
+    "has_solid": null,
+    "low_flow_overlap": null,
+    "o2_overlap": null,
+    "pressure_overlap": null
+   },
+   "doi": "10.60555/e9xp-ex83",
+   "envelope": {
+    "diluents": [],
+    "flow_cm_s": null,
+    "fuels": [
+     "polymethyl methacrylate (PMMA)",
+     "wax"
+    ],
+    "gravity": [
+     "microgravity",
+     "normal-gravity"
+    ],
+    "materials": [],
+    "n_rows": null,
+    "o2_pct": null,
+    "phenomena": [],
+    "pressure_atm": null
+   },
+   "missing_components": [
+    "o2_overlap",
+    "pressure_overlap",
+    "low_flow_overlap",
+    "has_solid",
+    "data_volume"
+   ],
+   "n_components_known": 1,
+   "name": "Concurrent Flame Spread Modeling using Flamelet Generated Manifolds in Microgravity with Comparison to BASS Experiments using Two-Color Tomography",
+   "psi_id": "PSI-62",
+   "rank": 22,
+   "rationale": "Low confidence: only 1 of 6 components known (micro-g flight flag); no headline score.",
+   "score": null,
+   "score_status": "low_confidence",
+   "summary": "The objective of this research was to develop and validate new flamelet generated manifold (FGM) modeling techniques for concurrent flame spread in microgravity. Concurrent flame spread presented one of the greatest modeling challenges in combustion science due to the intricate coupling between heat transfer, mass transport, and chemical kinetics near the solid-vapor interface. Traditional modeling strategies often...",
+   "title": "Concurrent Flame Spread Modeling using Flamelet Generated Manifolds in Microgravity with Comparison to BASS Experiments using Two-Color Tomography"
   },
   {
    "components": {

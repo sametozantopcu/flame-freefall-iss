@@ -38,6 +38,9 @@ def test_investigations(built):
         assert "doi" in r and "envelope" in r and "summary" in r and "components" in r and "rationale" in r
     scored = [r["score"] for r in inv if r["score"] is not None]
     assert all(0 <= s <= 100 for s in scored)
+    assert {r["score_status"] for r in inv} <= {"scored", "low_confidence", "not_scorable"}
+    assert all((r["score"] is not None) == (r["score_status"] == "scored") for r in inv)
+    assert any(r["score_status"] == "low_confidence" for r in inv)
 
 
 def test_envelope_not_zero_filled(built):

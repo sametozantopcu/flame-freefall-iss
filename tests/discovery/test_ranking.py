@@ -24,11 +24,28 @@ def test_24_rows_and_columns(df):
 def test_scores_in_range_and_status(df):
     s = df["score"].dropna()
     assert ((s >= 0) & (s <= 100)).all()
-    assert set(df["score_status"]) <= {"scored", "not_scorable"}
-    assert (df["score"].isna() == (df["score_status"] == "not_scorable")).all()
-    full = df[df.n_components_known >= R.MIN_KNOWN]["score"]
-    assert full.is_monotonic_decreasing
-    assert df.index[df.n_components_known >= R.MIN_KNOWN].max() < df.index[df.n_components_known < R.MIN_KNOWN].min()
+    assert set(df["score_status"]) <= {"scored", "low_confidence", "not_scorable"}
+    assert (df["score"].notna() == (df["score_status"] == "scored")).all()
+    assert (df[df.score_status == "scored"].n_components_known >= R.MIN_KNOWN).all()
+    low = df[df.score_status == "low_confidence"]
+    assert ((low.n_components_known >= 1) & (low.n_components_known < R.MIN_KNOWN)).all()
+    assert (df[df.score_status == "not_scorable"].n_components_known == 0).all()
+    assert df[df.score_status == "scored"]["score"].is_monotonic_decreasing
+    order = df["score_status"].map({"scored": 0, "low_confidence": 1, "not_scorable": 2})
+    assert order.is_monotonic_increasing
+    assert low["n_components_known"].is_monotonic_decreasing
+    for k in low.index:  # known components stay non-null (never zero-filled)
+        assert sum(pd.notna(low.loc[k, c]) for c in COMPONENTS) == low.loc[k, "n_components_known"]
+
+
+def test_low_confidence_keeps_components_and_has_no_score():
+    env = pd.DataFrame(columns=["psi_id"])
+    text = pd.DataFrame({"psi_id": ["PSI-1"], "field": ["gravity"], "accepted": [True], "value_text": ["µg"],
+                         "value_min_std": [None], "value_max_std": [None]})
+    inv = pd.DataFrame({"psi_id": ["PSI-1"], "doi": [None]})
+    r = R.rank_investigations(env=env, text=text, inv=inv).iloc[0]
+    assert pd.isna(r["score"]) and r["score_status"] == "low_confidence"
+    assert r["has_flight"] == 1.0 and r["n_components_known"] == 1 and "o2_overlap" in r["missing_components"]
 
 
 def test_missing_component_is_null_not_zero(df):

@@ -31,15 +31,25 @@ const invs = FF.data.investigations();
 const firstNull = invs.findIndex(i => i.score === null);
 ok(firstNull > 0 && invs.slice(firstNull).every(i => i.score === null), 'null scores sorted last');
 const minK = J.meta.score_assumptions.min_known;
-const well = invs.filter(i => i.score !== null && i.n_components_known >= minK).map(i => i.score);
+const well = invs.filter(i => i.score !== null).map(i => i.score);
 ok(well.every((s, i) => i === 0 || well[i - 1] >= s), 'well-documented scored sorted descending');
-const seq = invs.map(i => i.score === null ? 2 : i.n_components_known >= minK ? 0 : 1);
+const seq = invs.map(i => i.score_status === 'scored' ? 0 : i.score_status === 'low_confidence' ? 1 : 2);
+ok(invs.every(i => ['scored', 'low_confidence', 'not_scorable'].includes(i.score_status)), 'score_status is one of three states');
+ok(invs.every(i => (i.score_status === 'scored') === (i.score !== null) && (i.score_status !== 'scored' || i.n_components_known >= minK)), 'only scored rows carry a score');
+const lowInv = invs.find(i => i.score_status === 'low_confidence');
+if (lowInv) {
+  let h2; const r4 = { innerHTML: '', querySelector() { return null; },
+    querySelectorAll(sel) { return sel === '[data-psi]' ? [{ getAttribute: () => lowInv.psi_id, addEventListener(e, h) { h2 = h; } }] : []; } };
+  FF.views.kesif.render(r4); h2();
+  ok(r4.innerHTML.includes('Low confidence — only ' + lowInv.n_components_known + ' of 6'), 'low-confidence label shown');
+  ok(!/100\.0/.test(r4.innerHTML), 'no misleading 100.0 for low confidence');
+}
 ok(seq.every((v, i) => i === 0 || seq[i - 1] <= v), 'order: well-documented, low-confidence, not scorable');
 for (const inv of invs) {
   const c = FF.data.contributions(inv, J.meta.score_assumptions.weights);
   const sum = Object.values(c).reduce((a, v) => a + (v === null ? 0 : v), 0);
   if (inv.score !== null) { if (Math.abs(sum - inv.score) > 1e-6) ok(false, 'contrib sum ' + inv.psi_id); }
-  else if (Object.values(c).some(v => v !== null)) ok(false, 'null score has contributions ' + inv.psi_id);
+  else if (inv.score_status === 'not_scorable' && Object.values(c).some(v => v !== null)) ok(false, 'not-scorable has contributions ' + inv.psi_id);
 }
 ok(true, 'component contributions sum to score');
 const nullInv = invs[invs.length - 1];

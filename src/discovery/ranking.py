@@ -4,10 +4,11 @@ ASSUMPTION (planner's, not validated by NASA or the team): every constant in thi
 assumption chosen for prioritisation only. The score is not a safety certification. There is NO gravity component:
 no partial-gravity (Moon/Mars) data exists; `has_flight` only says that micro-g flight data exists.
 
-Output of `rank_investigations()` (one row per investigation, sorted: >=MIN_KNOWN components first, then score desc, not-scorable last):
-  psi_id, doi, score (0-100 or None), score_status ('scored' | 'not_scorable'),
+Output of `rank_investigations()` (one row per investigation, sorted: scored by score desc, then low_confidence, then not_scorable last):
+  psi_id, doi, score (0-100, None unless scored), score_status ('scored' | 'low_confidence' | 'not_scorable'),
   components in [0,1] or None: o2_overlap, pressure_overlap, low_flow_overlap, has_flight, has_solid, data_volume,
   n_components_known, missing_components (list of keys), rationale (one English sentence from a template).
+Fewer than MIN_KNOWN known components: score = None, status 'low_confidence' (known components are kept).
 Missing component = None (never 0); score = 100 * sum(w*c) / sum(w) over the known components only.
 Inputs come only from `envelope_from_tables`, meta/inv_envelope_text.parquet (accepted facts) and meta/investigations.parquet.
 """
@@ -25,7 +26,7 @@ WEIGHTS = {"o2_overlap": 0.25, "pressure_overlap": 0.20, "low_flow_overlap": 0.1
            "has_flight": 0.15, "has_solid": 0.10, "data_volume": 0.15}
 HABITAT = {"o2_pct": (17.0, 35.0), "pressure_kpa": (56.0, 101.0), "low_flow_cm_s": (0.0, 20.0)}
 KPA_PER_ATM = 101.325
-MIN_KNOWN = 3          # investigations with fewer known components are listed after the others (score still shown)
+MIN_KNOWN = 3          # fewer known components -> no headline score (status 'low_confidence'), listed after scored ones
 # -------------------------------------------------------------------------------------------------------------------
 COMPONENTS = list(WEIGHTS)
 FLIGHT_WORDS = ("µg", "microgravity")
@@ -84,6 +85,12 @@ def _components(psi: str, env: pd.DataFrame, text: pd.DataFrame) -> dict:
 
 
 def _rationale(r: dict) -> str:
+    if r["score_status"] == "low_confidence":
+        known = [lbl for key, lbl in [("o2_overlap", "O2 overlap"), ("pressure_overlap", "pressure overlap"),
+                 ("low_flow_overlap", "low-flow overlap"), ("has_flight", "micro-g flight flag"),
+                 ("has_solid", "solid-material flag"), ("data_volume", "data volume")] if r[key] is not None]
+        return (f"Low confidence: only {r['n_components_known']} of {len(COMPONENTS)} components known "
+                f"({', '.join(known)}); no headline score.")
     if r["score"] is None:
         return "Not scorable: no habitat-relevant condition is known for this investigation."
     parts = []
@@ -111,14 +118,17 @@ def rank_investigations(con=None, env=None, text=None, inv=None) -> pd.DataFrame
         if c["data_volume"] is not None:
             c["data_volume"] = c["data_volume"] / vmax
         known = {k: v for k, v in c.items() if v is not None}
-        score = 100 * sum(WEIGHTS[k] * v for k, v in known.items()) / sum(WEIGHTS[k] for k in known) if known else None
+        status = "not_scorable" if not known else "scored" if len(known) >= MIN_KNOWN else "low_confidence"
+        score = 100 * sum(WEIGHTS[k] * v for k, v in known.items()) / sum(WEIGHTS[k] for k in known) if status == "scored" else None
         r = dict(psi_id=psi, doi=doi if isinstance(doi, str) and doi else None, score=score,
-                 score_status="scored" if known else "not_scorable", **c, n_components_known=len(known),
+                 score_status=status, **c, n_components_known=len(known),
                  missing_components=[k for k in COMPONENTS if k not in known])
         r["rationale"] = _rationale(r)
         rows.append(r)
     out = pd.DataFrame(rows).astype({k: "object" for k in ["score", *COMPONENTS]})
-    out["_s"] = out["score"].map(lambda s: -1.0 if s is None else s)
-    out["_t"] = (out["n_components_known"] >= MIN_KNOWN).astype(int)
-    out = out.sort_values(["_t", "_s", "psi_id"], ascending=[False, False, True], kind="stable").drop(columns=["_s", "_t"])
+    tier = {"scored": 0, "low_confidence": 1, "not_scorable": 2}
+    out["_t"] = out["score_status"].map(tier)
+    out["_s"] = out["score"].map(lambda s: 0.0 if s is None else -s)
+    out["_k"] = -out["n_components_known"]
+    out = out.sort_values(["_t", "_s", "_k", "psi_id"], kind="stable").drop(columns=["_s", "_t", "_k"])
     return out.reset_index(drop=True)

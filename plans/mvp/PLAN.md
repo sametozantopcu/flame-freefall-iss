@@ -6,7 +6,7 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 ## Durum
 
 - İlerleme: 9/9 (S1–S9 tamam)
-- Son güncelleme: 2026-11-14 (S9 tamam: doküman temizliği, e2e_check.sh)
+- Son güncelleme: 2026-11-14 (S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
 - Sıradaki adım: yok (plan bitti)
 - Açık sorunlar: EVREN LLM ucu yanıt vermiyor (ReadTimeout) → fallback çalışıyor; push kimlik bilgisi bekliyor; tarayıcıda görsel doğrulama yapılmadı; bkz. "Açık noktalar".
 
@@ -45,6 +45,7 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 - [x] **S3 · M1 sıralama skoru**
   ✔ 2026-11-14 · $PY -m pytest tests/discovery/test_ranking.py -q · 9 passed (tests/discovery toplam 151 passed)
+  ✔ 2026-11-14 · düzeltme: low_confidence durumu · hızlı set 623 passed; e2e_check.sh E2E OK (16 scored / 6 low_confidence / 2 not_scorable)
   - Amaç: 24 investigation için basit, açıklanabilir "habitat relevance" skoru (bileşenleriyle).
   - Dokunulacak dosyalar: `src/discovery/ranking.py` (yeni), `tests/discovery/test_ranking.py` (yeni).
   - Girdi: `src/discovery/envelope.py` çıktısı (`envelope_from_tables`) ve `meta/inv_envelope_text.parquet` (önce sütun adlarını `$PY` ile doğrula; `investigations.parquet` DOI için).

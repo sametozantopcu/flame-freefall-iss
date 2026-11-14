@@ -26,7 +26,8 @@
     var U = FF.ui.components, rows = '';
     invs.forEach(function (e) {
       var scored = isNum(e.score);
-      rows += U.rowButton(String(e.rank).padStart(2, '0') + '  ' + e.name, scored ? num(e.score, 1) : t('explore.not_scorable_short'),
+      var label = scored ? num(e.score, 1) : e.score_status === 'low_confidence' ? t('explore.low_conf_short') : t('explore.not_scorable_short');
+      rows += U.rowButton(String(e.rank).padStart(2, '0') + '  ' + e.name, label,
         { selected: e.psi_id === state.psi, dataKey: 'psi', dataValue: e.psi_id, bar: scored ? e.score / 100 : undefined });
     });
     return U.row(t('explore.count', { n: invs.length }), t('explore.score')) + U.rule() + rows;
@@ -41,12 +42,20 @@
       h += U.row(t('explore.score_label'), num(e.score, 1) + ' / 100', { valueInk: true })
         + U.row(t('explore.known', { k: e.n_components_known, n: Object.keys(contrib).length }), '', { dim: true })
         + U.text(e.rationale, { dim: true });
-      if (e.n_components_known < m.score_assumptions.min_known) h += U.text(t('explore.low_conf', { min: m.score_assumptions.min_known }), { dim: true });
       h += U.rule();
       Object.keys(contrib).forEach(function (k) {
         var c = e.components[k];
         h += U.row(t('explore.comp.' + k), contrib[k] === null ? t('explore.no_data')
           : '+' + num(contrib[k], 1) + ' pts · ' + Math.round(c * 100) + '%', { dim: true });
+      });
+    } else if (e.score_status === 'low_confidence') {
+      var keys = Object.keys(m.score_assumptions.weights);
+      h += U.row(t('explore.score_label'), t('explore.low_conf_label', { k: e.n_components_known, n: keys.length }), { valueInk: true })
+        + U.text(t('explore.low_conf_note', { min: m.score_assumptions.min_known }), { dim: true })
+        + U.text(e.rationale, { dim: true }) + U.rule() + U.row(t('explore.known_list'), '', { dim: true });
+      keys.forEach(function (k) {
+        var c = e.components[k];
+        h += U.row(t('explore.comp.' + k), isNum(c) ? Math.round(c * 100) + '%' : t('explore.no_data'), { dim: true });
       });
     } else {
       h += U.row(t('explore.score_label'), t('explore.not_scorable'), { valueInk: true })
