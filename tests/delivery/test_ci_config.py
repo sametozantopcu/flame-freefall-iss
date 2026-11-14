@@ -67,3 +67,14 @@ def test_marked_tests_are_excluded_and_markers_registered(wf):
 def test_no_secrets_in_ci():
     text = WF.read_text()
     assert not re.search(r"secrets\.|API_KEY|LLM_", text), "CI must not need secrets (LLM is mocked in tests)"
+
+
+def test_first_green_run_is_recorded():
+    """The acceptance of 06/A1 includes a real green run, recorded with its link, commit and test summary."""
+    ev = REPO / "docs" / "evidence" / "ci_first_green.md"
+    assert ev.is_file()
+    text = ev.read_text()
+    assert "**Sonuç:** success" in text
+    assert re.search(r"https://github\.com/[\w.-]+/[\w.-]+/actions/runs/\d+", text)
+    assert re.search(r"`[0-9a-f]{40}`", text)
+    assert re.search(r"\d+ passed, \d+ skipped", text) and " failed" not in text

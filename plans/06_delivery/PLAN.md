@@ -4,9 +4,9 @@ Mimari: [Architecture.md §5–§7](../../Architecture.md) · Kod: `.github/work
 
 ## Durum
 
-- **İlerleme:** 1 / 14
+- **İlerleme:** 2 / 14
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A1 (genel sıra 1, 00/F3 ile birlikte: CI erken kurulursa her push'ta testler otomatik çalışır). B, C ve D adımları en sonda (genel sıra 6).
+- **Sıradaki adım:** B1 (genel sıra 6: teslim adımları en sonda; genel sıra 1 tamamlandı, sıradaki iş 02/A1)
 - **Açık sorunlar:** —
 
 ## Hedef
@@ -17,12 +17,13 @@ Jüri ve ekip, repoyu klonlayıp tek komutla sonuçları yeniden üretebilmeli. 
 
 ## Faz A — CI (erken kur)
 
-- [ ] **A1** GitHub Actions: tek pytest işi
+- [x] **A1** GitHub Actions: tek pytest işi
   - Yap: `.github/workflows/tests.yml`. Tek iş: bütün `plans/<konu>/requirements.txt` dosyalarını kurar ve `pytest tests` çalıştırır.
     `needs_raw`, `slow` ve `live` işaretli testler CI'da çalışmaz.
   - Test: `pytest tests/delivery/test_ci_config.py`. Test, workflow'un tek işte tüm plan requirements dosyalarını kurduğunu ve işaretli testleri hariç tuttuğunu kontrol eder.
     Ayrıca ilk CI çalıştırmasının yeşil olduğu `docs/evidence/ci_first_green.md` dosyasına not edilir.
-  - Kabul: Workflow geçerli ve kapsam eksiksiz.
+  - Kabul: Workflow geçerli ve kapsam eksiksiz. Not: GitHub uyarıları (Node 20'yi hedefleyen checkout@v4 / setup-python@v5, ubuntu-latest → Ubuntu 26 geçişi) iş başarısını etkilemiyor; kanıt dosyasında kayıtlı.
+  ✔ 2026-11-14 · `python -m pytest tests/delivery/test_ci_config.py -q` · 6 passed; ilk CI çalıştırması success (run 43612731836, commit 870d1a9, `350 passed, 10 skipped, 6 deselected`), kanıt `docs/evidence/ci_first_green.md`. Push öncesi temiz venv + temiz kopya provası aynı sonucu verdi; negatif kontrol (7): eksik plan requirements'ı, -m filtresi yok, secrets kullanımı, PR tetikleyicisi yok, Python 3.12, live hariç değil, işaret kayıtsız hepsi yakalandı
 - ~~[ ] **A2** Firmware derleme işi~~ — **İPTAL (2026-11-14):** firmware yok (04'ün donanım adımları iptal); tek geliştirici kapsamı; zaman kalırsa çizgi kaldırılıp geri açılır
   - ~~Yap: PlatformIO ile `pio run -e esp32-s3` ve `pio test -e native`.~~
   - ~~Test: `pytest tests/delivery/test_ci_config.py::test_firmware_job`~~

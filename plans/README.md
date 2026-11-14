@@ -13,7 +13,7 @@ Mimari kaynağı: [`../Architecture.md`](../Architecture.md).
 | 03 | M3 — Ekipman İçgörüsü | [03_m3_equipment](03_m3_equipment/PLAN.md) | 00, 01, 02 | 0 / 14 |
 | 04 | FlameSense (donanımsız yazılım demosu) | [04_flamesense](04_flamesense/PLAN.md) | 02 (F3 predict) | 0 / 9 |
 | 05 | Uygulama (Streamlit dashboard) | [05_backend_dashboard](05_backend_dashboard/PLAN.md) | 01, 02, 03, 04 | 0 / 12 |
-| 06 | Teslim: tekrarlanabilirlik, CI, sunum | [06_delivery](06_delivery/PLAN.md) | hepsi | 1 / 14 |
+| 06 | Teslim: tekrarlanabilirlik, CI, sunum | [06_delivery](06_delivery/PLAN.md) | hepsi | 2 / 14 |
 
 > Bu tabloyu, bir konunun `PLAN.md` dosyasındaki **Durum** bölümünü güncellediğinde aynı anda güncelle.
 
