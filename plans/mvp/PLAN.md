@@ -5,11 +5,11 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 ## Durum
 
-- İlerleme: 11/16 (S1–S9, R1 ve L1 tamam; Faz 2: R2–R6 bekliyor)
+- İlerleme: 12/16 (S1–S9, R1, L1 ve R2 tamam; Faz 2: R3–R6 bekliyor)
 - Son güncelleme: 2026-11-15 (R1 tamam: PR #7 risk motoru `src/risk/` altına Feature Store üzerinden taşındı; önceki: S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
 - Güncelleme (2026-11-14): `design/` v4 (FlameSense koyu render + render_top) uygulandı; Explore taşma/çakışma düzeltildi (liste kendi içinde kaydırılır); Explore (ölçülmüş noktalar, Feature Store) ve Scenario (FLEX tepki eğrisi) grafikleri gerçek veriyle geri geldi.
-- Sıradaki adım: Faz 2 — R2 → R3 → R4, R5 ve R6 sonda
-- Açık sorunlar (R1): `Anchors.from_feature_store` yayılma (PSI-39) katsayısını gömülü değerle aynı üretemiyor — Feature Store `cfi` tablosu deney tablosunun 87 satırından 79'unu içerir; k_hot'lu satır 66 (gömülü n=74), üs 0.319 (gömülü 0.454, fark 0.135 > orijinal ±0.10 tolerans). Fark `tests/risk/test_engine.py::test_spread_embedded_vs_refit_difference_is_reported` ile ölçülüp raporlanır; karar bekliyor. Diğerleri (yanma süresi n=175, tutuşma n=333, PMMA n=98/93) gömülü değerlerle aynı.
+- Sıradaki adım: Faz 2 — R3 → R4, R5 ve R6 sonda
+- Açık sorunlar (R1): `Anchors.from_feature_store` yayılma (PSI-39) katsayısını gömülü değerle aynı üretemiyor — Feature Store `cfi` tablosu deney tablosunun 87 satırından 79'unu içerir; k_hot'lu satır 66 (gömülü n=74), üs 0.319 (gömülü 0.454, fark 0.135 > orijinal ±0.10 tolerans). Fark `tests/risk/test_engine.py::test_spread_embedded_vs_refit_difference_is_reported` ile ölçülüp raporlanır; karar (2026-11-15, orkestratör): indekste gömülü 0.454 değişmeden kullanılır; provenance kaydı ikisini de taşır. Diğerleri (yanma süresi n=175, tutuşma n=333, PMMA n=98/93) gömülü değerlerle aynı.
 - Açık sorunlar: EVREN LLM ucu yanıt vermiyor (ReadTimeout) → fallback çalışıyor; push kimlik bilgisi bekliyor; tarayıcıda görsel doğrulama yapılmadı; bkz. "Açık noktalar".
 
 ## Kritik yol ve paralellik
@@ -143,7 +143,8 @@ Onaylı plan: LLM soru-cevabını sağlamlaştır ve kapatılmış PR #7'deki (y
   - Kabul testi: `$PY -m pytest tests/risk -q` (skip yok) ve `$PY -m pytest tests/data_layer/test_no_raw_access.py -q`.
   - Bağımlılık: yok.
 
-- [ ] **R2 · Dayanak (provenance) katmanı**
+- [x] **R2 · Dayanak (provenance) katmanı**
+  ✔ 2026-11-15 · `$PY -m pytest tests/risk -q` · 76 passed, 0 skipped (13 yeni provenance testi); yayılma kaydı embedded (0.454, n=74, R²=0.044) + feature_store_refit (0.319, n=66, R²=0.030), refit_differs=true
   - Amaç: Her bileşen için makinece okunur etiket `data`/`literature`/`assumption`, kaynak PSI kimliği + DOI (Metadata katmanı), n, R². Bilinenler: tutuşma olasılığı (veri, n=333), yanma süresi (veri, n=175, R²=0.40), yayılma (veri, n=74 gömülü / 66 Feature Store, R²≈0.04), tutuşma gecikmesi (literatür varsayımı), malzeme eşikleri (yalnız PMMA veri), ağırlıklar ve 35/65 eşikleri (varsayım, kalibre değil). Motor tutarsızlıkları için ek uyarı anahtarları (indeks formülüne dokunmadan): `above_threshold_low_index`, `clipped_below_reference`. `src/` metin üretmez: yalnız anahtar + sayı.
   - Dosyalar: `src/risk/provenance.py`, `tests/risk/test_provenance.py`.
   - Kabul testi: `$PY -m pytest tests/risk/test_provenance.py -q`.
