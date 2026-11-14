@@ -3,7 +3,7 @@
 ACME CFI-G (PSI-159) normal ve ters etilen alevleri: tutuşma, yanma süresi ve sönme biçimi.
 
 - **Veri seti:** `gas_flame` · **Satır:** 333 · **İçerik hash'i:** `sha256:ae4d3c5eab6aa6a2e4a85f3d222d347b9834f73f273dac070679e2d705acb84a`
-- **Üretme komutu:** `python -m src.prediction.datasets build` (çıktı `data/modeling/gas_flame.parquet`)
+- **Üretme komutu:** `python -m src.prediction.datasets build` (çıktı `data/modeling/gas_flame.parquet` ve `.csv`, aynı içerik)
 - **CV grubu:** flame_type × day
 
 ## Kaynaklar

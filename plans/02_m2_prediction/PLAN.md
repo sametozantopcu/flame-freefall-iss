@@ -4,9 +4,9 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
 
 ## Durum
 
-- **İlerleme:** 3 / 26
+- **İlerleme:** 4 / 26
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A4 (genel sıra 2: veri setleri; modeller B–H genel sıra 4)
+- **Sıradaki adım:** B1 (genel sıra 4: modeller; genel sıra 2 — veri setleri A1–A4 — tamamlandı, sıradaki iş genel sıra 3: 01, 03 ve 05'in yeni sayfaları)
 - **Açık sorunlar:**
   - Smoke ground eşlemesi doğrulanmadı. Bu yüzden smoke modeli yalnızca flight verisiyle kurulur (A1).
   - FLEX'te Extinction/Disruption ile biten testlerin yanma süresi kesilmiş; Completion testleriyle aynı şekilde modellenemez (D3).
@@ -51,10 +51,11 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
   - Test: `pytest tests/prediction/test_cards.py` (bağımsız analiz ajanı yazar, uygulamayı görmeden)
   - Kabul: JSON şeması doğrulanıyor; her sütunun bir birimi var (bilinmiyorsa `unit_unknown`); hash dosyayla eşleşiyor. Not: kartlar veriden üretilir (`src/prediction/cards.py`, `python -m src.prediction.cards write`) ve `docs/datasets/` altında commit edilir; veri setleri commit edilmez. İçerik hash'i (sütunlar + dtype + `hash_pandas_object`) commit'li kartın yeniden üretilen veriyle tutarlılığını sağlar (sapma koruması). Atıf: smoke kartı PSI-102'yi 'çıkarım' bağıyla da listeler. Birimi bilinmeyen tek sayısal sütun `hot_ignition` (0/1 hedef): EDA kataloğuyla birim uyumu (00/C3) bozulmasın diye `unit_unknown` bırakıldı.
   ✔ 2026-11-14 · `python -m pytest tests/prediction/test_cards.py -q` · 48 passed (bağımsız ajan uygulamayı görmeden yazdı, değerleri bağımsız hesapladı; kendi sayım hatasını veriye bakarak düzeltti, uygulamada hata bulmadı); tüm set 434 passed, 0 skipped. Negatif kontrol (8, koda uygulandı, baz çizgisi yeşil): dtype'sız hash, çıkarım bağının silinmesi, tüm varsayımların eklenmesi, boş birim, group rolünün feature olması, şemanın fazla anahtara izin vermesi, sızıntıdan diğer hedeflerin çıkması, eksik sayısının 0 yazılması hepsi yakalandı
-- [ ] **A4** CSV ve Parquet indirme dosyaları
+- [x] **A4** CSV ve Parquet indirme dosyaları
   - Yap: Her set için aynı içerikte CSV ve Parquet dosyası üret.
-  - Test: `pytest tests/prediction/test_datasets.py::test_formats`
-  - Kabul: CSV ve Parquet içerikleri eşit (dtype farkları tolere edilir).
+  - Test: `pytest tests/prediction/test_formats.py` (bağımsız analiz ajanı yazar, uygulamayı görmeden)
+  - Kabul: CSV ve Parquet içerikleri eşit (dtype farkları tolere edilir). Not: `build_all` her set için `.parquet` + `.csv` yazar (CSV: UTF-8, indekssiz, eksik = boş hücre, bool = True/False, LF). Float'lar CSV'den bit düzeyinde birebir geri geliyor (tolerans gerekmedi); fark yalnızca dtype (nullable boolean → object).
+  ✔ 2026-11-14 · `python -m pytest tests/prediction/test_formats.py -q` · 39 passed (bağımsız ajan yazdı; ilk çalıştırmada CLI'daki gerçek bir hatayı yakaladı: komut .csv dosyalarını parquet diye okuyup çöküyordu, düzeltildi); tüm set 473 passed, 0 skipped. Negatif kontrol (6, koda uygulandı, baz çizgisi yeşil): indeks sütunu, NA→0, float hassasiyet kaybı, bool→0/1, CLI hatasının geri gelmesi, CRLF hepsi yakalandı
 
 ## Faz B — Ortak ön işleme (`preprocess.py`)
 

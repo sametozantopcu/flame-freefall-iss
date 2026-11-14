@@ -213,7 +213,7 @@ def build_card(name: str, con=None) -> dict:
 def render_markdown(card: dict) -> str:
     L = [f"# {card['title']}", "", card["description"], "",
          f"- **Veri seti:** `{card['name']}` · **Satır:** {card['n_rows']} · **İçerik hash'i:** `{card['content_sha256']}`",
-         f"- **Üretme komutu:** `{card['build_command']}` (çıktı `data/modeling/{card['name']}.parquet`)",
+         f"- **Üretme komutu:** `{card['build_command']}` (çıktı `data/modeling/{card['name']}.parquet` ve `.csv`, aynı içerik)",
          f"- **CV grubu:** {' × '.join(card['cv_group'])}", ""]
     L += ["## Kaynaklar", "", "| Tablo | Satır filtresi | Satır | psi_id |", "|---|---|---|---|"]
     L += [f"| `{s['table']}` | {('`' + s['row_filter'] + '`') if s['row_filter'] else '—'} | {s['n_rows']} | {', '.join(s['psi_ids'])} |"

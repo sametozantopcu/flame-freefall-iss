@@ -3,7 +3,7 @@
 ISS'te serbest damlacık yanma deneyleri: FLEX (PSI-69, metanol/heptan) ve CFI (PSI-39, dodekan/farnesan karışımları). Girdiler başlangıç çapı, basınç ve ortam bileşimi; hedefler yanma süresi, yanma hızı sabiti K, sönme çapı ve test sonu.
 
 - **Veri seti:** `droplet` · **Satır:** 501 · **İçerik hash'i:** `sha256:551172e91164521ea30258f6c1773e344cc21e54454dde3530dbe3fcdaa240d5`
-- **Üretme komutu:** `python -m src.prediction.datasets build` (çıktı `data/modeling/droplet.parquet`)
+- **Üretme komutu:** `python -m src.prediction.datasets build` (çıktı `data/modeling/droplet.parquet` ve `.csv`, aynı içerik)
 - **CV grubu:** fuel × diluent
 
 ## Kaynaklar

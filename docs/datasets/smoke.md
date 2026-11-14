@@ -3,7 +3,7 @@
 Isıtılan malzemelerden çıkan duman parçacıkları (yalnızca uçuş testleri): ortalama çap ve DustTrak kütle derişimi.
 
 - **Veri seti:** `smoke` · **Satır:** 134 · **İçerik hash'i:** `sha256:457ce9e4bb0bc65a0ffa29d1db156914b84fb2047bac831654f1b701b40d555c`
-- **Üretme komutu:** `python -m src.prediction.datasets build` (çıktı `data/modeling/smoke.parquet`)
+- **Üretme komutu:** `python -m src.prediction.datasets build` (çıktı `data/modeling/smoke.parquet` ve `.csv`, aynı içerik)
 - **CV grubu:** material
 
 ## Kaynaklar

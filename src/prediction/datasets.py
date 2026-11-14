@@ -1,6 +1,6 @@
 """Modeling datasets (plans/02_m2_prediction, step A1): four faithful, traceable tables for other teams and for M2.
 
-    python -m src.prediction.datasets build [out_dir]      # default data/modeling/ (git-ignored, reproducible)
+    python -m src.prediction.datasets build [out_dir]      # default data/modeling/ (git-ignored, reproducible): .parquet + .csv
 
 Rules
 - Rows of a family are unioned; every row keeps psi_id/source_file/source_row and gets `source_table`.
@@ -115,14 +115,18 @@ def build_dataset(name: str, con=None) -> pd.DataFrame:
 
 
 def build_all(out_dir: str | Path = DEFAULT_OUT) -> list[Path]:
+    """Write <name>.parquet and <name>.csv (same content; step A4) for every dataset. CSV: UTF-8, no index column,
+    missing values as empty cells, booleans as True/False."""
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     con = connect()
     paths = []
     for name in DATASETS:
-        p = out / f"{name}.parquet"
-        build_dataset(name, con).to_parquet(p, index=False)
-        paths.append(p)
+        df = build_dataset(name, con)
+        p, c = out / f"{name}.parquet", out / f"{name}.csv"
+        df.to_parquet(p, index=False)
+        df.to_csv(c, index=False, encoding="utf-8", lineterminator="\n")
+        paths += [p, c]
     return paths
 
 
@@ -130,4 +134,5 @@ if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] != "build":
         sys.exit("usage: python -m src.prediction.datasets build [out_dir]")
     for p in build_all(*sys.argv[2:3]):
-        print(f"wrote {p} ({len(pd.read_parquet(p))} rows)")
+        rows = len(pd.read_parquet(p)) if p.suffix == ".parquet" else len(pd.read_csv(p))
+        print(f"wrote {p} ({rows} rows)")

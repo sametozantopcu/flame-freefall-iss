@@ -3,7 +3,7 @@
 BASS-II (PSI-25) testlerinde yanma boyunca O2/CO2 değişimi ve son CO derişimi.
 
 - **Veri seti:** `solid_atm` · **Satır:** 129 · **İçerik hash'i:** `sha256:014e329df5c41ef8f977d48a3522c0bbfc6afd31e889170458102f341625b9a4`
-- **Üretme komutu:** `python -m src.prediction.datasets build` (çıktı `data/modeling/solid_atm.parquet`)
+- **Üretme komutu:** `python -m src.prediction.datasets build` (çıktı `data/modeling/solid_atm.parquet` ve `.csv`, aynı içerik)
 - **CV grubu:** pi
 
 ## Kaynaklar

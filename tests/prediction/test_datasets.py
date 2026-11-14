@@ -137,9 +137,10 @@ def test_errors():
 def test_build_all_roundtrip_deterministic_and_ignored(tmp_path, monkeypatch, sets):
     monkeypatch.chdir(tmp_path)
     a, b = build_all(tmp_path / "a"), build_all(tmp_path / "b")
-    assert [p.name for p in a] == [f"{n}.parquet" for n in D.DATASETS]
+    assert [p.name for p in a] == [f"{n}.{ext}" for n in D.DATASETS for ext in ("parquet", "csv")]
     for p, q in zip(a, b):
         assert p.read_bytes() == q.read_bytes()
-        pd.testing.assert_frame_equal(pd.read_parquet(p), sets[p.stem])
+        if p.suffix == ".parquet":
+            pd.testing.assert_frame_equal(pd.read_parquet(p), sets[p.stem])
     r = subprocess.run(["git", "check-ignore", "-q", str(D.DEFAULT_OUT / "droplet.parquet")], cwd=REPO)
     assert r.returncode == 0, "data/modeling/ must stay git-ignored (datasets are derived, not committed)"
