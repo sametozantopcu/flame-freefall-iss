@@ -1,0 +1,221 @@
+{
+  "name": "smoke",
+  "title": "Mikrogravite dumanı (SAME / SAME-R uçuş)",
+  "description": "Isıtılan malzemelerden çıkan duman parçacıkları (yalnızca uçuş testleri): ortalama çap ve DustTrak kütle derişimi.",
+  "n_rows": 134,
+  "content_sha256": "sha256:457ce9e4bb0bc65a0ffa29d1db156914b84fb2047bac831654f1b701b40d555c",
+  "build_command": "python -m src.prediction.datasets build",
+  "sources": [
+    {
+      "table": "smoke",
+      "row_filter": "campaign != 'ground'",
+      "n_rows": 134,
+      "psi_ids": [
+        "PSI-101"
+      ]
+    }
+  ],
+  "investigations": [
+    {
+      "psi_id": "PSI-101",
+      "acronym": "SAME-R",
+      "doi": "10.60555/2np7-jv14",
+      "doi_flag": "ok",
+      "relation": "source_file"
+    },
+    {
+      "psi_id": "PSI-102",
+      "acronym": "SAME",
+      "doi": "10.60555/gd4k-8h62",
+      "doi_flag": "ok",
+      "relation": "inferred"
+    }
+  ],
+  "columns": [
+    {
+      "name": "psi_id",
+      "role": "trace",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_file",
+      "role": "trace",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_row",
+      "role": "trace",
+      "dtype": "int64",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_table",
+      "role": "meta",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "material",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "inlet_velocity_cm_s",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "cm/s",
+      "missing": 22
+    },
+    {
+      "name": "rt_r0",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "- (resistance ratio, heater temp proxy)",
+      "missing": 0
+    },
+    {
+      "name": "aging_s",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "s",
+      "missing": 4
+    },
+    {
+      "name": "sample_temp_c",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "°C",
+      "missing": 3
+    },
+    {
+      "name": "campaign",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "gravity",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "amd_um",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "µm",
+      "missing": 3
+    },
+    {
+      "name": "dusttrak_b_mg_m3",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "mg/m³",
+      "missing": 1
+    },
+    {
+      "name": "in_subset__amd_um",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__dusttrak_b_mg_m3",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    }
+  ],
+  "targets": [
+    {
+      "name": "amd_um",
+      "task": "regression",
+      "source_tables": [
+        "smoke"
+      ],
+      "subset": {
+        "smoke": "amd_um.notna()"
+      },
+      "defined_rows": 131,
+      "leakage": [
+        "dam_um",
+        "dg_um",
+        "dusttrak_a_mg_m3",
+        "dusttrak_b_mg_m3",
+        "log_m0",
+        "m0_per_cc",
+        "m1_mm_per_cc",
+        "m3_mpass",
+        "mass_loss_mg",
+        "mpass_3_2",
+        "sigma_g"
+      ],
+      "censoring": null
+    },
+    {
+      "name": "dusttrak_b_mg_m3",
+      "task": "regression",
+      "source_tables": [
+        "smoke"
+      ],
+      "subset": {
+        "smoke": "dusttrak_b_mg_m3.notna()"
+      },
+      "defined_rows": 133,
+      "leakage": [
+        "amd_um",
+        "dam_um",
+        "dg_um",
+        "dusttrak_a_mg_m3",
+        "log_m0",
+        "m0_per_cc",
+        "m1_mm_per_cc",
+        "m3_mpass",
+        "mass_loss_mg",
+        "mpass_3_2",
+        "sigma_g"
+      ],
+      "censoring": null
+    }
+  ],
+  "cv_group": [
+    "material"
+  ],
+  "group_gaps": {},
+  "labels": [],
+  "assumptions": [
+    {
+      "key": "smoke_ground_map",
+      "text": "Ground eşlemesi DOĞRULANMADI: amd_um <- 'Best Diameter Ion B/Ptrak Count Mean Diameter', dam_um <- 'DTRak B Diameter of average mass', m0 <- 'Mo Best Diameter', m1 <- 'Ion B M1'. Analizlerde flight-only ve flight+ground AYRI raporlanır."
+    },
+    {
+      "key": "smoke_leak",
+      "text": "amd_um = M1/M0 olduğundan m0_per_cc, m1_mm_per_cc, log_m0 ve ionb_moment amd_um hedefi için SIZINTIDIR; dam_um, dg_um, sigma_g, dusttrak, mpass da aynı anda ölçülen çıktılardır."
+    },
+    {
+      "key": "smoke_source",
+      "text": "`smoke_dataset.csv` repoda YOK. Yerine PSI-101 'Combined_SAMER_Results_06_02_14' çalışma kitabından yeniden kuruldu: flight = 'Reduced_data_sheet' (SAME=1, SAME-R=2), ground = 'SAME_Ground_Test_Results'."
+    },
+    {
+      "key": "smoke_zero",
+      "text": "Duman tablosunda çap/konsantrasyon/hız = 0 değerleri fiziksel değil (ölçülmedi) -> NaN. Sayılar load_report'ta. BELİRSİZ: inlet_velocity_cm_s=0 olan 22 satırın tamamı SAME-R'da; düşük akışlı run'lar olduğu için gerçek 0 olma ihtimali var — feature olarak kullanmadan önce teyit edilmeli."
+    }
+  ],
+  "notes": [
+    "Yalnızca uçuş (SAME + SAME-R): zemin testlerinin eşlemesi doğrulanmadığı için çıkarıldı.",
+    "SAME uçuş satırları PSI-101 çalışma kitabında; PSI-102 (SAME) ile bağı kampanya adından çıkarımdır.",
+    "Malzeme her modelde feature olarak kalmalı (Simpson paradoksu: ısıtıcı sıcaklığı ile çap ilişkisi malzeme içinde ters döner)."
+  ]
+}

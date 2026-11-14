@@ -1,0 +1,34 @@
+row,psi_id,field,decision,context,corrected_field,corrected_value_text,corrected_value_min_std,corrected_value_max_std,note
+0,PSI-26,flow,düzeltildi,experiment,,,unknown,,'reaching as high as 40 cm/s': 40 bir üst sınır; alt sınır metinde yok
+1,PSI-26,fuel_or_material,doğru,experiment,,,,,
+2,PSI-26,fuel_or_material,doğru,experiment,,,,,
+3,PSI-26,fuel_or_material,doğru,experiment,,,,,
+4,PSI-26,diluent,düzeltildi,experiment,phenomenon,flame suppressant,,,"Azot burada ortam seyrelticisi değil, söndürücü ajan ('flame suppressant'); söndürme olgusu olarak tutuldu"
+5,PSI-47,fuel_or_material,silindi,experiment,,,,,Arizona Red Dust aerosol standardı; yakıt veya yanan malzeme değil (DAFT bir yanma deneyi değil)
+6,PSI-47,diluent,silindi,experiment,,,,,GN2 tozu aerosol hâline getiren taşıyıcı gaz; yanma ortamının seyrelticisi değil
+7,PSI-47,flow,silindi,experiment,,,,,A2'de reddedildi (alıntıda akış değeri yok: '15-liter Mylar bags')
+8,PSI-62,fuel_or_material,doğru,modeling,,,,,
+9,PSI-62,fuel_or_material,doğru,modeling,,,,,
+10,PSI-62,gravity,doğru,modeling,,,,,
+11,PSI-62,gravity,doğru,modeling,,,,,
+12,PSI-68,pressure,doğru,experiment,,,,,
+13,PSI-68,o2,doğru,experiment,,,,,
+14,PSI-68,diluent,silindi,experiment,,,,,Seyreltici gazın adı metinde yok ('the diluent gas'); bilgi taşımıyor
+15,PSI-68,gravity,doğru,experiment,,,,,
+16,PSI-106,fuel_or_material,doğru,experiment,,,,,
+17,PSI-106,fuel_or_material,doğru,experiment,,,,,
+18,PSI-106,diluent,düzeltildi,experiment,fuel_or_material,nitrogen-diluted mixtures,,,"Azot yakıtı seyreltiyor (yakıt karışımı), ortam seyrelticisi değil"
+19,PSI-106,gravity,doğru,experiment,,,,,
+20,PSI-115,fuel_or_material,doğru,modeling,,,,,
+21,PSI-115,gravity,doğru,modeling,,,,,
+22,PSI-115,gravity,doğru,modeling,,,,,
+23,PSI-115,flow,silindi,modeling,,,,,A2'de reddedildi (akış hızı sayı olarak verilmemiş)
+24,PSI-117,fuel_or_material,doğru,modeling,,,,,
+25,PSI-117,gravity,doğru,modeling,,,,,
+26,PSI-117,diluent,silindi,modeling,,,,,Ozon bir katkı maddesi ('ozone-assisted'); ortam seyrelticisi değil
+27,PSI-142,pressure,düzeltildi,modeling,,,unknown,,"'up to 20 atm': 20 üst sınır, alt sınır metinde yok; değer sayısal modelleme koşulu (ISS deneyi değil)"
+28,PSI-142,fuel_or_material,doğru,modeling,,,,,
+29,PSI-142,fuel_or_material,doğru,modeling,,,,,
+30,PSI-142,fuel_or_material,silindi,modeling,,,,,Satır 29'un ('dimethyl ether (DME)') tekrarı
+31,PSI-142,phenomenon,doğru,modeling,,,,,
+32,PSI-142,phenomenon,doğru,modeling,,,,,

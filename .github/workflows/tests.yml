@@ -1,0 +1,29 @@
+# CI (plans/06_delivery A1): one pytest job on every push and pull request.
+# raw/ and csv/ are not in the repository, so tests marked needs_raw are deselected (others that need them skip
+# with a reason). No secrets are used: LLM calls are mocked in tests, live calls are marked `live` and excluded.
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: plans/*/requirements.txt
+
+      - name: Install every plan's requirements (single resolve)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install $(printf -- '-r %s ' plans/*/requirements.txt)
+
+      - name: Run tests
+        run: python -m pytest tests -q -rs -m "not needs_raw and not slow and not live"

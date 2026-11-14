@@ -31,5 +31,7 @@ mkdir -p analysis/logs
 for s in analysis/scripts/0*.py; do python "$s" > "analysis/logs/$(basename "$s" .py | cut -c1-2).log" 2>&1; done
 ```
 
+Veri katmanını doğrulamak/yeniden kurmak için (repo kökünden): `python -m src.data_layer.build_all --skip-raw` (ayrıntı: `src/data_layer/README.md`).
+
 `analysis/data/*.parquet` repoda olduğundan, sadece modelleme yapacaksanız indirme adımına gerek yok.
 Kurallar: model eğitimi bu klasörde yapılmaz; `raw/` ve `csv/` asla değiştirilmez.

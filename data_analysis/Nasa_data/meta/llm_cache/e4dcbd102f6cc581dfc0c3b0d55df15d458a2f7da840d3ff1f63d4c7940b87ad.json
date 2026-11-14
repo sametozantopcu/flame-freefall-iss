@@ -1,0 +1,52 @@
+{
+ "model": "deepseek-v4.1-flash",
+ "answer": {
+  "facts": [
+   {
+    "field": "flow",
+    "value_min": 40,
+    "value_max": null,
+    "unit": "cm/s",
+    "value_text": null,
+    "section": "approach",
+    "source_span": "with airflow speeds reaching as high as 40 cm/s"
+   },
+   {
+    "field": "fuel_or_material",
+    "value_text": "75% cotton and 25% fiberglass",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "section": "approach",
+    "source_span": "75% cotton and 25% fiberglass (by mass)"
+   },
+   {
+    "field": "fuel_or_material",
+    "value_text": "Nomex fabric",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "section": "approach",
+    "source_span": "Nomex fabric"
+   },
+   {
+    "field": "fuel_or_material",
+    "value_text": "Ultem",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "section": "approach",
+    "source_span": "Ultem"
+   },
+   {
+    "field": "diluent",
+    "value_text": "nitrogen",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "section": "research_impacts",
+    "source_span": "Using nitrogen as a flame suppressant in microgravity"
+   }
+  ]
+ }
+}

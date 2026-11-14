@@ -7,7 +7,7 @@ FlameSense cihazı ayrı bir konudur: [04_flamesense](../04_flamesense/PLAN.md).
 
 - **İlerleme:** 0 / 14
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A1 (A1–A4 hemen başlayabilir; yalnızca EDA çıktılarına ihtiyaç duyar)
+- **Sıradaki adım:** A1 (genel sıra 3: 01 ve 05/E1, E3 ile birlikte; A1–A4 yalnızca EDA çıktılarına ihtiyaç duyar)
 - **Açık sorunlar:**
   - Architecture §4.1'deki duman medyanı "0.12–0.28 µm" yazıyor. Flight verisinde değer 0.12–0.30 µm.
     A2 sayıları otomatik çektiği için bu fark kartlarda kendiliğinden düzelecek. Architecture metnini düzeltmek ekibin kararı.
@@ -87,7 +87,7 @@ Kartlardaki sayılar elle yazılmaz; analiz çıktılarından otomatik çekilir.
   - Yap: `insight/cards.json` (dashboard için) ve `insight/CARDS.md` (okunabilir özet) dosyalarını üret.
   - Test: `pytest tests/insight/test_export.py`
   - Kabul: JSON şemaya uyuyor; markdown'daki kart sayısı JSON'daki ile eşit.
-- [ ] **D2** `get_cards(habitat=None, equipment=None)` fonksiyonu (backend 05/C3 için)
+- [ ] **D2** `get_cards(habitat=None, equipment=None)` fonksiyonu (uygulama sayfası 05/E3 için)
   - Test: `pytest tests/insight/test_export.py::test_api`
   - Kabul: Filtreler çalışıyor; sonuç deterministik.
 - [ ] **D3** Plan ve durum güncellemesi

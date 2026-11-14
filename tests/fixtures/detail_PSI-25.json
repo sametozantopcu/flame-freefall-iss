@@ -1,0 +1,355 @@
+{
+ "accession": "PSI-25",
+ "acknowledgments": "",
+ "added": [
+  {
+   "bucket": "",
+   "date_created": {
+    "$date": 1763999802269
+   },
+   "date_modified": {
+    "$date": 1763999802269
+   },
+   "file_name": "PSI-25_Raw Data_BASS_GMT50_SAMPLE_147_TEST_B1.mp4",
+   "file_size": 5803980.0,
+   "organization": "shared",
+   "psi_legacy": true,
+   "psi_legacy_s3_path": "legacy/88719/224/BASS_GMT50_SAMPLE_147_TEST_B1.mp4",
+   "remote_path": "/Home/psi-data/PSI-25/Raw Data/PSI-25_Raw Data_BASS_GMT50_SAMPLE_147_TEST_B1.mp4",
+   "remote_url": "https://psi.ndc.nasa.gov/mpglobal/api/athena/file/4435701/?inline=1&log=1",
+   "resource_id": {
+    "$oid": "65e739c18e263688e9f9200d"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-25/Raw Data/PSI-25_Raw Data_BASS_GMT50_SAMPLE_147_TEST_B1.mp4",
+   "s3_version_id": null,
+   "study_id": {
+    "$oid": "6924805f7f6aa6a8302106fe"
+   },
+   "subcategory": "Reduced Gravity/ Bhattacharjee/B1",
+   "version": 2,
+   "visible": true
+  },
+  {
+   "bucket": "",
+   "date_created": {
+    "$date": 1763999832595
+   },
+   "date_modified": {
+    "$date": 1763999832595
+   },
+   "file_name": "PSI-25_Reference Data_Fan calibration data.xlsx",
+   "file_size": 23973.0,
+   "organization": "shared",
+   "psi_legacy": true,
+   "psi_legacy_s3_path": "legacy/88712/11524/Fan calibration data.xlsx",
+   "remote_path": "/Home/psi-data/PSI-25/Reference Data/PSI-25_Reference Data_Fan calibration data.xlsx",
+   "remote_url": "https://psi.ndc.nasa.gov/mpglobal/api/athena/file/5787819/?inline=1&log=1",
+   "resource_id": {
+    "$oid": "66d496337d829fb74370bab8"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-25/Reference Data/PSI-25_Reference Data_Fan calibration data.xlsx",
+   "s3_version_id": null,
+   "study_id": {
+    "$oid": "6924805f7f6aa6a8302106fe"
+   },
+   "subcategory": "",
+   "version": 2,
+   "visible": true
+  },
+  {
+   "bucket": "",
+   "date_created": {
+    "$date": 1763999824630
+   },
+   "date_modified": {
+    "$date": 1763999824630
+   },
+   "file_name": "PSI-25_Raw Data_GMT2014_050_BASS_S147M_TPB1_ProofSheet.pdf",
+   "file_size": 264402.0,
+   "organization": "shared",
+   "psi_legacy": true,
+   "psi_legacy_s3_path": "legacy/88719/11526/GMT2014_050_BASS_S147M_TPB1_ProofSheet.pdf",
+   "remote_path": "/Home/psi-data/PSI-25/Raw Data/PSI-25_Raw Data_GMT2014_050_BASS_S147M_TPB1_ProofSheet.pdf",
+   "remote_url": "https://psi.ndc.nasa.gov/mpglobal/api/athena/file/5752957/?inline=1&log=1",
+   "resource_id": {
+    "$oid": "65e739c18e263688e9f9200d"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-25/Raw Data/PSI-25_Raw Data_GMT2014_050_BASS_S147M_TPB1_ProofSheet.pdf",
+   "s3_version_id": null,
+   "study_id": {
+    "$oid": "6924805f7f6aa6a8302106fe"
+   },
+   "subcategory": "Reduced Gravity/ Bhattacharjee/B1",
+   "version": 2,
+   "visible": true
+  },
+  {
+   "bucket": "psi-repo-prod",
+   "date_created": {
+    "$date": 1763999802161
+   },
+   "date_modified": {
+    "$date": 1763999802161
+   },
+   "file_name": "PSI-25_metadata_PSI_metadata_PSI-101_BASS-II.zip",
+   "file_size": 13439,
+   "organization": "OSD",
+   "remote_path": "/Home/psi-data/PSI-25/metadata/PSI-25_metadata_PSI_metadata_PSI-101_BASS-II.zip",
+   "remote_url": "/datamanager/file/Home/psi-data/PSI-25/metadata/PSI-25_metadata_PSI_metadata_PSI-101_BASS-II.zip",
+   "resource_id": {
+    "$oid": "65e0a4d4931988043eebcd6e"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-25/metadata/PSI-25_metadata_PSI_metadata_PSI-101_BASS-II.zip",
+   "s3_version_id": "sHobLP7CKqTlAd5Uj7d29twUi9TIF6xB",
+   "study_id": {
+    "$oid": "6924805f7f6aa6a8302106fe"
+   },
+   "version": 4,
+   "visible": true
+  },
+  {
+   "bucket": "psi-repo-prod",
+   "date_created": {
+    "$date": 1763999839426
+   },
+   "date_modified": {
+    "$date": 1763999839426
+   },
+   "file_name": "PSI-25_Representative Image(s)_BASS-II_flame testing.jpg",
+   "file_size": 37525,
+   "organization": "shared",
+   "remote_path": "/Home/psi-data/PSI-25/Representative Image(s)/PSI-25_Representative Image(s)_BASS-II_flame testing.jpg",
+   "remote_url": "/datamanager/file/Home/psi-data/PSI-25/Representative Image(s)/PSI-25_Representative Image(s)_BASS-II_flame testing.jpg",
+   "resource_id": {
+    "$oid": "66ec8407c6ad4bdc12fc903b"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-25/Representative Image(s)/PSI-25_Representative Image(s)_BASS-II_flame testing.jpg",
+   "s3_version_id": "VoykHTvGMEXuEGNhOkQkPyOrlFE0YGil",
+   "study_id": {
+    "$oid": "6924805f7f6aa6a8302106fe"
+   },
+   "subcategory": "",
+   "version": 1,
+   "visible": true
+  }
+ ],
+ "approach": "To summarize, BASS-II's approach, microgravity combustion tests were performed aboard the International Space Station. Active crew support for real-time “lab partner” operations. The wind tunnel was installed in the Microgravity Science Glovebox which supplied power, imaging, and a level of containment. Fuel samples were mounted inside a small wind tunnel which could impose airflow speeds up to 40 cm/s. Main variables are airflow speed and oxygen concentration (oxygen varied below 21% by adding nitrogen). Flame appearance, flame growth, and spread rates were determined in both the opposed and concurrent flow.",
+ "assays": [],
+ "contacts": [],
+ "description": "",
+ "dirty": false,
+ "doi": "10.60555/4qc4-de67",
+ "experimentHardware": "Microgravity Science Glovebox (MSG)",
+ "experimentHardwareLink": "https://www1.grc.nasa.gov/space/iss-research/msg/",
+ "experimentalTable": [
+  {
+   "_id": {
+    "$oid": "67a3a17b09ed061032c19775"
+   },
+   "date_created": {
+    "$date": 1738776955343
+   },
+   "date_modified": {
+    "$date": 1738776955343
+   },
+   "file_name": "PSI-25_Experimental table_BASS-II.csv",
+   "file_size": 16590,
+   "remote_path": "/Home/psi-data/PSI-25/Experimental table/PSI-25_Experimental table_BASS-II.csv",
+   "remote_url": "/datamanager/file/Home/psi-data/PSI-25/Experimental table/PSI-25_Experimental table_BASS-II.csv",
+   "resource_id": {
+    "$oid": "66cf53d46f1142c964b2e0a8"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-25/Experimental table/PSI-25_Experimental table_BASS-II.csv",
+   "s3_version_id": "..Z_cQ7ymWFmdISmAvT7c5Gcs7ZHo4N_",
+   "study_id": {
+    "$oid": "6924805f7f6aa6a8302106fe"
+   },
+   "subcategory": "",
+   "version": 1,
+   "visible": true
+  }
+ ],
+ "experiments": [],
+ "factors": [],
+ "filesDisabled": null,
+ "flightProgram": "International Space Station (ISS)",
+ "funding": "",
+ "hypothesis": "BASS–II tests the hypothesis that materials in microgravity, with adequate ventilation, burn as well if not better than the same material in normal gravity with other conditions being identical (pressure, O2\nconcentration, temperature, etc.). NASA tests and controls materials from a flammability perspective using an upward burning test in normal gravity, which is considered to be the worst-case geometry for\nflammability of the material on Earth. However, it may not be conservative for flammability in space. Testing at constant O2 mole fractions permits studying flame spread and extinction at low and high flow speed. We are interested in finding the fundamental limit for a given material.",
+ "identifiers": [],
+ "images": [
+  {
+   "_id": {
+    "$oid": "6924805f7f6aa6a83021067f"
+   },
+   "date_created": {
+    "$date": 1763999839426
+   },
+   "date_modified": {
+    "$date": 1763999839426
+   },
+   "file_name": "PSI-25_Representative Image(s)_BASS-II_flame testing.jpg",
+   "file_size": 37525,
+   "remote_path": "/Home/psi-data/PSI-25/Representative Image(s)/PSI-25_Representative Image(s)_BASS-II_flame testing.jpg",
+   "remote_url": "/datamanager/file/Home/psi-data/PSI-25/Representative Image(s)/PSI-25_Representative Image(s)_BASS-II_flame testing.jpg",
+   "resource_id": {
+    "$oid": "66ec8407c6ad4bdc12fc903b"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-25/Representative Image(s)/PSI-25_Representative Image(s)_BASS-II_flame testing.jpg",
+   "s3_version_id": "VoykHTvGMEXuEGNhOkQkPyOrlFE0YGil",
+   "study_id": {
+    "$oid": "6924805f7f6aa6a8302106fe"
+   },
+   "subcategory": "",
+   "version": 1,
+   "visible": true
+  }
+ ],
+ "investigationAcronym": "BASS-II",
+ "investigationEndDate": "12-31-2022",
+ "investigationStartDate": "01-01-2010",
+ "licenseIdentifier": "CC0-1.0",
+ "licenseLink": "https://spdx.org/licenses/CC0-1.0.html",
+ "licenseName": "Creative Commons Zero v1.0 Universal",
+ "managingNasaCenter": "Glenn Research Center (GRC)",
+ "missionEnd": "",
+ "missionLink": "",
+ "missionName": "",
+ "missionStart": "",
+ "modified": [],
+ "modifiedDate": "24-Nov-2025",
+ "objective": "BASS-II results contribute to the combustion computational models used in the design of fire detection and suppression systems in microgravity and on Earth.\nObjectives Include:\n  1) Study the ignition, flame growth, flame spread, and extinction limits for solid fuels burning in low-velocity forced flows in microgravity.\n  2) Begin to bridge the gap between the normal gravity NASA-STD-6001 Test #1 method, ground-based microgravity tests, and actual material flammability in microgravity.\n  3) Provide SoFIE PIs with preliminary data to refine Science Requirements.\n  4)  Practical, realistic (thicker) fuels in typical geometries will be examined, including slabs, cylinders, and spherical sections.\n\nThe primary variables include:\n     • Forced flow velocity (speed and direction)\n     • Ambient oxygen concentration (via working volume nitrogen vitiation)\n     • Sample geometry (rods, spherical section, slabs, films, and fabric sheets",
+ "organizations": [],
+ "payloads": [],
+ "projectIdentifier": "",
+ "projectLink": "",
+ "projectTitle": "",
+ "projectType": "Microgravity Investigation",
+ "proposalTitle": "",
+ "public": true,
+ "publications": [
+  {
+   "authorList": "Olson Sandra L., Ferkul Paul V.",
+   "comments": [],
+   "doi": "10.1016/j.combustflame.2017.03.001",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Microgravity flammability boundary for PMMA rods in axial stagnation flow: Experimental results and energy balance analyses"
+  },
+  {
+   "authorList": "Bhattacharjee Subrata, Paolini Christopher, Tran Wynn, Villaraza Jeanie Ray, Takahashi Shuhei",
+   "comments": [],
+   "doi": "10.1016/j.proci.2014.05.093",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Temperature and CO2 fields of a downward spreading flame over thin cellulose: A comparison of experimental and computational results"
+  },
+  {
+   "authorList": "SL Olson, PV Ferkul, S Bhattacharjee, FJ Miller, C Fernandez-Pello, S Link, JS Tien, I Wichman",
+   "comments": [],
+   "doi": "",
+   "pubMedID": "",
+   "status": {
+    "@id": "Rd2oZxVKYUnMCRj3tbHg0eGQhfrFmtiEFnMOyDHF",
+    "annotationValue": "published",
+    "comments": [],
+    "termAccession": "http://www.ebi.ac.uk/efo/EFO_0001796",
+    "termSource": "EFO"
+   },
+   "title": "Results from on-board CSA-CP and CDM Sensor Readings during the Burning and Suppression of Solids - II (BASS-II) Experiment in the Microgravity Science Glovebox (MSG)"
+  }
+ ],
+ "related_glds": "PSI-26",
+ "releaseDate": "31-Dec-2022",
+ "removed": [
+  {
+   "bucket": "",
+   "date_created": {
+    "$date": 1726714598684
+   },
+   "date_modified": {
+    "$date": 1726714598684
+   },
+   "file_name": "BASS-II data FAQ.docx",
+   "file_size": 21538.0,
+   "organization": "shared",
+   "psi_legacy": true,
+   "psi_legacy_s3_path": "legacy/88712/11524/BASS-II data FAQ.docx",
+   "remote_path": "/Home/psi-data/PSI-25/Raw Data/BASS-II data FAQ.docx",
+   "remote_url": "https://psi.ndc.nasa.gov/mpglobal/api/athena/file/6570129/?inline=1&log=1",
+   "resource_id": {
+    "$oid": "65e739c18e263688e9f9200d"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-25/Raw Data/BASS-II data FAQ.docx",
+   "s3_version_id": null,
+   "study_id": {
+    "$oid": "67a3a17b09ed061032c19776"
+   },
+   "subcategory": "Legacy/Bhattacharjee",
+   "version": 1,
+   "visible": true
+  },
+  {
+   "bucket": "",
+   "date_created": {
+    "$date": 1726714598684
+   },
+   "date_modified": {
+    "$date": 1726714598684
+   },
+   "file_name": "BASS-II data FAQ.docx",
+   "file_size": 21538.0,
+   "organization": "shared",
+   "psi_legacy": true,
+   "psi_legacy_s3_path": "legacy/88712/11524/BASS-II data FAQ.docx",
+   "remote_path": "/Home/psi-data/PSI-25/Raw Data/BASS-II data FAQ.docx",
+   "remote_url": "https://psi.ndc.nasa.gov/mpglobal/api/athena/file/6570129/?inline=1&log=1",
+   "resource_id": {
+    "$oid": "65e739c18e263688e9f9200d"
+   },
+   "restricted": false,
+   "s3_path": "psi-data/PSI-25/Raw Data/BASS-II data FAQ.docx",
+   "s3_version_id": null,
+   "study_id": {
+    "$oid": "67a3a17b09ed061032c19776"
+   },
+   "subcategory": "Legacy/Bhattacharjee",
+   "version": 1,
+   "visible": true
+  }
+ ],
+ "researchArea": "Combustion Science",
+ "researchImpacts": "A primary goal of BASS-II is improved spacecraft fire safety, improved understanding of combustion in space and how to avoid it. If you’re on a mission far from Earth, a fire can be catastrophic. BASS-II helps engineers select the safest materials and improve firefighting methods on future space missions. In outer space, fuels burn as oval balls rather than with an upward pointed cone flame as they do on Earth. This simpler combustion process enables researchers to evaluate computer models of fuel burning. These models can then be used to more accurately study flames on Earth, such as in wildfires, building fires, energy recapture from waste recycling, and other combustion problems.",
+ "restricted": false,
+ "sourceAccession": "",
+ "sourceLink": "",
+ "spaceProgram": "National Aeronautics and Space Administration (NASA)",
+ "subResearchArea": "Spacecraft Fire Safety",
+ "submissionDate": "31-Dec-2022",
+ "title": "Burning and Suppression of Solids - II",
+ "totalFileSize": 274631106141.0,
+ "version": 4,
+ "versionMessage": "",
+ "versionMessageLevel": "",
+ "versionMessageLocations": [],
+ "versionReason": "Metadata update"
+}

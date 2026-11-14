@@ -1,12 +1,6 @@
 # 04 — FlameSense host tarafı (minimum)
-# Firmware PlatformIO ile derlenir:  pip install platformio
 numpy>=1.26
 pandas>=2.2           # SAFFIRE replay verisi
-pyyaml>=6.0           # hw_config, rules, alarm_matrix
-jsonschema>=4.20      # MQTT mesaj şemaları
-paho-mqtt>=2.0
-pyserial>=3.5         # HIL replay
-platformio>=6.1
+pyyaml>=6.0           # rules, alarm_matrix
 pytest>=8
-# İsteğe bağlı (Raspberry Pi düğümü): onnxruntime>=1.17
-# Sistem bağımlılığı: mosquitto (G2 entegrasyon testi)
+# (2026-11-14: jsonschema, paho-mqtt, pyserial, platformio kaldırıldı; donanımsız yazılım demosu)

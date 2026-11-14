@@ -1,0 +1,43 @@
+{
+ "model": "deepseek-v4.1-flash",
+ "answer": {
+  "facts": [
+   {
+    "field": "pressure",
+    "value_min": 0.5,
+    "value_max": 3.0,
+    "unit": "atm",
+    "value_text": null,
+    "section": "approach",
+    "source_span": "varied in pressure between 0.5 atm to 3.0 atm"
+   },
+   {
+    "field": "o2",
+    "value_min": 0.1,
+    "value_max": 0.4,
+    "unit": "mole fraction",
+    "value_text": null,
+    "section": "approach",
+    "source_span": "O2 concentration between 0.1 to 0.4 mole fraction"
+   },
+   {
+    "field": "diluent",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "diluent gas",
+    "section": "approach",
+    "source_span": "with the diluent gas making up the balance"
+   },
+   {
+    "field": "gravity",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "microgravity",
+    "section": "hypothesis",
+    "source_span": "conducting these experiments in a microgravity environment"
+   }
+  ]
+ }
+}

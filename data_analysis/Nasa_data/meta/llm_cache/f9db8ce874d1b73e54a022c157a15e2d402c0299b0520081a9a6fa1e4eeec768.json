@@ -1,0 +1,34 @@
+{
+ "model": "deepseek-v4.1-flash",
+ "answer": {
+  "facts": [
+   {
+    "field": "fuel_or_material",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "Arizona Red Dust (ARD)",
+    "section": "approach",
+    "source_span": "Arizona Red Dust (ARD) was chosen as an aerosol standard due to its ease of dispersion."
+   },
+   {
+    "field": "diluent",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "GN2",
+    "section": "approach",
+    "source_span": "The ARD was aerosolized with GN2 to create particle samples."
+   },
+   {
+    "field": "flow",
+    "value_min": 15,
+    "value_max": 15,
+    "unit": "liter",
+    "value_text": null,
+    "section": "approach",
+    "source_span": "The aerosol was contained within 15-liter Mylar bags."
+   }
+  ]
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "model": "deepseek-v4.1-flash",
+ "answer": {
+  "facts": [
+   {
+    "field": "fuel_or_material",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "polymethyl methacrylate (PMMA)",
+    "section": "approach",
+    "source_span": "rod-shaped polymethyl methacrylate (PMMA) samples"
+   },
+   {
+    "field": "fuel_or_material",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "wax",
+    "section": "approach",
+    "source_span": "wax cylinders"
+   },
+   {
+    "field": "gravity",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "microgravity",
+    "section": "objective",
+    "source_span": "concurrent flame spread in microgravity"
+   },
+   {
+    "field": "gravity",
+    "value_min": null,
+    "value_max": null,
+    "unit": null,
+    "value_text": "normal-gravity",
+    "section": "approach",
+    "source_span": "across both microgravity and normal-gravity conditions"
+   }
+  ]
+ }
+}
