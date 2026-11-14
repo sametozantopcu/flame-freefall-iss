@@ -1,0 +1,7 @@
+# 01 — M1 Keşif & Sıralama (minimum)
+-r ../00_data_layer/requirements.txt
+pydantic>=2.5
+pyyaml>=6.0
+sentence-transformers>=2.7   # lokal embedding
+faiss-cpu>=1.8               # vektör indeksi
+anthropic>=0.40              # RAG yorumu (testlerde mock'lanır)
