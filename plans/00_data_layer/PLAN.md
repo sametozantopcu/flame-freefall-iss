@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 20 / 22
+- **İlerleme:** 21 / 22
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** F2 (veri katmanı kullanım kuralı testi). Faz B, C, D tamam; Faz E (video) tamamen iptal.
+- **Sıradaki adım:** F3 (plan ve durum tutarlılığı testi). Faz B, C, D tamam; Faz E (video) tamamen iptal.
 - **Açık sorunlar:**
   - Dosya listesi eksik (7 investigation, toplam ≈7,2 TB): PSI-20, 21, 22, 68, 69, 99, 106 için `detail.json`'da dosya listesi yok/boş ya da 1 dosya, oysa `totalFileSize` 17 GB – 2 TB. Listelenen boyut toplam boyutla tüm diğer investigation'larda birebir tutuyor, bunlarda tutmuyor. Bu investigation'lar için dosya düzeyinde bilgi bu repoda yok. Veri kapsamı değerlendirmesinde (01/C5) bilinmeli.
   - D1'in `files` tablosu yalnızca `added`/`removed` listelerini alıyor; `detail.json`'daki ayrı `experimentalTable` (22 dosya) ve `images` listeleri `files`'a girmedi. Eklemek D1/D2'nin sabit sayılarını (27.076) değiştirir; ayrı küçük bir adım olarak karar verilecek.
@@ -162,10 +162,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Test: `pytest tests/data_layer/test_build_all.py`
   - Kabul: Komut temiz bir çalışma kopyasında hatasız bitiyor (raw gerektiren adımlar `--skip-raw` ile atlanabiliyor). Not: `build_all` yalnızca orkestra eder (store/metadata/table_map'in mantığını çağırır) ve değişmezleri doğrular (satır sayıları parquet ile eşit, units = toplam sütun, table_map satır toplamı, investigation kümesi). E adımları iptal olduğu için zincirde yok. `raw/` varken commit'li `meta/`'nın üzerine yazmaz (taze export `--out/meta`'ya gider, içerik karşılaştırılır); fark = uyarı (çıkış 0), `--update-meta` ile bilinçli güncelleme. Çıktılar `Nasa_data/build/` (gitignore). Repo kökünden çalışır (`src` isim alanı paketi).
   ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 298 passed, 0 skipped (test_build_all.py: 11). Temiz kopya (git ls-files, raw/csv yok, PYTHONPATH yok): `--skip-raw` çıkış 0, 6 adım OK, 11 görünüm, 24 investigation, 26 satırlık table_map; yalnızca `--out`a yazıyor; iki çalıştırma aynı; eksik parquet/katalog/meta adıyla hata; raw'sız `--skip-raw` olmadan net hata. raw varken: rapor 'AYNI', commit'li meta/ ve 24 detail.json değişmedi; bozulmuş meta/ bayraksız KORUNUR, `--update-meta` ile düzelir. Negatif kontrol (7, baz çizgisi yeşil): ignore edilen klasöre gizli bağımlılık, --skip-raw'ı yok sayma, varsayılanda meta/ üzerine yazma, hatada çıkış 0, zaman damgalı çıktı, --out dışına yazma, investigation-kümesi değişmezini silme
-- [ ] **F2** Veri katmanı kullanım kuralının testi
+- [x] **F2** Veri katmanı kullanım kuralının testi
   - Yap: `src/` (data_layer hariç), `backend/` ve `app/` klasörlerinde `raw/` veya `csv/` yoluna geçen her referansı bulan bir test yaz.
   - Test: `pytest tests/data_layer/test_no_raw_access.py`
-  - Kabul: Hiç referans yok.
+  - Kabul: Hiç referans yok. Not: bugün ihlal yok (app/ 23 dosya temiz, backend/ henüz yok, src/ içinde data_layer dışında dosya yok), yani gerçek tarama ilk günden boş geçiyor; asıl kanıt dedektörün doğruluğu (13 pozitif + 19 negatif örnek, gerçek ham-veri okuyan ingest/EDA kodunu buluyor, enjekte edilen ihlal yakalanıyor). AST tabanlı statik kontrol: çalışma zamanında birleştirilen yolları göremez (güvenlik ağı, ispat değil). Plan metninin ötesinde: `src/data_layer/` içinde yalnızca `metadata.py` ve `build_all.py` raw/'a değebilir, hiçbir dosya csv/'ye değemez. Not: `app/config.py` `data/processed/bass2_clean.csv`'yi doğrudan okuyor; bu raw/csv klasörü değil, bu kuralın dışında, 05/A3 Feature Store'a geçirecek. İzin listesi (`ALLOWLIST`) boş.
+  ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 337 passed, 0 skipped (test_no_raw_access.py: 39). app/ + src/ (data_layer hariç) + backend/ taraması: 0 ihlal, app/'de ≥20 dosya gerçekten tarandı; data_layer'da yalnızca metadata.py ve build_all.py raw/'a değiyor, csv/ yok. Negatif kontrol (8, baz çizgisi yeşil): app/'e eklenen `pd.read_csv('csv/...')`, pathlib '/' kuralının silinmesi, MIME ('text/csv') tuzağı, taranan klasörlerden app/'in çıkarılması, data_layer/store.py'ye csv/ referansı, docstring'lerin ihlal sayılması, çıplak "csv"/"raw" metinlerinin ihlal sayılması, ayrıştırılamayan dosyanın sessizce atlanması hepsi yakalandı
 - [ ] **F3** Plan ve durum güncellemesi
   - Yap: Bu dosyanın Durum bölümünü ve `plans/README.md` tablosunu güncelle.
   - Test: `pytest tests/data_layer/test_plan_status.py`. Test, işaretli kutu sayısının Durum satırındaki sayıyla eşleştiğini kontrol eder.
