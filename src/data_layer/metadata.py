@@ -92,6 +92,7 @@ def parse_detail(obj: dict, psi_id: str, source_file: str):
            **{k: _date(obj.get(f), kind, f) for k, (f, kind) in INV_DATES.items()},
            "version": obj.get("version"), "total_file_size": _size(obj.get("totalFileSize"), "totalFileSize"),
            "n_publications": len(pubs_in), "n_files_added": len(added), "n_files_removed": len(removed),
+           "n_experimental_tables": len(obj.get("experimentalTable") or []),
            "source_file": source_file, "source_row": 0}
 
     pubs = pd.DataFrame([{**trace, "source_row": i, "title": _s(p.get("title")), "authors": _s(p.get("authorList")),
@@ -143,7 +144,7 @@ def load_all(raw_dir: str | Path = RAW_DIR):
     inv_df = inv_df.astype({**{c: "string" for c in text}, "total_file_size": "Int64"})
     for c in INV_DATES:
         inv_df[c] = pd.to_datetime(inv_df[c]).astype("datetime64[ms]")
-    inv_df = inv_df.astype({"source_row": "int64", "version": "int64", "n_publication_dois": "int64",
+    inv_df = inv_df.astype({"source_row": "int64", "version": "int64", "n_publication_dois": "int64", "n_experimental_tables": "int64",
                             "doi_flag": "string", "pub_doi_status": "string"})
     return inv_df, pubs_df, files_df
 
@@ -161,15 +162,20 @@ def export(out_dir: str | Path = META_DIR, raw_dir: str | Path = RAW_DIR) -> lis
     return paths
 
 
-def connect_meta(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
-    """DuckDB with views investigations / publications / files over meta/*.parquet (absolute paths). Never touches raw/."""
+def register_meta_views(con: duckdb.DuckDBPyConnection) -> None:
+    """Create the investigations / publications / files views over meta/*.parquet (absolute paths) on `con`."""
     missing = [n for n in META_TABLES if not (META_DIR / f"{n}.parquet").exists()]
     if missing:
         raise FileNotFoundError(f"metadata export missing in {META_DIR}: {missing} "
                                 "(run: python -m src.data_layer.metadata export)")
-    con = duckdb.connect(str(db_path) if db_path else ":memory:")
     for n in META_TABLES:
         con.execute(f"CREATE OR REPLACE VIEW {n} AS SELECT * FROM read_parquet('{(META_DIR / f'{n}.parquet').as_posix()}')")
+
+
+def connect_meta(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
+    """DuckDB with views investigations / publications / files over meta/*.parquet. Never touches raw/."""
+    con = duckdb.connect(str(db_path) if db_path else ":memory:")
+    register_meta_views(con)
     return con
 
 

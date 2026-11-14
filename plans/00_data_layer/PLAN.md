@@ -4,10 +4,11 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 18 / 27
+- **İlerleme:** 19 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** D4 (investigation ↔ parquet tablosu eşlemesi). Faz B ve C tamam.
+- **Sıradaki adım:** E1 (video listesi). Faz B, C ve D tamam.
 - **Açık sorunlar:**
+  - D1'in `files` tablosu yalnızca `added`/`removed` listelerini alıyor; `detail.json`'daki ayrı `experimentalTable` (22 dosya) ve `images` listeleri `files`'a girmedi. Videolar `added`'de olduğu için Faz E etkilenmiyor. Eklemek D1/D2'nin sabit sayılarını (27.076) değiştirir; ayrı küçük bir adım olarak karar verilecek.
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
 
@@ -119,10 +120,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Test: `pytest tests/data_layer/test_metadata.py::test_doi`
   - Kabul: Geçersiz DOI'lerin hepsi işaretli; her investigation en az 1 DOI'ye sahip ya da `no_doi` bayrağı taşıyor. Not: `doi_flag` ∈ ok/missing/invalid_format, hem `investigations` hem `publications` tablosunda; `investigations.pub_doi_status` ∈ ok/no_doi/no_publications (+ `n_publication_dois`, yalnızca geçerli DOI'ler sayılır). Değer asla düzeltilmez/silinmez. Gerçek veride geçersiz DOI YOK (284 ok, 68 missing); işaretleme mantığı yapay değerlerle kanıtlandı. Kopya DOI'ler (93 satır, 44 DOI birden çok investigation'da, 1 DOI PSI-21 içinde iki kez) bu adımda dokunulmadı → 06/C1'e not.
   ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 266 passed, 0 skipped (test_metadata.py: 51). Gerçek veri: yayınlar 284 ok / 68 missing / 0 invalid; 24 investigation doi_flag=ok; pub_doi_status 22 ok, 1 no_doi (PSI-100), 1 no_publications (PSI-115). `meta/` yeni sütunlarla yeniden üretildi (0,76 MB). Negatif kontrol (5 + baz çizgisi): gevşetilmiş regex, düşürülen geçersiz yayın, missing→invalid, yanlış durum sayımı, eski şemalı meta/ hepsi yakalandı
-- [ ] **D4** Investigation ↔ parquet tablosu eşlemesi
+- [x] **D4** Investigation ↔ parquet tablosu eşlemesi
   - Yap: `table_map` tablosu oluştur: psi_id → hangi parquet tablosu (ör. PSI-10/159 → acme_*, PSI-101 → smoke).
   - Test: `pytest tests/data_layer/test_metadata.py::test_table_map`
-  - Kabul: Her parquet tablosundaki her psi_id değerinin bir eşlemesi var.
+  - Kabul: Her parquet tablosundaki her psi_id değerinin bir eşlemesi var. Not: `table_map` verinin kendisinden üretilir (`src/data_layer/table_map.py`), `store.connect_all()` ile Feature Store + metadata + table_map tek bağlantıda (`connect()` değişmedi, 12 görünüm). PSI-102 ↔ smoke bağlantısı `relation='inferred'` (smoke `campaign='SAME'` = PSI-102'nin kısaltması; 25 satır, çıkarım olarak işaretli); `ground` satırları hiçbir investigation'a bağlanmadı. 9 investigation eşlemesiz: 4 `no_experimental_table` (PSI-60/62/115/117), 5 `experimental_table_not_loaded` (PSI-26/47/68/106/142); neden `investigations.n_experimental_tables`'tan (yeni sütun, `raw/` ile çapraz doğrulandı: toplam 22) türetilir.
+  ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 287 passed, 0 skipped (test_table_map.py: 21; test_metadata.py::test_table_map). 11 tablonun her `(psi_id, tablo)` çifti eşlenmiş ve tablo başına `n_rows` toplamı tablo satır sayısına eşit; yetim yok; `flex ⋈ investigations` 274 satır. Negatif kontrol (6, baz çizgisi 72 yeşil): atlanan tablo, kendi acronym'ine çıkarımsal bağ, sabit neden, `connect()`'e sızan görünüm, sabit n_experimental_tables, eski şemalı meta/ hepsi yakalandı
 
 ## Faz E — Video indeksi (`test_video_map`)
 

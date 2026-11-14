@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 from conftest import REPO
-from src.data_layer import metadata
+from src.data_layer import metadata, store
 from src.data_layer.metadata import load_all, parse_detail
 
 FIX = REPO / "tests" / "fixtures" / "detail_PSI-25.json"
@@ -320,3 +320,14 @@ def test_doi(parsed):
     pubs = con.execute("SELECT doi, doi_flag FROM publications").df()
     assert (pubs.doi_flag.eq("invalid_format") == (pubs.doi.notna() & ~pubs.doi.fillna("").str.fullmatch(r"10\.\d{4,9}/\S+"))).all()
     assert (pubs.doi_flag.eq("missing") == pubs.doi.isna()).all()
+
+
+def test_table_map():
+    """D4 acceptance (details in test_table_map.py): every psi_id in every parquet table has a mapping."""
+    con = store.connect_all()
+    unmapped = con.execute("""SELECT count(*) FROM (SELECT DISTINCT psi_id FROM acme_normal UNION SELECT psi_id FROM acme_inverse
+        UNION SELECT psi_id FROM acme_testdays UNION SELECT psi_id FROM bass2 UNION SELECT psi_id FROM cfi
+        UNION SELECT psi_id FROM flex UNION SELECT psi_id FROM saffire1 UNION SELECT psi_id FROM saffire2
+        UNION SELECT psi_id FROM saffire3 UNION SELECT psi_id FROM smoke UNION SELECT psi_id FROM spice) t
+        WHERE psi_id NOT IN (SELECT psi_id FROM table_map WHERE coverage <> 'none')""").fetchone()[0]
+    assert unmapped == 0

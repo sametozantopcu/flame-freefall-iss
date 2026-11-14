@@ -62,6 +62,18 @@ def connect(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
     return con
 
 
+def connect_all(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
+    """Feature store + metadata views (investigations/publications/files) + `table_map` on ONE connection, so rows can be
+    joined to their investigation and DOI. `connect()` itself is unchanged."""
+    from . import metadata, table_map                        # local import: metadata/table_map import this module
+    con = connect(db_path)
+    metadata.register_meta_views(con)
+    con.register("_table_map_df", table_map.build_table_map(con))
+    con.execute("CREATE OR REPLACE TABLE table_map AS SELECT * FROM _table_map_df")
+    con.unregister("_table_map_df")
+    return con
+
+
 def build(out_path: str | Path = DEFAULT_DB) -> Path:
     """Write the store to a file. Idempotent: existing views are replaced."""
     out = Path(out_path)
