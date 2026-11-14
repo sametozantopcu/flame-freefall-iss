@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 11 / 27
+- **İlerleme:** 12 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** C4 (veya B4; B4 `csv/` ister)
+- **Sıradaki adım:** C5 (veya B4; B4 `csv/` ister)
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -82,10 +82,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Test: `pytest tests/data_layer/test_store.py::test_catalog_units`
   - Kabul: Her sayısal feature'ın biriminin bir değeri var (bilinmiyorsa `unit_unknown`). Not: `units` bir görünüm değil gerçek tablo (pandas'tan gelen veri dosyaya görünüm olarak yazılamaz); kategorik sütunların birimi `unit_unknown` kalır, `is_numeric` ile ayırt edilir; `units` 11 tabloyu, `catalog` yalnızca 6 Tier-1 tabloyu kapsar.
   ✔ 2026-11-14 · `python -m pytest tests -q` · 113 passed (test_store.py: 18). 39 sayısal feature'ın hepsinin birimi var, 16 kategorik `unit_unknown`; catalog 226 satır, rol sayıları sabitlendi; `build` /tmp'den iki kez çalıştı. Negatif kontrol: birimi silinen sayısal feature ve silinen katalog satırı testi düşürdü
-- [ ] **C4** `get_features(table, target)` fonksiyonu
+- [x] **C4** `get_features(table, target)` fonksiyonu
   - Yap: Fonksiyon `role=feature` olan sütunları döndürsün ve o hedefin leakage listesini otomatik olarak çıkarsın.
   - Test: `pytest tests/data_layer/test_store.py::test_get_features`
-  - Kabul: Dönen listede hiçbir leakage sütunu yok; FLEX `burn_time_s` için `d_ext_mm` yok.
+  - Kabul: Dönen listede hiçbir leakage sütunu yok; FLEX `burn_time_s` için `d_ext_mm` yok. Not: bugünkü katalogda sızıntı sütunları zaten `role=leakage` olduğu için çıkarma adımı fiilen bir şeyi değiştirmiyor; fonksiyon bir güvence katmanı ve yapay ihlalle (SPEC'e eklenen sızıntı, katalogda yanlışlıkla `feature` yapılan sızıntı) kanıtlandı. Sızıntı kaynağı `SPEC`.
+  ✔ 2026-11-14 · `python -m pytest tests -q` · 141 passed (test_features.py: 28; 19 hedefin hepsi parametreli). Negatif kontrol: çıkarma satırı silinince iki yapay-ihlal testi düştü; hedef/diğer-hedef koruması silinince katalog-ihlal testi düştü
 - [ ] **C5** `get_modeling_frame(table, target)` fonksiyonu
   - Yap: Hedef alt küme sorgusunu uygula (ör. ACME burn_time için yalnızca CFI-G satırları). Feature'lar, hedef, grup sütunları ve iz sütunları dönsün.
   - Test: `pytest tests/data_layer/test_store.py::test_modeling_frame`

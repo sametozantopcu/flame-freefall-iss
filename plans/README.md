@@ -7,7 +7,7 @@ Mimari kaynağı: [`../Architecture.md`](../Architecture.md).
 
 | # | Konu | Plan | Bağlı olduğu | İlerleme |
 |---|---|---|---|---|
-| 00 | Ortak Veri Katmanı (Feature Store, Metadata, Video İndeksi) | [00_data_layer](00_data_layer/PLAN.md) | — | 11 / 27 |
+| 00 | Ortak Veri Katmanı (Feature Store, Metadata, Video İndeksi) | [00_data_layer](00_data_layer/PLAN.md) | — | 12 / 27 |
 | 01 | M1 — Keşif & Sıralama | [01_m1_discovery](01_m1_discovery/PLAN.md) | 00 | 0 / 22 |
 | 02 | M2 — Tahmin & Senaryo Motoru | [02_m2_prediction](02_m2_prediction/PLAN.md) | 00 | 0 / 32 |
 | 03 | M3 — Ekipman İçgörüsü | [03_m3_equipment](03_m3_equipment/PLAN.md) | 00, 01, 02 | 0 / 14 |
