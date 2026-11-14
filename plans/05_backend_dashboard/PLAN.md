@@ -53,9 +53,9 @@ Tek bir backend M1, M2, M3 ve FlameSense'i REST + WebSocket ile sunar. Dashboard
 - [ ] **C2** `POST /m2/predict` (02/F3)
   - Test: `pytest tests/backend/test_m2.py::test_predict`
   - Kabul: Yanıtta tahmin, aralık, `ad_warning` ve `physics_flags` var.
-- [ ] **C3** `POST /m2/nearest` + `GET /videos/{test_id}` (02/G2–G5)
-  - Test: `pytest tests/backend/test_m2.py::test_nearest`. PSI çağrıları mock'lanır.
-  - Kabul: k=5 komşu dönüyor; video yoksa 404 değil `null` dönüyor; presigned URL hatası anlaşılır biçimde iletiliyor.
+- [ ] **C3** `POST /m2/nearest` (02/G2). `GET /videos/{test_id}` iptal (2026-11-14: video işi kapsam dışı)
+  - Test: `pytest tests/backend/test_m2.py::test_nearest`
+  - Kabul: k=5 komşu dönüyor; başka aileden komşu dönmüyor.
 - [ ] **C4** `GET /m3/cards` (03/D2)
   - Test: `pytest tests/backend/test_m3.py`
   - Kabul: Habitat ve ekipman filtreleri çalışıyor.
@@ -84,13 +84,13 @@ Tek bir backend M1, M2, M3 ve FlameSense'i REST + WebSocket ile sunar. Dashboard
 ## Faz E — Dashboard sekmeleri
 
 - [ ] **E1** Keşif sekmesi
-  - Yap: Sıralı tablo + bileşen çubukları, O2 × basınç zarf grafiği, investigation kartı (DOI, video).
+  - Yap: Sıralı tablo + bileşen çubukları, O2 × basınç zarf grafiği, investigation kartı (DOI).
   - Test: `pytest tests/app/test_tab_discovery.py` (AppTest, backend mock'lanır)
   - Kabul: Habitat değişince sıralama güncelleniyor; ağırlık slider'ları çalışıyor.
 - [ ] **E2** Senaryo sekmesi
-  - Yap: Senaryo formu, tahmin + aralık, AD ve fizik uyarıları, en yakın deney + video + "neden benzer" metni.
+  - Yap: Senaryo formu, tahmin + aralık, AD ve fizik uyarıları, en yakın deney + "neden benzer" metni (video yok).
   - Test: `pytest tests/app/test_tab_scenario.py`
-  - Kabul: Kapsam dışı bir senaryoda uyarı görünüyor; video yoksa yer tutucu gösteriliyor.
+  - Kabul: Kapsam dışı bir senaryoda uyarı görünüyor.
 - [ ] **E3** Ekipman sekmesi
   - Yap: Bulgu kartları, güven rozetleri (A/B/C), Dünya uygulamaları, veri boşluğu kartları.
   - Test: `pytest tests/app/test_tab_equipment.py`

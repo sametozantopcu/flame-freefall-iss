@@ -10,7 +10,7 @@ Bu repo bir NASA Space Apps 2026 projesi: "Flame in Freefall". Mimari için `Arc
    Kutunun altına `✔ YYYY-MM-DD · <komut> · <sonuç>` biçiminde bir kanıt satırı ekle. Skip veya xfail olan testler geçti sayılmaz.
 3. Oturum sonunda `PLAN.md` dosyasındaki Durum bölümünü (ilerleme, son güncelleme, sıradaki adım, açık sorunlar) ve `plans/README.md` tablosunu güncelle.
 4. Yeni bir paket import ettiysen onu `plans/<konu>/requirements.txt` dosyasına `>=` alt sınırıyla ekle.
-5. Adım ID'lerini yeniden numaralandırma. Yeni adımı fazın sonuna ekle. Gereksizleşen adımın üstünü çiz.
+5. Adım ID'lerini yeniden numaralandırma. Yeni adımı fazın sonuna ekle. Gereksizleşen adımın üstünü çiz (`- ~~[ ] **ID** ...~~ — **İPTAL (tarih):** neden`); iptal edilen adım toplamdan düşer.
 
 ## Değişmez kurallar
 

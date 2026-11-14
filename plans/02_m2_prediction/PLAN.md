@@ -4,7 +4,7 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
 
 ## Durum
 
-- **İlerleme:** 0 / 32
+- **İlerleme:** 0 / 29
 - **Son güncelleme:** 2026-11-14
 - **Sıradaki adım:** A1 (önce 00/C5 tamamlanmalı)
 - **Açık sorunlar:**
@@ -15,7 +15,7 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
 
 1. **(A)** Başka ekiplerin de kullanabileceği temiz modelleme veri setleri ve veri kartları.
 2. **(B)** Belirsizliğini, kapsam dışı uyarısını ve fizik tutarlılığını söyleyen bir senaryo motoru.
-3. Kullanıcıya en yakın gerçek ISS deneyini ve varsa videosunu gösterme.
+3. Kullanıcıya en yakın gerçek ISS deneyini gösterme (video yok: her deneyin videosu bulunmuyor, iptal 2026-11-14).
 
 **Kurallar:**
 - Doğrulama her zaman grup bazlı yapılır (GroupKFold).
@@ -158,7 +158,7 @@ Baseline geçilemezse adım yine tamamlanabilir, ama bu durum dürüstçe raporl
   - Test: `pytest tests/prediction/test_api.py::test_predict`
   - Kabul: Dönen nesnede tahmin, aralık, `ad_warning` ve `physics_flags` var; belirsiz yakıt verilince tüm aileler dönüyor.
 
-## Faz G — En yakın deney + video
+## Faz G — En yakın deney (video kısmı iptal)
 
 - [ ] **G1** Gower uzaklığı
   - Test: `pytest tests/prediction/test_knn.py::test_gower`
@@ -171,20 +171,20 @@ Baseline geçilemezse adım yine tamamlanabilir, ama bu durum dürüstçe raporl
 - [ ] **G2** kNN (k=5, aynı aile içinde, yalnızca `role=feature` sütunları)
   - Test: `pytest tests/prediction/test_knn.py::test_neighbors`
   - Kabul: Sonuçta test_id, benzerlik yüzdesi ve feature farkları var; başka aileden komşu dönmüyor.
-- [ ] **G3** `test_video_map` ile birleştirme
-  - Test: `pytest tests/prediction/test_knn.py::test_video_join`
-  - Kabul: Eşleşme düzeyi (`exact` / `date` / `investigation`) sonuçta görünüyor; video yoksa `null` dönüyor ve hata vermiyor.
-- [ ] **G4** Önizleme klipleri (ffmpeg, 15 sn, 640p)
-  - Test: `pytest tests/prediction/test_preview.py`. ffmpeg `lavfi` ile üretilen 30 sn'lik bir test videosu kullanılır.
-  - Kabul: Çıktı ≤ 15 sn ve 640p; aynı girdi ikinci kez önbellekten geliyor.
-- [ ] **G5** PSI presigned URL (lazy, `redirect=false`)
-  - Test: `pytest tests/prediction/test_preview.py::test_presigned`. HTTP mock'lanır.
-  - Kabul: Doğru istek gönderiliyor; hata durumunda kullanıcıya anlaşılır bir mesaj dönüyor.
+- ~~[ ] **G3** `test_video_map` ile birleştirme~~ — **İPTAL (2026-11-14):** video özelliği kapsam dışı: her deneyin videosu yok (00/E2–E5 de iptal)
+  - ~~Test: `pytest tests/prediction/test_knn.py::test_video_join`~~
+  - ~~Kabul: Eşleşme düzeyi (`exact` / `date` / `investigation`) sonuçta görünüyor; video yoksa `null` dönüyor ve hata vermiyor.~~
+- ~~[ ] **G4** Önizleme klipleri (ffmpeg, 15 sn, 640p)~~ — **İPTAL (2026-11-14):** video özelliği kapsam dışı: her deneyin videosu yok (00/E2–E5 de iptal)
+  - ~~Test: `pytest tests/prediction/test_preview.py`. ffmpeg `lavfi` ile üretilen 30 sn'lik bir test videosu kullanılır.~~
+  - ~~Kabul: Çıktı ≤ 15 sn ve 640p; aynı girdi ikinci kez önbellekten geliyor.~~
+- ~~[ ] **G5** PSI presigned URL (lazy, `redirect=false`)~~ — **İPTAL (2026-11-14):** video özelliği kapsam dışı: her deneyin videosu yok (00/E2–E5 de iptal)
+  - ~~Test: `pytest tests/prediction/test_preview.py::test_presigned`. HTTP mock'lanır.~~
+  - ~~Kabul: Doğru istek gönderiliyor; hata durumunda kullanıcıya anlaşılır bir mesaj dönüyor.~~
 - [ ] **G6** "Neden benzer" açıklama metni
   - Test: `pytest tests/prediction/test_knn.py::test_explanation`
   - Kabul:
     - Metinde test ID, benzerlik yüzdesi ve en büyük feature farkı geçiyor.
-    - Eşleşme düzeyi `date` veya `investigation` ise uyarı cümlesi var.
+    - (Eşleşme düzeyi/video uyarısı iptal: video işi kapsam dışı, 2026-11-14.)
 
 ## Faz H — Kapanış
 

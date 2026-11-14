@@ -7,9 +7,9 @@ Mimari kaynağı: [`../Architecture.md`](../Architecture.md).
 
 | # | Konu | Plan | Bağlı olduğu | İlerleme |
 |---|---|---|---|---|
-| 00 | Ortak Veri Katmanı (Feature Store, Metadata, Video İndeksi) | [00_data_layer](00_data_layer/PLAN.md) | — | 20 / 27 |
+| 00 | Ortak Veri Katmanı (Feature Store, Metadata) | [00_data_layer](00_data_layer/PLAN.md) | — | 20 / 23 |
 | 01 | M1 — Keşif & Sıralama | [01_m1_discovery](01_m1_discovery/PLAN.md) | 00 | 0 / 22 |
-| 02 | M2 — Tahmin & Senaryo Motoru | [02_m2_prediction](02_m2_prediction/PLAN.md) | 00 | 0 / 32 |
+| 02 | M2 — Tahmin & Senaryo Motoru | [02_m2_prediction](02_m2_prediction/PLAN.md) | 00 | 0 / 29 |
 | 03 | M3 — Ekipman İçgörüsü | [03_m3_equipment](03_m3_equipment/PLAN.md) | 00, 01, 02 | 0 / 14 |
 | 04 | FlameSense sensör cihazı | [04_flamesense](04_flamesense/PLAN.md) | 02 (model export) | 0 / 30 |
 | 05 | Backend (FastAPI) + Dashboard | [05_backend_dashboard](05_backend_dashboard/PLAN.md) | 01, 02, 03, 04 | 0 / 23 |
@@ -30,7 +30,7 @@ Mimari kaynağı: [`../Architecture.md`](../Architecture.md).
 5. **Durum bölümünü güncelle.** Her oturumun sonunda ilgili `PLAN.md` dosyasında şunları güncelle: ilerleme sayısı, "Son güncelleme" tarihi, "Sıradaki adım", açık sorunlar.
    Sonra yukarıdaki genel tabloyu güncelle.
 6. **Yeni adım gerekirse** ilgili fazın sonuna yeni bir ID ile ekle (ör. `C7`). Mevcut ID'leri **yeniden numaralandırma**; başka planlar bu ID'lere referans veriyor.
-   Gereksiz hale gelen adımı silme, üstünü çiz (`~~...~~`) ve nedenini yaz.
+   Gereksiz hale gelen adımı silme, üstünü çiz (`- ~~[ ] **ID** ...~~ — **İPTAL (tarih):** neden`) ve nedenini yaz. İptal edilen adımlar toplamdan düşer (sayım `- [ ]`/`- [x]` kutularıdır).
 7. **Requirements:** Bir paketi konunun `requirements.txt` dosyasına yalnızca kod onu gerçekten import ettiğinde ekle. Sürümler alt sınır (`>=`) olarak yazılır.
 8. **Veri kuralları:** `data_analysis/Nasa_data/raw/` ve `csv/` asla değiştirilmez. Eksik değerler asla 0 ile doldurulmaz.
    Ara tablolarda kaynak izi (`psi_id`, `source_file`, `source_row`) korunur.
@@ -42,7 +42,7 @@ Planlar bu yerleşimi varsayar. Değişirse burada güncelle.
 
 ```
 src/
-  data_layer/      00 — DuckDB store, metadata, video index
+  data_layer/      00 — DuckDB store, metadata
   discovery/       01 — zarf, skor, embedding, RAG
   prediction/      02 — modelleme setleri, preprocess, modeller, AD, kNN
   insight/         03 — bulgu kartları, ekipman eşleme

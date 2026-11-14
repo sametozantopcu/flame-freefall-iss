@@ -29,7 +29,7 @@ Jüri ve ekip, repoyu klonlayıp tek komutla sonuçları yeniden üretebilmeli. 
   - Kabul: İş tanımlı.
 - [ ] **A3** Plan tutarlılık testi (bütün konular için)
   - Yap: Her `PLAN.md` dosyasında işaretli kutu sayısı Durum satırıyla ve `plans/README.md` tablosuyla eşleşmeli.
-    Her `[x]` kutusunun altında `✔ YYYY-MM-DD` ile başlayan bir kanıt satırı olmalı.
+    İptal edilen (üstü çizili, `- ~~[ ]`) adımlar sayıma girmez. Her `[x]` kutusunun altında `✔ YYYY-MM-DD` ile başlayan bir kanıt satırı olmalı.
   - Test: `pytest tests/delivery/test_plans.py`
   - Kabul: Bütün planlar tutarlı. Kanıt satırı olmayan `[x]` kutusu testi düşürüyor.
 
@@ -43,7 +43,7 @@ Jüri ve ekip, repoyu klonlayıp tek komutla sonuçları yeniden üretebilmeli. 
   - Test: `pytest tests/delivery/test_cards_complete.py`
   - Kabul: `models/*/card.json` ve `data/modeling/*` kartlarının hepsi şemaya uyuyor ve zorunlu alanları dolu.
 - [ ] **B3** Kurulum dokümantasyonu
-  - Yap: Kök README'de sıfırdan kurulum anlatılsın (her konunun requirements dosyası, sistem bağımlılıkları: ffmpeg, mosquitto, PlatformIO).
+  - Yap: Kök README'de sıfırdan kurulum anlatılsın (her konunun requirements dosyası, sistem bağımlılıkları: mosquitto, PlatformIO).
   - Test: `pytest tests/delivery/test_readme.py`. Test, README'de bahsedilen komutların ve dosyaların var olduğunu kontrol eder.
   - Kabul: Kırık referans yok.
 
@@ -63,6 +63,7 @@ Jüri ve ekip, repoyu klonlayıp tek komutla sonuçları yeniden üretebilmeli. 
     - duman medyanı (0.12–0.30 µm)
     - diyagram kutuları
     - mevcut `app/` ile ilişki (05/A1)
+    - video özelliklerinin iptali (2026-11-14): §3.5 "Video eşleme", M2 diyagramındaki video blokları, "Metadata & Video Index" kutusu, dashboard'daki video göstergeleri
     Bu değişiklikleri ekip onaylar.
   - Test: `pytest tests/delivery/test_architecture.py`. Test, Architecture'daki sayıların kart ve çıktı dosyalarındaki değerlerle tutarlı olduğunu kontrol eder.
   - Kabul: Tutarsızlık yok.

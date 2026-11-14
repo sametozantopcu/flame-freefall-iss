@@ -71,7 +71,7 @@ Her sıranın gerekçesi gösterilir ve kaynaklara atıf yapılır.
     - µg habitat ile µg veri → 1.0.
     - Ay/Mars → 0.5 ve `warning="partial_gravity"`.
 - [ ] **C5** c₅ Veri kullanılabilirliği
-  - Yap: Şunlardan belgelenmiş bir formül kur: experimental table var mı, n, audit kalitesi, video var mı.
+  - Yap: Şunlardan belgelenmiş bir formül kur: experimental table var mı, n, audit kalitesi. Video bilgisi kullanılmaz (her deneyin videosu yok; iptal 2026-11-14).
   - Test: `pytest tests/discovery/test_score.py::test_c5`
   - Kabul: Diğer her şey sabitken n arttıkça skor azalmıyor; sonuç [0, 1] içinde.
 - [ ] **C6** Toplam skor ve ağırlıklar
