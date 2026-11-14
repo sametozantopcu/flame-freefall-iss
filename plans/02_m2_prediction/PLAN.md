@@ -4,9 +4,9 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
 
 ## Durum
 
-- **İlerleme:** 2 / 26
+- **İlerleme:** 3 / 26
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A3 (genel sıra 2: veri setleri A3–A4; modeller B–H genel sıra 4)
+- **Sıradaki adım:** A4 (genel sıra 2: veri setleri; modeller B–H genel sıra 4)
 - **Açık sorunlar:**
   - Smoke ground eşlemesi doğrulanmadı. Bu yüzden smoke modeli yalnızca flight verisiyle kurulur (A1).
   - FLEX'te Extinction/Disruption ile biten testlerin yanma süresi kesilmiş; Completion testleriyle aynı şekilde modellenemez (D3).
@@ -46,10 +46,11 @@ Mimari: [Architecture.md §3](../../Architecture.md) · Kod: `src/prediction/`, 
   - Test: `pytest tests/prediction/test_censor_flags.py` (bağımsız analiz ajanı yazar, uygulamayı görmeden)
   - Kabul: Bayrak sayıları EDA sayılarıyla eşit. Not: bayraklar nullable boolean ve yalnızca hedefin (burn_time) alt kümesinde, sonlanma biçimi biliniyorsa dolu; bilinmeyen = NA, asla False. EDA sayıları ext_mode/test_end alt kümesinden sayıldığı için tam eşitlik yalnızca alt küme içindeki satırlarda; fark tam olarak alt küme dışındaki satırlar (acme_normal 1 FT, acme_inverse 8 SE, flex 6 boş burn_time) ve test bunu ayrıca sabitliyor.
   ✔ 2026-11-14 · `python -m pytest tests/prediction/test_censor_flags.py -q` · 10 passed (testleri bağımsız analiz ajanı uygulamayı görmeden yazdı; aynı sayıları bağımsız hesapladı); tüm set 386 passed, 0 skipped. gas_flame burn_time_censored: Normal 30 FT / 102 SE / 47 NA, Inverse 58 / 73 / 23; droplet burn_time_truncated: flex 241 / 27 / 6, cfi 227 NA. Negatif kontrol (6, baz çizgisi yeşil): bilinmeyeni False yapmak, alt küme dışında bayrak, ters bayrak, CFI'yi False yapmak, object dtype, yanlış Completion tanımı hepsi yakalandı
-- [ ] **A3** Veri kartları (`.md` + `.json`)
+- [x] **A3** Veri kartları (`.md` + `.json`)
   - Yap: Her kartta şunlar olsun: sütun birimleri, `assumptions.md` içindeki ilgili maddeler, leakage listesi, sansür bilgisi, DOI'ler, satır sayısı, veri hash'i.
-  - Test: `pytest tests/prediction/test_datasets.py::test_cards`
-  - Kabul: JSON şeması doğrulanıyor; her sütunun bir birimi var (bilinmiyorsa `unit_unknown`); hash dosyayla eşleşiyor.
+  - Test: `pytest tests/prediction/test_cards.py` (bağımsız analiz ajanı yazar, uygulamayı görmeden)
+  - Kabul: JSON şeması doğrulanıyor; her sütunun bir birimi var (bilinmiyorsa `unit_unknown`); hash dosyayla eşleşiyor. Not: kartlar veriden üretilir (`src/prediction/cards.py`, `python -m src.prediction.cards write`) ve `docs/datasets/` altında commit edilir; veri setleri commit edilmez. İçerik hash'i (sütunlar + dtype + `hash_pandas_object`) commit'li kartın yeniden üretilen veriyle tutarlılığını sağlar (sapma koruması). Atıf: smoke kartı PSI-102'yi 'çıkarım' bağıyla da listeler. Birimi bilinmeyen tek sayısal sütun `hot_ignition` (0/1 hedef): EDA kataloğuyla birim uyumu (00/C3) bozulmasın diye `unit_unknown` bırakıldı.
+  ✔ 2026-11-14 · `python -m pytest tests/prediction/test_cards.py -q` · 48 passed (bağımsız ajan uygulamayı görmeden yazdı, değerleri bağımsız hesapladı; kendi sayım hatasını veriye bakarak düzeltti, uygulamada hata bulmadı); tüm set 434 passed, 0 skipped. Negatif kontrol (8, koda uygulandı, baz çizgisi yeşil): dtype'sız hash, çıkarım bağının silinmesi, tüm varsayımların eklenmesi, boş birim, group rolünün feature olması, şemanın fazla anahtara izin vermesi, sızıntıdan diğer hedeflerin çıkması, eksik sayısının 0 yazılması hepsi yakalandı
 - [ ] **A4** CSV ve Parquet indirme dosyaları
   - Yap: Her set için aynı içerikte CSV ve Parquet dosyası üret.
   - Test: `pytest tests/prediction/test_datasets.py::test_formats`

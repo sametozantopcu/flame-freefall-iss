@@ -1,0 +1,553 @@
+{
+  "name": "droplet",
+  "title": "Damlacık yanması (FLEX + CFI)",
+  "description": "ISS'te serbest damlacık yanma deneyleri: FLEX (PSI-69, metanol/heptan) ve CFI (PSI-39, dodekan/farnesan karışımları). Girdiler başlangıç çapı, basınç ve ortam bileşimi; hedefler yanma süresi, yanma hızı sabiti K, sönme çapı ve test sonu.",
+  "n_rows": 501,
+  "content_sha256": "sha256:551172e91164521ea30258f6c1773e344cc21e54454dde3530dbe3fcdaa240d5",
+  "build_command": "python -m src.prediction.datasets build",
+  "sources": [
+    {
+      "table": "flex",
+      "row_filter": null,
+      "n_rows": 274,
+      "psi_ids": [
+        "PSI-69"
+      ]
+    },
+    {
+      "table": "cfi",
+      "row_filter": null,
+      "n_rows": 227,
+      "psi_ids": [
+        "PSI-39"
+      ]
+    }
+  ],
+  "investigations": [
+    {
+      "psi_id": "PSI-39",
+      "acronym": "CFI",
+      "doi": "10.60555/m6pj-a914",
+      "doi_flag": "ok",
+      "relation": "source_file"
+    },
+    {
+      "psi_id": "PSI-69",
+      "acronym": "FLEX",
+      "doi": "10.60555/mbq8-0451",
+      "doi_flag": "ok",
+      "relation": "source_file"
+    }
+  ],
+  "columns": [
+    {
+      "name": "psi_id",
+      "role": "trace",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_file",
+      "role": "trace",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_row",
+      "role": "trace",
+      "dtype": "int64",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_table",
+      "role": "meta",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "fuel",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "x_o2",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mol fraction",
+      "missing": 0
+    },
+    {
+      "name": "x_n2",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mol fraction",
+      "missing": 0
+    },
+    {
+      "name": "x_co2",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mol fraction",
+      "missing": 227
+    },
+    {
+      "name": "x_he",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mol fraction",
+      "missing": 0
+    },
+    {
+      "name": "d0_mm",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mm",
+      "missing": 91
+    },
+    {
+      "name": "p_atm",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "atm",
+      "missing": 0
+    },
+    {
+      "name": "diluent",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "year",
+      "role": "group",
+      "dtype": "float64",
+      "unit": "year",
+      "missing": 277
+    },
+    {
+      "name": "burn_time_s",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "s",
+      "missing": 233
+    },
+    {
+      "name": "burn_rate_K_mm2_s",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "mm²/s (assumed)",
+      "missing": 243
+    },
+    {
+      "name": "d_ext_mm",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "mm",
+      "missing": 304
+    },
+    {
+      "name": "test_end",
+      "role": "target",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 227
+    },
+    {
+      "name": "fiber",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 343
+    },
+    {
+      "name": "ign_power_w",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "W",
+      "missing": 277
+    },
+    {
+      "name": "ign_time_ms",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "ms",
+      "missing": 277
+    },
+    {
+      "name": "k_hot_mm2_s",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "mm²/s",
+      "missing": 353
+    },
+    {
+      "name": "hf_burn_time_s",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "s (assumed)",
+      "missing": 354
+    },
+    {
+      "name": "d_ext_hot_mm",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "mm",
+      "missing": 357
+    },
+    {
+      "name": "has_cool_flame",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "0/1",
+      "missing": 274
+    },
+    {
+      "name": "burn_time_truncated",
+      "role": "label",
+      "dtype": "boolean",
+      "unit": "unit_unknown",
+      "missing": 233
+    },
+    {
+      "name": "in_subset__burn_time_s",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__burn_rate_K_mm2_s",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__d_ext_mm",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__test_end",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__k_hot_mm2_s",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__hf_burn_time_s",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__d_ext_hot_mm",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__has_cool_flame",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    }
+  ],
+  "targets": [
+    {
+      "name": "burn_time_s",
+      "task": "regression",
+      "source_tables": [
+        "flex"
+      ],
+      "subset": {
+        "flex": "burn_time_s.notna()"
+      },
+      "defined_rows": 268,
+      "leakage": [
+        "K_from_d2_law",
+        "burn_rate_K_mm2_s",
+        "burn_time_approx",
+        "d_ext_hot_mm",
+        "d_ext_mm",
+        "d_ext_over_d0",
+        "has_cool_flame",
+        "hf_burn_time_s",
+        "k_hot_mm2_s",
+        "test_end"
+      ],
+      "censoring": "burn_time_truncated"
+    },
+    {
+      "name": "burn_rate_K_mm2_s",
+      "task": "regression",
+      "source_tables": [
+        "flex"
+      ],
+      "subset": {
+        "flex": "burn_rate_K_mm2_s.notna()"
+      },
+      "defined_rows": 258,
+      "leakage": [
+        "K_from_d2_law",
+        "burn_time_s",
+        "d_ext_hot_mm",
+        "d_ext_mm",
+        "d_ext_over_d0",
+        "has_cool_flame",
+        "hf_burn_time_s",
+        "k_hot_mm2_s",
+        "test_end"
+      ],
+      "censoring": null
+    },
+    {
+      "name": "d_ext_mm",
+      "task": "regression",
+      "source_tables": [
+        "flex"
+      ],
+      "subset": {
+        "flex": "d_ext_mm.notna()"
+      },
+      "defined_rows": 197,
+      "leakage": [
+        "K_from_d2_law",
+        "burn_rate_K_mm2_s",
+        "burn_time_s",
+        "d_ext_hot_mm",
+        "d_ext_over_d0",
+        "has_cool_flame",
+        "hf_burn_time_s",
+        "k_hot_mm2_s",
+        "test_end"
+      ],
+      "censoring": null
+    },
+    {
+      "name": "test_end",
+      "task": "multiclass",
+      "source_tables": [
+        "flex"
+      ],
+      "subset": {
+        "flex": "test_end.notna()"
+      },
+      "defined_rows": 274,
+      "leakage": [
+        "K_from_d2_law",
+        "burn_rate_K_mm2_s",
+        "burn_time_s",
+        "d_ext_hot_mm",
+        "d_ext_mm",
+        "d_ext_over_d0",
+        "has_cool_flame",
+        "hf_burn_time_s",
+        "k_hot_mm2_s"
+      ],
+      "censoring": null
+    },
+    {
+      "name": "k_hot_mm2_s",
+      "task": "regression",
+      "source_tables": [
+        "cfi"
+      ],
+      "subset": {
+        "cfi": "k_hot_mm2_s.notna()"
+      },
+      "defined_rows": 148,
+      "leakage": [
+        "actual_d_mm",
+        "burn_rate_K_mm2_s",
+        "burn_time_s",
+        "cf_rad_ratio",
+        "d_ext_cool_mm",
+        "d_ext_hot_mm",
+        "d_ext_mm",
+        "extrap_cf",
+        "has_cool_flame",
+        "hf_burn_time_s",
+        "k_cool_mm2_s",
+        "peak_h2o_rad",
+        "peak_hf_rad",
+        "rad_2p5mm",
+        "rad_2p5mm_cf",
+        "rad_2p5mm_narrow",
+        "rad_ratio",
+        "reignitions",
+        "test_end",
+        "time_2p5mm"
+      ],
+      "censoring": null
+    },
+    {
+      "name": "hf_burn_time_s",
+      "task": "regression",
+      "source_tables": [
+        "cfi"
+      ],
+      "subset": {
+        "cfi": "hf_burn_time_s.notna()"
+      },
+      "defined_rows": 147,
+      "leakage": [
+        "actual_d_mm",
+        "burn_rate_K_mm2_s",
+        "burn_time_s",
+        "cf_rad_ratio",
+        "d_ext_cool_mm",
+        "d_ext_hot_mm",
+        "d_ext_mm",
+        "extrap_cf",
+        "has_cool_flame",
+        "k_cool_mm2_s",
+        "k_hot_mm2_s",
+        "peak_h2o_rad",
+        "peak_hf_rad",
+        "rad_2p5mm",
+        "rad_2p5mm_cf",
+        "rad_2p5mm_narrow",
+        "rad_ratio",
+        "reignitions",
+        "test_end",
+        "time_2p5mm"
+      ],
+      "censoring": null
+    },
+    {
+      "name": "d_ext_hot_mm",
+      "task": "regression",
+      "source_tables": [
+        "cfi"
+      ],
+      "subset": {
+        "cfi": "d_ext_hot_mm.notna()"
+      },
+      "defined_rows": 144,
+      "leakage": [
+        "actual_d_mm",
+        "burn_rate_K_mm2_s",
+        "burn_time_s",
+        "cf_rad_ratio",
+        "d_ext_cool_mm",
+        "d_ext_mm",
+        "extrap_cf",
+        "has_cool_flame",
+        "hf_burn_time_s",
+        "k_cool_mm2_s",
+        "k_hot_mm2_s",
+        "peak_h2o_rad",
+        "peak_hf_rad",
+        "rad_2p5mm",
+        "rad_2p5mm_cf",
+        "rad_2p5mm_narrow",
+        "rad_ratio",
+        "reignitions",
+        "test_end",
+        "time_2p5mm"
+      ],
+      "censoring": null
+    },
+    {
+      "name": "has_cool_flame",
+      "task": "binary",
+      "source_tables": [
+        "cfi"
+      ],
+      "subset": {
+        "cfi": "completed_analysis == 'Yes'"
+      },
+      "defined_rows": 146,
+      "leakage": [
+        "actual_d_mm",
+        "burn_rate_K_mm2_s",
+        "burn_time_s",
+        "cf_rad_ratio",
+        "d_ext_cool_mm",
+        "d_ext_hot_mm",
+        "d_ext_mm",
+        "extrap_cf",
+        "hf_burn_time_s",
+        "k_cool_mm2_s",
+        "k_hot_mm2_s",
+        "peak_h2o_rad",
+        "peak_hf_rad",
+        "rad_2p5mm",
+        "rad_2p5mm_cf",
+        "rad_2p5mm_narrow",
+        "rad_ratio",
+        "reignitions",
+        "test_end",
+        "time_2p5mm"
+      ],
+      "censoring": null
+    }
+  ],
+  "cv_group": [
+    "fuel",
+    "diluent"
+  ],
+  "group_gaps": {
+    "flex.year": 50
+  },
+  "labels": [
+    {
+      "name": "burn_time_truncated",
+      "meaning": "test_end != 'Completion' (sönme/bozulma): yanma süresi kesilmiş. Yalnızca FLEX burn_time satırlarında; CFI'de test_end yok → NA.",
+      "true": 241,
+      "false": 27,
+      "na": 233
+    }
+  ],
+  "assumptions": [
+    {
+      "key": "cfi_has_cool",
+      "text": "has_cool_flame = kcool ölçülmüş mü (1/0) - türetilmiş ikili hedef adayı; kcool analizi yapılmamış testlerde de 0 olabileceği için 'completed_analysis' ile birlikte yorumlanmalı."
+    },
+    {
+      "key": "cfi_hf_burn",
+      "text": "'hf burn time' sütununun birimi belirtilmemiş; değer aralığına göre saniye VARSAYILDI (hf = hot flame)."
+    },
+    {
+      "key": "cfi_merge",
+      "text": "PSI-39 cfi = Master_Sheet ⋈ DATA ⋈ Igniter (flex number, 1:1). Experimental_table (87) Master'ın alt kümesi; in_experimental_table ile işaretlendi."
+    },
+    {
+      "key": "flex_K_d2",
+      "text": "K_from_d2_law = (d0² - d_ext²)/t_b yalnızca bilgi amaçlı türetildi; hedef K ile sızıntı ilişkisi var (hedef olarak kullanılamaz)."
+    },
+    {
+      "key": "flex_approx",
+      "text": "FLEX 'Burn time' içindeki '~6', '~9' -> 6, 9 sayısal + burn_time_approx=True. '–' -> NaN."
+    },
+    {
+      "key": "flex_burn_rate_unit",
+      "text": "PSI-69 'Burning rate; mm' başlığındaki birim eksik; değer aralığı (~0.4-1 ) damlacık yanma sabiti K ile uyumlu -> burn_rate_K_mm2_s (mm²/s) VARSAYILDI."
+    }
+  ],
+  "notes": [
+    "FLEX ve CFI hedefleri birleştirilmedi: FLEX burn_rate_K_mm2_s ile CFI k_hot_mm2_s ayrı sütunlar (yakıtlar kesişmiyor, tanımlar farklı); birleştirmek bir modelleme kararıdır.",
+    "CFI'de x_co2 ölçülmemiş/raporlanmamış: boş bırakıldı, 0 değildir.",
+    "FLEX year 50 testte kaynakta boş; doldurulmadı (CV anahtarı fuel × diluent)."
+  ]
+}

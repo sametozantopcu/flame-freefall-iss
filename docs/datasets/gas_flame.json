@@ -1,0 +1,372 @@
+{
+  "name": "gas_flame",
+  "title": "Gaz alevi tutuşma ve sönme (ACME CFI-G)",
+  "description": "ACME CFI-G (PSI-159) normal ve ters etilen alevleri: tutuşma, yanma süresi ve sönme biçimi.",
+  "n_rows": 333,
+  "content_sha256": "sha256:ae4d3c5eab6aa6a2e4a85f3d222d347b9834f73f273dac070679e2d705acb84a",
+  "build_command": "python -m src.prediction.datasets build",
+  "sources": [
+    {
+      "table": "acme_normal",
+      "row_filter": "experiment == 'CFI-G'",
+      "n_rows": 179,
+      "psi_ids": [
+        "PSI-159"
+      ]
+    },
+    {
+      "table": "acme_inverse",
+      "row_filter": "experiment == 'CFI-G'",
+      "n_rows": 154,
+      "psi_ids": [
+        "PSI-159"
+      ]
+    }
+  ],
+  "investigations": [
+    {
+      "psi_id": "PSI-159",
+      "acronym": "ACME CFI-G",
+      "doi": "10.60555/cyt1-kh64",
+      "doi_flag": "ok",
+      "relation": "source_file"
+    }
+  ],
+  "columns": [
+    {
+      "name": "psi_id",
+      "role": "trace",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_file",
+      "role": "trace",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_row",
+      "role": "trace",
+      "dtype": "int64",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_table",
+      "role": "meta",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "flame_type",
+      "role": "meta",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "day",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "test day index",
+      "missing": 0
+    },
+    {
+      "name": "x_fuel",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mol fraction",
+      "missing": 154
+    },
+    {
+      "name": "m_fuel_mg_s",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mg/s",
+      "missing": 154
+    },
+    {
+      "name": "xo2_init",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mol fraction",
+      "missing": 154
+    },
+    {
+      "name": "p_atm",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "atm",
+      "missing": 0
+    },
+    {
+      "name": "zst",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "- (mixture fraction)",
+      "missing": 2
+    },
+    {
+      "name": "tad_k_calc",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "K (calculated)",
+      "missing": 2
+    },
+    {
+      "name": "experiment",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "fuel_base",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "fuel_bottle_frac",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "vol fraction",
+      "missing": 154
+    },
+    {
+      "name": "burn_time_s",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "s",
+      "missing": 4
+    },
+    {
+      "name": "hot_ignition",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "ext_mode",
+      "role": "target",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 61
+    },
+    {
+      "name": "xo2",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mol fraction",
+      "missing": 179
+    },
+    {
+      "name": "m_o2_mg_s",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mg/s",
+      "missing": 179
+    },
+    {
+      "name": "x_fuel_amb_init",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mol fraction",
+      "missing": 179
+    },
+    {
+      "name": "hc_burnrate_mg_s",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mg/s",
+      "missing": 179
+    },
+    {
+      "name": "burn_time_censored",
+      "role": "label",
+      "dtype": "boolean",
+      "unit": "unit_unknown",
+      "missing": 70
+    },
+    {
+      "name": "in_subset__burn_time_s",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__hot_ignition",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__ext_mode",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    }
+  ],
+  "targets": [
+    {
+      "name": "burn_time_s",
+      "task": "regression",
+      "source_tables": [
+        "acme_inverse",
+        "acme_normal"
+      ],
+      "subset": {
+        "acme_inverse": "experiment == 'CFI-G' and hot_ignition == 1",
+        "acme_normal": "experiment == 'CFI-G' and hot_ignition == 1"
+      },
+      "defined_rows": 263,
+      "leakage": [
+        "color_hit_limit",
+        "color_raw",
+        "comments",
+        "cool_flame",
+        "cool_flame_raw",
+        "d_xo2",
+        "ext_mode",
+        "ext_mode_raw",
+        "flame_color",
+        "hot_ignition",
+        "hot_ignition_raw",
+        "ignition_class",
+        "p_final_atm",
+        "peak_burner_T_C",
+        "peak_burner_T_K",
+        "x_fuel_amb_final",
+        "xo2_final",
+        "xo2_final_pct"
+      ],
+      "censoring": "burn_time_censored"
+    },
+    {
+      "name": "hot_ignition",
+      "task": "binary",
+      "source_tables": [
+        "acme_inverse",
+        "acme_normal"
+      ],
+      "subset": {
+        "acme_inverse": "experiment == 'CFI-G'",
+        "acme_normal": "experiment == 'CFI-G'"
+      },
+      "defined_rows": 333,
+      "leakage": [
+        "burn_time_s",
+        "color_hit_limit",
+        "color_raw",
+        "comments",
+        "cool_flame",
+        "cool_flame_raw",
+        "d_xo2",
+        "ext_mode",
+        "ext_mode_raw",
+        "flame_color",
+        "hot_ignition_raw",
+        "ignition_class",
+        "peak_burner_T_C",
+        "peak_burner_T_K",
+        "x_fuel_amb_final",
+        "xo2_final",
+        "xo2_final_pct"
+      ],
+      "censoring": null
+    },
+    {
+      "name": "ext_mode",
+      "task": "binary",
+      "source_tables": [
+        "acme_inverse",
+        "acme_normal"
+      ],
+      "subset": {
+        "acme_inverse": "experiment == 'CFI-G' and ext_mode.notna()",
+        "acme_normal": "experiment == 'CFI-G' and ext_mode.notna()"
+      },
+      "defined_rows": 272,
+      "leakage": [
+        "burn_time_s",
+        "color_hit_limit",
+        "color_raw",
+        "comments",
+        "d_xo2",
+        "ext_mode_raw",
+        "flame_color",
+        "hot_ignition",
+        "hot_ignition_raw",
+        "peak_burner_T_C",
+        "peak_burner_T_K",
+        "x_fuel_amb_final",
+        "xo2_final",
+        "xo2_final_pct"
+      ],
+      "censoring": null
+    }
+  ],
+  "cv_group": [
+    "flame_type",
+    "day"
+  ],
+  "group_gaps": {},
+  "labels": [
+    {
+      "name": "burn_time_censored",
+      "meaning": "ext_mode == 'FT' (akış kesildi): yanma süresi sağdan sansürlü. Yalnızca burn_time satırlarında ve sonlanma biçimi biliniyorsa dolu; bilinmiyorsa NA.",
+      "true": 88,
+      "false": 175,
+      "na": 70
+    }
+  ],
+  "assumptions": [
+    {
+      "key": "acme_color_limit",
+      "text": "PSI-159 inverse 'Color'='limit' bir renk değil (sıcaklık limitine ulaşıldı yorumu) -> flame_color NaN, color_hit_limit=True."
+    },
+    {
+      "key": "acme_ext_mode",
+      "text": "'Self-ext or flow term' içindeki '-' = tutuşma olmadı/uygulanamaz -> ext_mode NaN; SE=self-extinction, FT=flow termination."
+    },
+    {
+      "key": "acme_flash",
+      "text": "PSI-159 inverse 'Hot ignition'='flash': anlık parlama, sürekli alev değil -> ignition_class='flash' (3 sınıf korunur), ikili hot_ignition=0."
+    },
+    {
+      "key": "acme_p_unit",
+      "text": "PSI-159 'approx p (bar)' -> p_atm = p_bar/1.01325 (yaklaşık basınç). PSI-10 'pmean (atm)' p_atm olarak kullanıldı."
+    },
+    {
+      "key": "acme_psi10_targets",
+      "text": "PSI-10 Flame Design tablolarında yanma süresi / tutuşma / söndürme sütunu YOK. Bu hedefler yalnızca PSI-159 (CFI-G) satırlarında tanımlı."
+    },
+    {
+      "key": "acme_ramp",
+      "text": "PSI-10 'RAMP/RAMPED/LOW O2' satırları akış rampası yapılan testler: sayısal değer NaN, token <col>_flag'de saklı, satır SİLİNMEDİ."
+    },
+    {
+      "key": "acme_tad",
+      "text": "'Tad (K)' adyabatik alev sıcaklığı HESAPLANMIŞ bir büyüklük -> tad_k_calc adıyla tutuldu; ölçüm değil, girdilerin (XO2, yakıt, Zst) fonksiyonu."
+    },
+    {
+      "key": "acme_tfp",
+      "text": "TFP (Yes/No) anlamı belgelenmemiş; kategorik olarak tutuldu, birim/anlam atanmadı."
+    }
+  ],
+  "notes": [
+    "Normal alevde xo2_init (ortam O2) ile ters alevde xo2 (oksitleyici akımındaki O2) farklı büyüklükler: ayrı sütunlar.",
+    "Test günü numaraları iki alev türünde de 1'den başlar; CV grubu flame_type × day.",
+    "PSI-10 Flame Design satırları hedef içermediği için yok (yalnızca CFI-G).",
+    "Burn time alt kümesi dışında ext_mode'u bilinen 9 satır var (1 'No' + FT, 8 'flash' + SE); sansür bayrakları orada NA."
+  ]
+}

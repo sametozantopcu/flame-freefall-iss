@@ -1,0 +1,272 @@
+{
+  "name": "solid_atm",
+  "title": "Katı malzeme yanmasında atmosfer değişimi (BASS-II)",
+  "description": "BASS-II (PSI-25) testlerinde yanma boyunca O2/CO2 değişimi ve son CO derişimi.",
+  "n_rows": 129,
+  "content_sha256": "sha256:014e329df5c41ef8f977d48a3522c0bbfc6afd31e889170458102f341625b9a4",
+  "build_command": "python -m src.prediction.datasets build",
+  "sources": [
+    {
+      "table": "bass2",
+      "row_filter": null,
+      "n_rows": 129,
+      "psi_ids": [
+        "PSI-25"
+      ]
+    }
+  ],
+  "investigations": [
+    {
+      "psi_id": "PSI-25",
+      "acronym": "BASS-II",
+      "doi": "10.60555/4qc4-de67",
+      "doi_flag": "ok",
+      "relation": "source_file"
+    }
+  ],
+  "columns": [
+    {
+      "name": "psi_id",
+      "role": "trace",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_file",
+      "role": "trace",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_row",
+      "role": "trace",
+      "dtype": "int64",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "source_table",
+      "role": "meta",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "pi",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "flow_restrictor",
+      "role": "feature",
+      "dtype": "int64",
+      "unit": "setting index",
+      "missing": 0
+    },
+    {
+      "name": "o2_init_pct",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "% vol",
+      "missing": 0
+    },
+    {
+      "name": "co2_init_pct",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "% vol",
+      "missing": 2
+    },
+    {
+      "name": "co_init_ppm",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "ppm",
+      "missing": 3
+    },
+    {
+      "name": "material",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "geometry",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "thickness_mm",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "mm",
+      "missing": 33
+    },
+    {
+      "name": "rod_color",
+      "role": "feature",
+      "dtype": "str",
+      "unit": "unit_unknown",
+      "missing": 75
+    },
+    {
+      "name": "air_display_initial",
+      "role": "feature",
+      "dtype": "float64",
+      "unit": "unit_unknown (device reading)",
+      "missing": 7
+    },
+    {
+      "name": "d_o2_pct",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "% vol",
+      "missing": 2
+    },
+    {
+      "name": "d_co2_pct",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "% vol",
+      "missing": 8
+    },
+    {
+      "name": "co_final_ppm",
+      "role": "target",
+      "dtype": "float64",
+      "unit": "ppm",
+      "missing": 9
+    },
+    {
+      "name": "in_subset__d_o2_pct",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__d_co2_pct",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    },
+    {
+      "name": "in_subset__co_final_ppm",
+      "role": "mask",
+      "dtype": "bool",
+      "unit": "unit_unknown",
+      "missing": 0
+    }
+  ],
+  "targets": [
+    {
+      "name": "d_o2_pct",
+      "task": "regression",
+      "source_tables": [
+        "bass2"
+      ],
+      "subset": {
+        "bass2": "d_o2_pct.notna() and not o2_final_anomaly_flag"
+      },
+      "defined_rows": 122,
+      "leakage": [
+        "co2_final_pct",
+        "co_final_ppm",
+        "co_final_ppm_overrange",
+        "d_co2_pct",
+        "d_co_ppm",
+        "frames",
+        "frames_raw",
+        "o2_final_anomaly_flag",
+        "o2_final_pct"
+      ],
+      "censoring": null
+    },
+    {
+      "name": "d_co2_pct",
+      "task": "regression",
+      "source_tables": [
+        "bass2"
+      ],
+      "subset": {
+        "bass2": "d_co2_pct.notna()"
+      },
+      "defined_rows": 121,
+      "leakage": [
+        "co2_final_pct",
+        "co_final_ppm",
+        "co_final_ppm_overrange",
+        "d_co_ppm",
+        "d_o2_pct",
+        "frames",
+        "frames_raw",
+        "o2_final_anomaly_flag",
+        "o2_final_pct"
+      ],
+      "censoring": null
+    },
+    {
+      "name": "co_final_ppm",
+      "task": "regression",
+      "source_tables": [
+        "bass2"
+      ],
+      "subset": {
+        "bass2": "co_final_ppm.notna() and not co_negative_flag"
+      },
+      "defined_rows": 108,
+      "leakage": [
+        "co2_final_pct",
+        "co_final_ppm_overrange",
+        "d_co2_pct",
+        "d_co_ppm",
+        "d_o2_pct",
+        "frames",
+        "frames_raw",
+        "o2_final_anomaly_flag",
+        "o2_final_pct"
+      ],
+      "censoring": null
+    }
+  ],
+  "cv_group": [
+    "pi"
+  ],
+  "group_gaps": {},
+  "labels": [],
+  "assumptions": [
+    {
+      "key": "bass2_air_display",
+      "text": "Air/Fan display bir hız değil cihaz potansiyometre okuması; çoğu hücre test boyunca ayar dizisi ('5 3 2 ext'). air_display_initial = ilk sayı; birim unit_unknown."
+    },
+    {
+      "key": "bass2_co_censor",
+      "text": "BASS-II CO 'OR'/'over'/'>500' = ölçüm aralığı aşıldı (sağdan sansürlü) -> NaN + *_overrange=True. 'none' -> NaN."
+    },
+    {
+      "key": "bass2_material",
+      "text": "BASS-II 'Fuel Sample Material' serbest metin -> material (PMMA/SIBAL/Nomex/Wax candle), geometry (film/slab/rod/fabric/sphere_section/candle), thickness_mm (micron/mm/inç'ten). Çubuklarda 'thickness' = çap. '4 cm spherical section' PMMA VARSAYILDI. SIBAL'de '2 cm' genişliktir, kalınlık NaN."
+    },
+    {
+      "key": "bass2_negative_co",
+      "text": "Negatif CO değerleri DÜZELTİLMEDİ; co_negative_flag ile işaretlendi (sensör ofseti olası)."
+    },
+    {
+      "key": "bass2_o2_anomaly",
+      "text": "o2_final_anomaly_flag: final O2 < %10 ya da O2'nin test boyunca >0.5 puan ARTMASI (fiziksel değil) -> işaretlendi, düzeltilmedi."
+    }
+  ],
+  "notes": [
+    "Negatif CO değerleri düzeltilmedi; co_final_ppm hedefinin alt kümesi co_negative_flag satırlarını dışarıda bırakır.",
+    "d_o2_pct alt kümesi O2 anomalisi işaretli satırları dışarıda bırakır (filtre sütunları sette yok).",
+    "PI (araştırmacı) ve malzeme iç içe; CV grubu pi."
+  ]
+}
