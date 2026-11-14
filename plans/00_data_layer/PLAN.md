@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 10 / 27
+- **İlerleme:** 11 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** C3 (veya B4; B4 `csv/` ister)
+- **Sıradaki adım:** C4 (veya B4; B4 `csv/` ister)
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -77,10 +77,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Test: `pytest tests/data_layer/test_store.py::test_views`
   - Kabul: 11 görünüm var; görünümlerin satır sayıları parquet ile eşit. Not: `connect()` görünümleri her çağrıda mutlak yolla kurar, çünkü DuckDB'de göreli yollu görünüm başka klasörden açılınca bozuluyor (doğrulandı). `.duckdb` dosyası git'e girmez.
   ✔ 2026-11-14 · `python -m pytest tests -q` · 110 passed (test_store.py: 15). `python -m src.data_layer.store build` /tmp'den iki kez çalıştı (11 görünüm, hata yok). Negatif kontrol: eksik parquet → net FileNotFoundError; kısaltılmış flex → tam set 3 testle yakaladı (görünüm testi tek başına yakalamaz, satır sayısını B1 korur)
-- [ ] **C3** Katalog ve birim görünümleri
+- [x] **C3** Katalog ve birim görünümleri
   - Yap: `catalog` (feature_catalog.csv) ve `units` (UNITS + `unit_unknown`) görünümlerini ekle.
   - Test: `pytest tests/data_layer/test_store.py::test_catalog_units`
-  - Kabul: Her sayısal feature'ın biriminin bir değeri var (bilinmiyorsa `unit_unknown`).
+  - Kabul: Her sayısal feature'ın biriminin bir değeri var (bilinmiyorsa `unit_unknown`). Not: `units` bir görünüm değil gerçek tablo (pandas'tan gelen veri dosyaya görünüm olarak yazılamaz); kategorik sütunların birimi `unit_unknown` kalır, `is_numeric` ile ayırt edilir; `units` 11 tabloyu, `catalog` yalnızca 6 Tier-1 tabloyu kapsar.
+  ✔ 2026-11-14 · `python -m pytest tests -q` · 113 passed (test_store.py: 18). 39 sayısal feature'ın hepsinin birimi var, 16 kategorik `unit_unknown`; catalog 226 satır, rol sayıları sabitlendi; `build` /tmp'den iki kez çalıştı. Negatif kontrol: birimi silinen sayısal feature ve silinen katalog satırı testi düşürdü
 - [ ] **C4** `get_features(table, target)` fonksiyonu
   - Yap: Fonksiyon `role=feature` olan sütunları döndürsün ve o hedefin leakage listesini otomatik olarak çıkarsın.
   - Test: `pytest tests/data_layer/test_store.py::test_get_features`
