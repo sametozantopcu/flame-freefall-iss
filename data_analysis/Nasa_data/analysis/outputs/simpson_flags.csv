@@ -1,0 +1,16 @@
+table,target,feature,control,marginal_rho,partial_rho,n,finding
+acme_normal,hot_ignition,m_fuel_mg_s,day,0.3,0.085,179,ilişki büyük ölçüde grup kaynaklı
+acme_normal,hot_ignition,tad_k_calc,day,0.342,0.171,177,ilişki büyük ölçüde grup kaynaklı
+acme_inverse,burn_time_s,x_fuel_amb_init,day,0.666,0.228,131,ilişki büyük ölçüde grup kaynaklı
+acme_inverse,burn_time_s,p_atm,day,-0.537,-0.043,131,ilişki büyük ölçüde grup kaynaklı
+acme_inverse,burn_time_s,zst,day,-0.436,-0.169,131,ilişki büyük ölçüde grup kaynaklı
+acme_inverse,hot_ignition,x_fuel_amb_init,day,-0.342,-0.035,154,ilişki büyük ölçüde grup kaynaklı
+acme_inverse,ext_mode,x_fuel_amb_init,day,-0.573,-0.019,139,ilişki büyük ölçüde grup kaynaklı
+acme_inverse,ext_mode,p_atm,day,0.577,0.006,139,ilişki büyük ölçüde grup kaynaklı
+flex,burn_rate_K_mm2_s,x_he,diluent,0.417,0.134,258,ilişki büyük ölçüde grup kaynaklı
+smoke,amd_um,rt_r0,material,-0.271,0.491,141,işaret dönüşü (Simpson belirtisi)
+smoke,amd_um,sample_temp_c,material,-0.296,0.492,128,işaret dönüşü (Simpson belirtisi)
+smoke,dusttrak_b_mg_m3,rt_r0,material,-0.397,0.366,143,işaret dönüşü (Simpson belirtisi)
+smoke,dusttrak_b_mg_m3,sample_temp_c,material,-0.404,0.388,131,işaret dönüşü (Simpson belirtisi)
+cfi,k_hot_mm2_s,x_he,diluent,0.398,0.044,148,ilişki büyük ölçüde grup kaynaklı
+cfi,hf_burn_time_s,x_he,diluent,-0.422,-0.156,147,ilişki büyük ölçüde grup kaynaklı

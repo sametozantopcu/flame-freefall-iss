@@ -1,0 +1,227 @@
+dataset,column,role,dtype,unit,missing_pct,n_unique,notes,leakage_reason
+acme_normal,psi_id,meta,str,unit_unknown,0.0,2,kaynak izi,
+acme_normal,source_file,meta,str,unit_unknown,0.0,2,kaynak izi,
+acme_normal,source_row,meta,int64,unit_unknown,0.0,207,kaynak izi,
+acme_normal,flame_type,meta,str,unit_unknown,0.0,1,,
+acme_normal,day,feature,Int64,test day index,0.0,14,grup/karıştırıcı adayı (GroupKFold),
+acme_normal,fuel_raw,meta,str,unit_unknown,0.0,8,,
+acme_normal,test,id,str,unit_unknown,0.0,386,,
+acme_normal,x_fuel,feature,Float64,mol fraction,15.5,107,,
+acme_normal,m_fuel_mg_s,feature,Float64,mg/s,15.5,157,,
+acme_normal,m_n2_mg_s,exclude,Float64,mg/s,61.9,97,çekirdek feature listesinde değil (az dolu / tek deneye özgü / türetilmiş),
+acme_normal,m_tot_mg_s,exclude,Float64,mg/s,61.9,142,çekirdek feature listesinde değil (az dolu / tek deneye özgü / türetilmiş),
+acme_normal,xo2_init,feature,Float64,mol fraction,0.0,327,,
+acme_normal,xo2_final,leakage,Float64,mol fraction,5.2,323,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_normal,p_init_atm,exclude,Float64,atm,46.4,80,çekirdek feature listesinde değil (az dolu / tek deneye özgü / türetilmiş),
+acme_normal,p_final_atm,leakage,Float64,atm,51.6,91,,hedef(ler) burn_time_s ile aynı anda ölçülen/hedeften türetilen çıktı
+acme_normal,p_atm,feature,Float64,atm,5.2,117,,
+acme_normal,zst,feature,Float64,- (mixture fraction),16.1,277,hesaplanmış stokiyometrik karışım kesri,
+acme_normal,tad_k_calc,feature,Float64,K (calculated),16.1,277,"HESAPLANMIŞ (XO2, yakıt, Zst fonksiyonu) — xo2/zst ile çoklu doğrusal; ağaç modellerde tek başına yeterli olabilir",
+acme_normal,experiment,feature,str,unit_unknown,0.0,2,grup/karıştırıcı adayı (GroupKFold),
+acme_normal,x_fuel_flag,meta,string,unit_unknown,84.5,2,,
+acme_normal,m_fuel_mg_s_flag,meta,string,unit_unknown,84.5,2,,
+acme_normal,m_n2_mg_s_flag,meta,string,unit_unknown,84.5,2,,
+acme_normal,m_tot_mg_s_flag,meta,string,unit_unknown,84.5,2,,
+acme_normal,zst_flag,meta,string,unit_unknown,83.9,3,,
+acme_normal,tad_k_calc_flag,meta,string,unit_unknown,83.9,3,,
+acme_normal,cool_flame_raw,leakage,str,unit_unknown,97.9,8,,"hedef(ler) burn_time_s, hot_ignition ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_normal,p_bar,exclude,Float64,bar,53.6,5,tekrarlı: p_atm ile aynı bilgi (birim farkı),
+acme_normal,tfp,exclude,str,unit_unknown,53.6,2,"anlamı belgelenmemiş — sızıntı olabilir, doğrulanmadan kullanma",
+acme_normal,hot_ignition_raw,leakage,str,unit_unknown,53.6,2,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_normal,burn_time_s,target,Float64,s,54.7,78,regression; alt küme: experiment == 'CFI-G' and hot_ignition == 1,"diğer hedefler için sızıntı: hot_ignition, ext_mode"
+acme_normal,ext_mode_raw,leakage,str,unit_unknown,53.6,3,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_normal,peak_burner_T_C,leakage,Float64,°C,65.5,129,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_normal,comments,leakage,str,unit_unknown,88.6,32,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_normal,peak_burner_T_C_flag,meta,string,unit_unknown,88.1,1,,
+acme_normal,fuel_base,feature,str,unit_unknown,0.0,4,grup/karıştırıcı adayı (GroupKFold),
+acme_normal,fuel_bottle_frac,feature,float64,vol fraction,0.0,3,,
+acme_normal,xo2_init_pct,exclude,Float64,%,0.0,327,tekrarlı: xo2_init ×100,
+acme_normal,xo2_final_pct,leakage,Float64,%,5.2,323,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_normal,d_xo2,leakage,Float64,mol fraction,5.2,321,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_normal,hot_ignition,target,Float64,unit_unknown,53.6,2,binary; alt küme: experiment == 'CFI-G',"diğer hedefler için sızıntı: burn_time_s, ext_mode"
+acme_normal,ext_mode,target,string,unit_unknown,65.5,2,binary; alt küme: experiment == 'CFI-G' and ext_mode.notna(),"diğer hedefler için sızıntı: burn_time_s, hot_ignition"
+acme_normal,cool_flame,leakage,string,unit_unknown,97.9,2,,"hedef(ler) burn_time_s, hot_ignition ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_normal,any_ramp_flag,meta,bool,unit_unknown,0.0,2,,
+acme_inverse,psi_id,meta,str,unit_unknown,0.0,2,kaynak izi,
+acme_inverse,source_file,meta,str,unit_unknown,0.0,2,kaynak izi,
+acme_inverse,source_row,meta,int64,unit_unknown,0.0,154,kaynak izi,
+acme_inverse,flame_type,meta,str,unit_unknown,0.0,1,,
+acme_inverse,day,feature,Float64,test day index,0.0,12,grup/karıştırıcı adayı (GroupKFold),
+acme_inverse,test,id,str,unit_unknown,0.0,274,,
+acme_inverse,xo2,feature,Float64,mol fraction,4.0,70,,
+acme_inverse,m_o2_mg_s,feature,Float64,mg/s,2.9,142,,
+acme_inverse,m_n2_mg_s,exclude,Float64,mg/s,60.2,109,çekirdek feature listesinde değil (az dolu / tek deneye özgü / türetilmiş),
+acme_inverse,m_tot_mg_s,exclude,Float64,mg/s,60.2,109,çekirdek feature listesinde değil (az dolu / tek deneye özgü / türetilmiş),
+acme_inverse,x_fuel_amb_init,feature,Float64,mol fraction,0.0,260,,
+acme_inverse,x_fuel_amb_final,leakage,Float64,mol fraction,0.0,261,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_inverse,p_init_atm,exclude,Float64,atm,56.2,69,çekirdek feature listesinde değil (az dolu / tek deneye özgü / türetilmiş),
+acme_inverse,p_final_atm,leakage,Float64,atm,56.2,72,,hedef(ler) burn_time_s ile aynı anda ölçülen/hedeften türetilen çıktı
+acme_inverse,p_atm,feature,Float64,atm,0.0,95,,
+acme_inverse,zst,feature,Float64,- (mixture fraction),4.0,254,hesaplanmış stokiyometrik karışım kesri,
+acme_inverse,tad_k_calc,feature,Float64,K (calculated),4.0,254,"HESAPLANMIŞ (XO2, yakıt, Zst fonksiyonu) — xo2/zst ile çoklu doğrusal; ağaç modellerde tek başına yeterli olabilir",
+acme_inverse,fuel_raw,meta,str,unit_unknown,0.0,4,,
+acme_inverse,experiment,feature,str,unit_unknown,0.0,2,grup/karıştırıcı adayı (GroupKFold),
+acme_inverse,xo2_flag,meta,string,unit_unknown,96.0,2,,
+acme_inverse,m_o2_mg_s_flag,meta,string,unit_unknown,97.1,2,,
+acme_inverse,m_n2_mg_s_flag,meta,string,unit_unknown,96.0,2,,
+acme_inverse,m_tot_mg_s_flag,meta,string,unit_unknown,96.0,2,,
+acme_inverse,zst_flag,meta,string,unit_unknown,96.0,2,,
+acme_inverse,tad_k_calc_flag,meta,string,unit_unknown,96.0,2,,
+acme_inverse,p_bar,exclude,Float64,bar,43.8,6,tekrarlı: p_atm ile aynı bilgi (birim farkı),
+acme_inverse,hc_burnrate_mg_s,feature,Float64,mg/s,43.8,14,,
+acme_inverse,tfp,exclude,string,unit_unknown,43.8,2,"anlamı belgelenmemiş — sızıntı olabilir, doğrulanmadan kullanma",
+acme_inverse,hot_ignition_raw,leakage,str,unit_unknown,43.8,5,,"hedef(ler) burn_time_s, hot_ignition ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_inverse,burn_time_s,target,Float64,s,43.8,51,regression; alt küme: experiment == 'CFI-G' and hot_ignition == 1,"diğer hedefler için sızıntı: hot_ignition, ext_mode"
+acme_inverse,ext_mode_raw,leakage,str,unit_unknown,43.8,3,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_inverse,peak_burner_T_C,leakage,Float64,°C,44.9,141,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_inverse,peak_burner_T_K,leakage,Float64,K,44.5,142,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_inverse,color_raw,leakage,str,unit_unknown,47.4,8,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_inverse,comments,leakage,str,unit_unknown,85.8,21,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_inverse,peak_burner_T_C_flag,meta,string,unit_unknown,99.3,1,,
+acme_inverse,peak_burner_T_K_flag,meta,string,unit_unknown,99.3,1,,
+acme_inverse,fuel_base,feature,str,unit_unknown,0.0,4,grup/karıştırıcı adayı (GroupKFold),
+acme_inverse,xo2_pct,exclude,Float64,%,4.0,70,tekrarlı: xo2 ×100,
+acme_inverse,ignition_class,leakage,string,unit_unknown,43.8,3,,"hedef(ler) burn_time_s, hot_ignition ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_inverse,hot_ignition,target,Float64,unit_unknown,43.8,2,binary; alt küme: experiment == 'CFI-G',diğer hedefler için sızıntı: burn_time_s
+acme_inverse,ext_mode,target,string,unit_unknown,49.3,2,binary; alt küme: experiment == 'CFI-G' and ext_mode.notna(),"diğer hedefler için sızıntı: burn_time_s, hot_ignition"
+acme_inverse,flame_color,leakage,string,unit_unknown,66.8,3,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+acme_inverse,color_hit_limit,leakage,bool[pyarrow],unit_unknown,47.4,2,,"hedef(ler) burn_time_s, hot_ignition, ext_mode ile aynı anda ölçülen/hedeften türetilen çıktı"
+flex,psi_id,meta,str,unit_unknown,0.0,1,kaynak izi,
+flex,source_file,meta,str,unit_unknown,0.0,1,kaynak izi,
+flex,source_row,meta,int64,unit_unknown,0.0,274,kaynak izi,
+flex,test_no,id,Int64,id,0.0,274,,
+flex,flex_id,id,str,unit_unknown,0.0,273,,
+flex,date,id,datetime64[us],unit_unknown,18.2,66,,
+flex,gmt,id,str,unit_unknown,0.4,269,,
+flex,fuel,feature,str,unit_unknown,0.0,2,grup/karıştırıcı adayı (GroupKFold),
+flex,p_mmHg,exclude,Float64,mmHg,0.0,183,tekrarlı: p_atm ×760,
+flex,x_o2,feature,Float64,mol fraction,0.0,15,,
+flex,x_n2,feature,Float64,mol fraction,0.0,33,,
+flex,x_co2,feature,Float64,mol fraction,0.0,14,,
+flex,x_he,feature,Float64,mol fraction,0.0,10,,
+flex,d0_mm,feature,Float64,mm,4.4,163,,
+flex,d_ext_mm,target,Float64,mm,28.1,145,regression; alt küme: d_ext_mm.notna(),"diğer hedefler için sızıntı: burn_time_s, burn_rate_K_mm2_s, test_end"
+flex,burn_rate_K_mm2_s,target,Float64,mm²/s (assumed),5.8,60,regression; alt küme: burn_rate_K_mm2_s.notna(),"diğer hedefler için sızıntı: burn_time_s, d_ext_mm, test_end"
+flex,burn_time_s,target,Float64,s,2.2,162,regression; alt küme: burn_time_s.notna(),"diğer hedefler için sızıntı: burn_rate_K_mm2_s, d_ext_mm, test_end"
+flex,test_end,target,str,unit_unknown,0.0,3,multiclass; alt küme: test_end.notna(),"diğer hedefler için sızıntı: burn_time_s, burn_rate_K_mm2_s, d_ext_mm"
+flex,burn_time_approx,leakage,boolean,unit_unknown,0.0,2,,hedef(ler) burn_time_s ile aynı anda ölçülen/hedeften türetilen çıktı
+flex,d0_mm_flag,meta,string,unit_unknown,97.8,1,,
+flex,d_ext_mm_flag,meta,string,unit_unknown,89.8,1,,
+flex,year,exclude,float64,year,18.2,3,tekrarlı: zaman/kampanya vekili,
+flex,p_atm,feature,Float64,atm,0.0,183,,
+flex,x_o2_pct,exclude,Float64,%,0.0,15,tekrarlı: x_o2 ×100,
+flex,diluent,feature,str,unit_unknown,0.0,3,grup/karıştırıcı adayı (GroupKFold),
+flex,d0_sq_mm2,exclude,Float64,mm²,4.4,163,tekrarlı: d0_mm²,
+flex,d_ext_over_d0,leakage,Float64,-,28.1,189,,"hedef(ler) burn_time_s, burn_rate_K_mm2_s, d_ext_mm, test_end ile aynı anda ölçülen/hedeften türetilen çıktı"
+flex,K_from_d2_law,leakage,Float64,mm²/s,28.5,196,,"hedef(ler) burn_time_s, burn_rate_K_mm2_s, d_ext_mm, test_end ile aynı anda ölçülen/hedeften türetilen çıktı"
+bass2,psi_id,meta,str,unit_unknown,0.0,1,kaynak izi,
+bass2,source_file,meta,str,unit_unknown,0.0,1,kaynak izi,
+bass2,source_row,meta,int64,unit_unknown,0.0,129,kaynak izi,
+bass2,pi,feature,str,unit_unknown,0.0,6,grup/karıştırıcı adayı (GroupKFold),
+bass2,test,id,str,unit_unknown,0.0,129,,
+bass2,date,id,datetime64[us],unit_unknown,0.0,30,,
+bass2,gmt_day,id,str,unit_unknown,0.0,29,,
+bass2,sample_no,id,str,unit_unknown,0.0,107,,
+bass2,material_raw,meta,str,unit_unknown,0.0,51,,
+bass2,flow_restrictor,feature,Int64,setting index,0.0,3,,
+bass2,fan_display_raw,meta,str,unit_unknown,10.1,99,,
+bass2,air_display_raw,meta,str,unit_unknown,3.1,90,,
+bass2,radiometer_gain_raw,meta,str,unit_unknown,0.0,14,,
+bass2,frames_raw,leakage,str,unit_unknown,0.0,110,,"hedef(ler) d_o2_pct, d_co2_pct, co_final_ppm ile aynı anda ölçülen/hedeften türetilen çıktı"
+bass2,o2_init_pct,feature,Float64,% vol,0.0,50,,
+bass2,o2_final_pct,leakage,Float64,% vol,1.6,65,,"hedef(ler) d_o2_pct, d_co2_pct, co_final_ppm ile aynı anda ölçülen/hedeften türetilen çıktı"
+bass2,co2_init_pct,feature,Float64,% vol,1.6,52,,
+bass2,co2_final_pct,leakage,Float64,% vol,4.7,80,,"hedef(ler) d_o2_pct, d_co2_pct, co_final_ppm ile aynı anda ölçülen/hedeften türetilen çıktı"
+bass2,co_init_ppm,feature,Float64,ppm,2.3,65,,
+bass2,co_final_ppm,target,Float64,ppm,7.0,96,regression; alt küme: co_final_ppm.notna() and not co_negative_flag,"diğer hedefler için sızıntı: d_o2_pct, d_co2_pct"
+bass2,co_init_ppm_overrange,meta,boolean,unit_unknown,0.0,2,,
+bass2,co_final_ppm_overrange,leakage,boolean,unit_unknown,0.0,2,,"hedef(ler) d_o2_pct, d_co2_pct, co_final_ppm ile aynı anda ölçülen/hedeften türetilen çıktı"
+bass2,o2_final_pct_flag,meta,string,unit_unknown,98.4,1,,
+bass2,co2_init_pct_flag,meta,string,unit_unknown,98.4,1,,
+bass2,co2_final_pct_flag,meta,string,unit_unknown,96.1,1,,
+bass2,co_init_ppm_flag,meta,string,unit_unknown,97.7,2,,
+bass2,co_final_ppm_flag,meta,string,unit_unknown,93.8,4,,
+bass2,material,feature,str,unit_unknown,0.0,4,grup/karıştırıcı adayı (GroupKFold),
+bass2,geometry,feature,str,unit_unknown,0.0,6,,
+bass2,thickness_mm,feature,float64,mm,25.6,12,,
+bass2,rod_color,feature,str,unit_unknown,58.1,2,,
+bass2,one_sided,exclude,bool,unit_unknown,0.0,2,çekirdek feature listesinde değil (az dolu / tek deneye özgü / türetilmiş),
+bass2,air_display_initial,feature,float64,unit_unknown (device reading),5.4,16,,
+bass2,air_display_multi,exclude,boolean,unit_unknown,0.0,2,çekirdek feature listesinde değil (az dolu / tek deneye özgü / türetilmiş),
+bass2,fan_display_initial,exclude,float64,unit_unknown (device reading),24.0,45,"anlamı belgelenmemiş — sızıntı olabilir, doğrulanmadan kullanma",
+bass2,frames,leakage,float64,count,4.7,106,,"hedef(ler) d_o2_pct, d_co2_pct, co_final_ppm ile aynı anda ölçülen/hedeften türetilen çıktı"
+bass2,d_o2_pct,target,Float64,% vol,1.6,40,regression; alt küme: d_o2_pct.notna() and not o2_final_anomaly_flag,"diğer hedefler için sızıntı: d_co2_pct, co_final_ppm"
+bass2,d_co2_pct,target,Float64,% vol,6.2,82,regression; alt küme: d_co2_pct.notna(),"diğer hedefler için sızıntı: d_o2_pct, co_final_ppm"
+bass2,d_co_ppm,leakage,Float64,ppm,8.5,87,,"hedef(ler) d_o2_pct, d_co2_pct, co_final_ppm ile aynı anda ölçülen/hedeften türetilen çıktı"
+bass2,co_negative_flag,meta,bool,unit_unknown,0.0,2,,
+bass2,o2_final_anomaly_flag,leakage,bool,unit_unknown,0.0,2,,"hedef(ler) d_o2_pct, d_co2_pct, co_final_ppm ile aynı anda ölçülen/hedeften türetilen çıktı"
+smoke,psi_id,meta,str,unit_unknown,0.0,1,kaynak izi,
+smoke,source_file,meta,str,unit_unknown,0.0,2,kaynak izi,
+smoke,source_row,meta,int64,unit_unknown,0.0,142,kaynak izi,
+smoke,flight_code,meta,str,unit_unknown,0.0,3,,
+smoke,material,feature,string,unit_unknown,0.0,5,grup/karıştırıcı adayı (GroupKFold),
+smoke,description,id,str,unit_unknown,0.0,46,,
+smoke,inlet_velocity_cm_s,feature,Float64,cm/s,21.0,5,,
+smoke,rt_r0,feature,Float64,"- (resistance ratio, heater temp proxy)",8.4,22,malzeme içinde Simpson işaret dönüşümü — mutlaka material ile birlikte kullan,
+smoke,aging_s,feature,Float64,s,7.8,122,,
+smoke,m0_per_cc,leakage,Float64,#/cm³,13.2,145,,"hedef(ler) amd_um, dusttrak_b_mg_m3 ile aynı anda ölçülen/hedeften türetilen çıktı"
+smoke,m1_mm_per_cc,leakage,Float64,mm/cm³,10.8,149,,"hedef(ler) amd_um, dusttrak_b_mg_m3 ile aynı anda ölçülen/hedeften türetilen çıktı"
+smoke,m3_mpass,leakage,Float64,unit_unknown,46.1,90,,"hedef(ler) amd_um, dusttrak_b_mg_m3 ile aynı anda ölçülen/hedeften türetilen çıktı"
+smoke,dusttrak_a_mg_m3,leakage,Float64,mg/m³,37.1,105,,"hedef(ler) amd_um, dusttrak_b_mg_m3 ile aynı anda ölçülen/hedeften türetilen çıktı"
+smoke,dusttrak_b_mg_m3,target,Float64,mg/m³,11.4,148,regression; alt küme: dusttrak_b_mg_m3.notna(),diğer hedefler için sızıntı: amd_um
+smoke,amd_um,target,Float64,µm,8.4,150,regression; alt küme: amd_um.notna(),diğer hedefler için sızıntı: dusttrak_b_mg_m3
+smoke,dam_um,leakage,Float64,µm,9.0,149,,"hedef(ler) amd_um, dusttrak_b_mg_m3 ile aynı anda ölçülen/hedeften türetilen çıktı"
+smoke,mpass_3_2,leakage,Float64,-,47.3,88,,"hedef(ler) amd_um, dusttrak_b_mg_m3 ile aynı anda ölçülen/hedeften türetilen çıktı"
+smoke,sigma_g,leakage,Float64,-,25.7,124,,"hedef(ler) amd_um, dusttrak_b_mg_m3 ile aynı anda ölçülen/hedeften türetilen çıktı"
+smoke,dg_um,leakage,Float64,µm,25.7,124,,"hedef(ler) amd_um, dusttrak_b_mg_m3 ile aynı anda ölçülen/hedeften türetilen çıktı"
+smoke,sample_temp_c,feature,Float64,°C,21.6,81,malzeme içinde Simpson işaret dönüşümü — mutlaka material ile birlikte kullan,
+smoke,mass_loss_mg,leakage,Float64,mg,21.6,67,,"hedef(ler) amd_um, dusttrak_b_mg_m3 ile aynı anda ölçülen/hedeften türetilen çıktı"
+smoke,sample_temp_c_flag,meta,string,unit_unknown,98.8,1,,
+smoke,mass_loss_mg_flag,meta,string,unit_unknown,98.2,1,,
+smoke,campaign,feature,str,unit_unknown,0.0,3,grup/karıştırıcı adayı (GroupKFold),
+smoke,gravity,feature,str,unit_unknown,0.0,2,,
+smoke,zero_as_missing_any,meta,bool,unit_unknown,0.0,1,,
+smoke,log_m0,leakage,Float64,log10(#/cm³),13.2,145,,"hedef(ler) amd_um, dusttrak_b_mg_m3 ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,psi_id,meta,str,unit_unknown,0.0,1,kaynak izi,
+cfi,source_file,meta,str,unit_unknown,0.0,1,kaynak izi,
+cfi,source_row,meta,int64,unit_unknown,0.0,227,kaynak izi,
+cfi,flex_no,id,str,unit_unknown,0.0,227,,
+cfi,date,id,datetime64[us],unit_unknown,0.0,53,,
+cfi,local_time,id,str,unit_unknown,0.4,225,,
+cfi,cir,id,str,unit_unknown,0.0,226,,
+cfi,pressure_raw,meta,str,unit_unknown,0.0,15,,
+cfi,x_o2,feature,Float64,mol fraction,0.0,2,,
+cfi,x_n2,feature,Float64,mol fraction,0.0,5,,
+cfi,x_he,feature,Float64,mol fraction,0.0,3,,
+cfi,fiber,feature,str,unit_unknown,30.4,2,,
+cfi,fuel_raw,meta,str,unit_unknown,0.0,4,,
+cfi,d0_mm,feature,Float64,mm,34.8,143,,
+cfi,d_ext_hot_mm,target,Float64,mm,36.6,133,regression; alt küme: d_ext_hot_mm.notna(),"diğer hedefler için sızıntı: k_hot_mm2_s, hf_burn_time_s, has_cool_flame"
+cfi,k_hot_mm2_s,target,Float64,mm²/s,34.8,135,regression; alt küme: k_hot_mm2_s.notna(),"diğer hedefler için sızıntı: hf_burn_time_s, d_ext_hot_mm, has_cool_flame"
+cfi,k_cool_mm2_s,leakage,Float64,mm²/s,44.1,108,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,d_ext_cool_mm,leakage,Float64,mm,47.1,71,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,p_atm_data,exclude,Float64,atm,0.0,7,tekrarlı: p_atm (Master) ile aynı,
+cfi,reignitions,leakage,Float64,count,33.5,8,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,extrap_cf,leakage,Float64,0/1,34.4,2,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,hf_burn_time_s,target,Float64,s (assumed),35.2,130,regression; alt küme: hf_burn_time_s.notna(),"diğer hedefler için sızıntı: k_hot_mm2_s, d_ext_hot_mm, has_cool_flame"
+cfi,peak_hf_rad,leakage,Float64,unit_unknown,36.1,143,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,peak_h2o_rad,leakage,Float64,unit_unknown,36.1,144,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,rad_ratio,leakage,Float64,-,36.1,145,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,rad_2p5mm,leakage,Float64,unit_unknown,61.2,88,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,rad_2p5mm_narrow,leakage,Float64,unit_unknown,61.2,88,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,cf_rad_ratio,leakage,Float64,-,61.2,88,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,rad_2p5mm_cf,leakage,Float64,unit_unknown,71.4,65,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,time_2p5mm,leakage,Float64,s (assumed),57.7,96,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,actual_d_mm,leakage,Float64,mm,57.7,40,,"hedef(ler) k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm, has_cool_flame ile aynı anda ölçülen/hedeften türetilen çıktı"
+cfi,completed_analysis,meta,str,unit_unknown,0.0,2,,
+cfi,ign_power_raw,meta,str,unit_unknown,1.3,8,,
+cfi,ign_time_raw,meta,str,unit_unknown,1.3,17,,
+cfi,p_atm,feature,float64,atm,0.0,7,grup/karıştırıcı adayı (GroupKFold),
+cfi,ign_power_w,feature,float64,W,1.3,7,,
+cfi,ign_time_ms,feature,float64,ms,1.3,15,,
+cfi,fuel,feature,str,unit_unknown,0.0,4,grup/karıştırıcı adayı (GroupKFold),
+cfi,diluent,feature,str,unit_unknown,0.0,2,grup/karıştırıcı adayı (GroupKFold),
+cfi,x_o2_pct,exclude,Float64,%,0.0,2,tekrarlı: x_o2 ×100,
+cfi,in_experimental_table,meta,bool,unit_unknown,0.0,2,,
+cfi,has_cool_flame,target,int64,0/1,0.0,2,binary; alt küme: completed_analysis == 'Yes',"diğer hedefler için sızıntı: k_hot_mm2_s, hf_burn_time_s, d_ext_hot_mm"
+cfi,p_mismatch,meta,boolean,unit_unknown,0.0,1,,

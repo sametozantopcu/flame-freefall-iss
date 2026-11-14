@@ -1,2 +1,6 @@
 data/* 
 __pycache__/ 
+data_analysis/Nasa_data/csv
+data_analysis/Nasa_data/raw
+data_analysis/Nasa_data/analysis/logs/
+*_log.txt

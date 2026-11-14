@@ -1,0 +1,9 @@
+{
+ "acme_normal_ign_rate":0.7374301676,
+ "acme_inverse_ign_rate":0.8506493506,
+ "flex_slope_all":1.3095343814,
+ "flex_K_ratio_median":0.9511842477,
+ "cfi_slope":-1.4247235803,
+ "cfi_K_ratio_median":0.8185494689,
+ "bass_pmma_ratio_median":-0.8
+}
