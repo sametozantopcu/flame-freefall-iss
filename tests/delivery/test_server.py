@@ -111,3 +111,76 @@ def test_key_not_in_static_files():
 def test_binds_loopback(srv):
     m, port = srv
     assert m.make_server(0).server_address[0] == "127.0.0.1"
+
+
+# ---- L1: robustness (no live API) ----
+def _ask(m, q="smoke in PSI-101?"):
+    return m.answer_question(q)
+
+
+@pytest.fixture()
+def fast(monkeypatch):
+    m = _load()
+    monkeypatch.setenv("API_KEY", SECRET)
+    monkeypatch.setattr(m, "LLM_RETRY_WAIT", 0)
+    return m
+
+
+def test_retry_after_timeout_then_ok(fast, monkeypatch):
+    calls = []
+    def f(s, u):
+        calls.append(1)
+        if len(calls) == 1:
+            raise TimeoutError("x")
+        return {"answer": "ok PSI-101", "sources": ["PSI-101"]}
+    monkeypatch.setattr(fast, "call_llm", f)
+    j = _ask(fast)
+    assert j["mode"] == "llm" and j.get("reason") is None and len(calls) == 2
+
+
+def test_two_timeouts_fallback_reason(fast, monkeypatch, capsys):
+    calls = []
+    def f(s, u):
+        calls.append(1)
+        raise TimeoutError("x")
+    monkeypatch.setattr(fast, "call_llm", f)
+    j = _ask(fast)
+    assert j["mode"] == "fallback" and j["reason"] == "timeout" and len(calls) == 2
+    err = capsys.readouterr().err
+    assert "timeout" in err and SECRET not in err and "Authorization" not in err
+    assert SECRET not in json.dumps(j)
+
+
+def test_http_429_retries_then_reason(fast, monkeypatch):
+    calls = []
+    def f(s, u):
+        calls.append(1)
+        raise fast.LLMCallError("http_429")
+    monkeypatch.setattr(fast, "call_llm", f)
+    j = _ask(fast)
+    assert j["reason"] == "http_429" and len(calls) == 2
+
+
+def test_bad_response_no_retry(fast, monkeypatch):
+    calls = []
+    def f(s, u):
+        calls.append(1)
+        return {"answer": ""}
+    monkeypatch.setattr(fast, "call_llm", f)
+    j = _ask(fast)
+    assert j["mode"] == "fallback" and j["reason"] == "bad_response" and len(calls) == 1
+
+
+def test_no_key_reason(fast, monkeypatch):
+    def boom(*a, **k):
+        raise fast.load_settings.__globals__["LLMError"]("no key")
+    monkeypatch.setattr(fast, "load_settings", boom)
+    assert _ask(fast)["reason"] == "no_key"
+
+
+def test_context_limit_and_defaults(fast):
+    site = fast.load_site()
+    assert fast.MAX_CONTEXT_CHARS <= 2000 and fast.LLM_TIMEOUT == 45
+    for q in ("Which experiments matter most for a high-oxygen Mars habitat?", "What does the FLEX model predict?", "smoke PSI-101"):
+        ctx = fast.build_context(fast.select_context(q, site), site)
+        assert len(ctx) <= 2000 and "[LIMITS]" in ctx

@@ -5,7 +5,7 @@ Run: `python app/server.py [--port 8000]`  (env PORT also works).
 
 The LLM key is read server-side via `src.discovery.llm.load_settings` (.env / environment) and never leaves
 this process: not in responses, logs or static files. Without a key (or on any LLM error) the endpoint
-answers HTTP 200 with mode "fallback" built from the closest static cards.
+answers HTTP 200 with mode "fallback" (plus a short `reason`) built from the closest static cards.
 """
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ import mimetypes
 import os
 import re
 import sys
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
@@ -29,9 +30,10 @@ from src.discovery.llm import load_settings  # noqa: E402  (reuses .env parsing 
 SITE_JSON = APP_DIR / "data" / "site_data.json"
 MAX_QUESTION = 500
 MAX_BODY = 8192
-LLM_TIMEOUT = float(os.environ.get("LLM_TIMEOUT", 90))  # seconds; the endpoint can be slow
+LLM_TIMEOUT = float(os.environ.get("LLM_TIMEOUT", 45))  # seconds per attempt (one retry follows)
+LLM_RETRY_WAIT = 1.5  # seconds before the single retry
 LLM_MAX_TOKENS = 350  # short answers (<=150 words)
-MAX_CONTEXT_CHARS = 5000
+MAX_CONTEXT_CHARS = 2000
 BLOCKED_SUFFIXES = {".py", ".pyc", ".env"}
 
 SYSTEM_PROMPT = (
@@ -101,10 +103,21 @@ def _render_item(it: dict) -> str:
 
 
 def build_context(items: list[dict], site: dict) -> str:
+    """Most relevant items first, within MAX_CONTEXT_CHARS; the LIMITS line is always kept."""
     model = site.get("model") or {}
     notes = (site.get("meta") or {}).get("notes") or model.get("notes") or []
-    parts = [_render_item(i) for i in items]
-    parts.append("[LIMITS] No partial-gravity (Moon/Mars) data exists. " + " ".join(str(n) for n in notes))
+    limits = ("[LIMITS] No partial-gravity (Moon/Mars) data exists. " + " ".join(str(n) for n in notes))[:350]
+    left = MAX_CONTEXT_CHARS - len(limits) - 1
+    parts = []
+    for it in items:  # items are already ordered by relevance within their kind
+        line = _render_item(it)
+        if len(line) + 1 > left:
+            if left < 250:
+                continue
+            line = line[:left - 1]
+        parts.append(line)
+        left -= len(line) + 1
+    parts.append(limits)
     return "\n".join(parts)[:MAX_CONTEXT_CHARS]
 
 
@@ -112,7 +125,7 @@ def _source(it: dict) -> dict:
     return {("card_id" if it["type"] == "card" else "psi_id"): it["id"], "doi": it["doi"]}
 
 
-def fallback_answer(question: str, items: list[dict]) -> dict:
+def fallback_answer(question: str, items: list[dict], reason: str | None = None) -> dict:
     top = [i for i in items if i["score"] > 0][:3] or items[:1]
     lines = []
     for it in top:
@@ -123,7 +136,28 @@ def fallback_answer(question: str, items: list[dict]) -> dict:
             lines.append(f"{it['id']} {r.get('name')}: {(r.get('summary') or r.get('title') or '')[:300]}")
     answer = ("LLM unavailable - showing closest cards. " + " | ".join(lines)) if lines else \
         "LLM unavailable and nothing in the data matches this question."
-    return {"answer": answer, "sources": [_source(i) for i in top], "mode": "fallback"}
+    return {"answer": answer, "sources": [_source(i) for i in top], "mode": "fallback",
+            "reason": reason or "error"}
+
+
+class LLMCallError(Exception):
+    """Carries only a short reason code (never request data or credentials)."""
+
+
+def classify_error(exc: BaseException) -> str:
+    if isinstance(exc, LLMCallError):
+        return str(exc)
+    if isinstance(exc, TimeoutError):
+        return "timeout"
+    if isinstance(exc, ConnectionError):
+        return "connection"
+    if type(exc).__name__ == "LLMError":
+        return "no_key"
+    return "bad_response" if isinstance(exc, (ValueError, KeyError, TypeError)) else "error"
+
+
+def _log(reason: str, secs: float, attempt: int) -> None:
+    sys.stderr.write(f"LLM fail reason={reason} attempt={attempt} after={secs:.1f}s\n")  # no key/headers/body
 
 
 def call_llm(system: str, user: str) -> dict:
@@ -133,11 +167,19 @@ def call_llm(system: str, user: str) -> dict:
     st = load_settings()
     body = {"model": st.model, "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
             "max_tokens": LLM_MAX_TOKENS, "temperature": 0, "thinking": False}
-    r = requests.post(st.base_url.rstrip("/") + "/chat/completions", json=body, timeout=LLM_TIMEOUT,
-                      headers={"Authorization": f"Bearer {st.api_key}", "Content-Type": "application/json"})
+    try:
+        r = requests.post(st.base_url.rstrip("/") + "/chat/completions", json=body, timeout=LLM_TIMEOUT,
+                          headers={"Authorization": f"Bearer {st.api_key}", "Content-Type": "application/json"})
+    except requests.Timeout:
+        raise TimeoutError("timeout") from None
+    except requests.ConnectionError:
+        raise ConnectionError("connection") from None
     if r.status_code != 200:
-        raise RuntimeError(f"LLM HTTP {r.status_code}")
-    return _parse_json(r.json()["choices"][0]["message"]["content"])
+        raise LLMCallError(f"http_{r.status_code}")
+    try:
+        return _parse_json(r.json()["choices"][0]["message"]["content"])
+    except Exception:
+        raise LLMCallError("bad_response") from None
 
 
 def answer_question(question: str, site: dict | None = None) -> dict:
@@ -145,15 +187,27 @@ def answer_question(question: str, site: dict | None = None) -> dict:
     items = select_context(question, site)
     try:
         load_settings()  # raises when no key; fast path to fallback
-        res = call_llm(SYSTEM_PROMPT, f"Context:\n{build_context(items, site)}\n\nQuestion: {question}")
-        answer = str(res.get("answer") or "").strip()
-        if not answer:
-            raise ValueError("empty answer")
-        wanted = {str(s) for s in (res.get("sources") or res.get("cards") or [])}
-        used = [i for i in items if str(i["id"]) in wanted] or [i for i in items if i["id"] and str(i["id"]) in answer]
-        return {"answer": answer, "sources": [_source(i) for i in used], "mode": "llm"}
-    except Exception:  # any failure (no key, network, timeout, bad JSON) -> static fallback; never log details
-        return fallback_answer(question, items)
+    except Exception:
+        return fallback_answer(question, items, "no_key")
+    user = f"Context:\n{build_context(items, site)}\n\nQuestion: {question}"
+    reason = "error"
+    for attempt in (1, 2):
+        t0 = time.monotonic()
+        try:
+            res = call_llm(SYSTEM_PROMPT, user)
+            answer = str(res.get("answer") or "").strip()
+            if not answer:
+                raise LLMCallError("bad_response")
+            wanted = {str(s) for s in (res.get("sources") or res.get("cards") or [])}
+            used = [i for i in items if str(i["id"]) in wanted] or [i for i in items if i["id"] and str(i["id"]) in answer]
+            return {"answer": answer, "sources": [_source(i) for i in used], "mode": "llm", "reason": None}
+        except Exception as e:
+            reason = classify_error(e)
+            _log(reason, time.monotonic() - t0, attempt)
+            if attempt == 2 or reason not in ("timeout", "connection", "http_429", "http_503"):
+                break
+            time.sleep(LLM_RETRY_WAIT)
+    return fallback_answer(question, items, reason)
 
 
 class Handler(BaseHTTPRequestHandler):

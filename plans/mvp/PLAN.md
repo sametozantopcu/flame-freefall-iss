@@ -5,10 +5,10 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 ## Durum
 
-- İlerleme: 10/16 (S1–S9 ve R1 tamam; Faz 2: L1, R2–R6 bekliyor)
+- İlerleme: 11/16 (S1–S9, R1 ve L1 tamam; Faz 2: R2–R6 bekliyor)
 - Son güncelleme: 2026-11-15 (R1 tamam: PR #7 risk motoru `src/risk/` altına Feature Store üzerinden taşındı; önceki: S9 tamam; S3 düzeltmesi: bilinen bileşeni <3 olan araştırmalar skorsuz `low_confidence`)
 - Güncelleme (2026-11-14): `design/` v4 (FlameSense koyu render + render_top) uygulandı; Explore taşma/çakışma düzeltildi (liste kendi içinde kaydırılır); Explore (ölçülmüş noktalar, Feature Store) ve Scenario (FLEX tepki eğrisi) grafikleri gerçek veriyle geri geldi.
-- Sıradaki adım: Faz 2 — L1 (bağımsız) ve R2 (R1'e bağlı); sıra R2 → R3 → R4, R5 ve R6 sonda
+- Sıradaki adım: Faz 2 — R2 → R3 → R4, R5 ve R6 sonda
 - Açık sorunlar (R1): `Anchors.from_feature_store` yayılma (PSI-39) katsayısını gömülü değerle aynı üretemiyor — Feature Store `cfi` tablosu deney tablosunun 87 satırından 79'unu içerir; k_hot'lu satır 66 (gömülü n=74), üs 0.319 (gömülü 0.454, fark 0.135 > orijinal ±0.10 tolerans). Fark `tests/risk/test_engine.py::test_spread_embedded_vs_refit_difference_is_reported` ile ölçülüp raporlanır; karar bekliyor. Diğerleri (yanma süresi n=175, tutuşma n=333, PMMA n=98/93) gömülü değerlerle aynı.
 - Açık sorunlar: EVREN LLM ucu yanıt vermiyor (ReadTimeout) → fallback çalışıyor; push kimlik bilgisi bekliyor; tarayıcıda görsel doğrulama yapılmadı; bkz. "Açık noktalar".
 
@@ -129,7 +129,8 @@ Python: yalnızca `/home/halil/miniconda3/envs/nasa_hack/bin/python` (aşağıda
 
 Onaylı plan: LLM soru-cevabını sağlamlaştır ve kapatılmış PR #7'deki (yazar: sametozantopcu) risk motorunu mevcut statik siteye, dayanakları etiketlenmiş biçimde ekle. Çalışma dalı `risk-engine`; mevcut dosyalarda yalnızca ekleme yapılır (FLEX modeli, sıralama, kartlar, FlameSense değişmez). PR #7'den alınmayanlar: `.gitignore` değişikliği, 19 dosyadaki docstring çevirileri, `csv/` doğrudan okuma. Sıra: L1 bağımsız; R1 → R2 → R3 → R4; R5, L1 ve R3'ten sonra; R6 en sonda.
 
-- [ ] **L1 · LLM soru-cevabını sağlamlaştır**
+- [x] **L1 · LLM soru-cevabını sağlamlaştır**
+  ✔ 2026-11-15 · pytest tests/delivery/test_server.py -q; node --check app/ui/ask.js; bash scripts/e2e_check.sh; 3 canlı soru · 13 passed, E2E OK, 3/3 mode:llm
   - Amaç: Bağlam üst sınırı 5000 → ~2000 karakter; zaman aşımı/429/503/bağlantı hatasında bir yeniden deneme; hata türü ve süre loglanır (anahtar/başlık asla); yanıta `reason` eklenir; sohbet kutusu fallback'te kısa durum notu gösterir.
   - Dosyalar: `app/server.py`, `app/ui/ask.js`, `tests/delivery/test_server.py`.
   - Kabul testi: `$PY -m pytest tests/delivery/test_server.py -q` (mock'lu: yeniden deneme, `reason`, anahtar sızmaması) + 3 ardışık canlı soru, en az 2/3 `mode: llm`.
