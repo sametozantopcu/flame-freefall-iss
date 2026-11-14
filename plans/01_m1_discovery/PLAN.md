@@ -4,11 +4,13 @@ Mimari: [Architecture.md §2](../../Architecture.md) · Kod: `src/discovery/` ·
 
 ## Durum
 
-- **İlerleme:** 0 / 21
+- **İlerleme:** 1 / 21
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** A1 (genel sıra 3: 03 ve 05/E1, E3 ile birlikte; 00/C5 ve 00/D2 hazır)
+- **Sıradaki adım:** A2 (LLM ile metinden zarf; genel sıra 3: 03 ve 05/E1, E3 ile birlikte)
 - **Açık sorunlar:**
   - LLM adımları (A2, E1–E4) EVREN API anahtarını kök `.env`'den okur; EVREN kullanım şartları hesap sahibince onaylanmış olmalı.
+  - Veri sürprizi (A1): PSI-21 `fuel_bottle` değerleri tablo programı otomatik doldurma artığı gibi (`100% C2H5…C2H11`, `40% CH5…CH14`; 30 farklı değer), PSI-23'te `45% CH4 with N3`. Zarf bunları olduğu gibi tutar; skorlama `material_class` kullanmalı, ileride bir temizlik adımı gerekebilir.
+  - SAFFIRE-I `Percent O2` metni "21.5 - 21.7" ama `o2_pct_approx` 21.5; zarf `o2_pct_approx`'u kullanır.
 
 ## Hedef
 
@@ -27,14 +29,15 @@ Her sıranın gerekçesi gösterilir ve kaynaklara atıf yapılır.
 
 ## Faz A — Koşul zarfı (`inv_envelope`)
 
-- [ ] **A1** Tablolardan zarf çıkarımı
+- [x] **A1** Tablolardan zarf çıkarımı
   - Yap: Parquet tablosu olan investigation'lar için şu alanları çıkar:
     O2 min/max, basınç min/max, seyrelticiler, yakıt/malzeme sınıfı, akış, yerçekimi, olgu etiketleri. `source=table` olarak işaretle.
   - Test: `pytest tests/discovery/test_envelope.py::test_from_tables`
   - Kabul:
     - ACME O2 aralığı parquet tablosundaki min/max ile birebir aynı.
     - Hiçbir satırda min > max yok.
-    - Birimler O2 için %, basınç için atm.
+    - Birimler O2 için %, basınç için atm. Not: `src/discovery/envelope.py` → `envelope_from_tables()`: table_map'te kapsamı table/inferred olan her (investigation, tablo) için bir satır (17). O2'nin anlamı `o2_basis` ile belirtilir (ACME ters alevde oksitleyici akımı; BASS-II başlangıç kabin O2'si); O2 sütunu olmayan tablolarda %21 varsayılmaz. p ≤ 0 (FLEX PSI-69 source_row 113, p_mmHg=0) ve negatif akış (SPICE, 8 değer) zarfa katılmaz, sayılır.
+  ✔ 2026-11-14 · `python -m pytest tests/discovery/test_envelope.py -q` · 28 passed (bağımsız ajan uygulamayı görmeden yazdı; sözleşmedeki '16 satır' hatamı kendi hesabıyla yakaladı, doğrusu 17); tüm set 501 passed, 0 skipped. ACME O2 ve basınç min/max'ı her (psi_id, tablo) için parquet ×100 ile birebir. Negatif kontrol (7, koda uygulandı, baz çizgisi yeşil): ters alevi 'ambient' saymak, 0 atm'yi tutmak, çıkarımsal PSI-102'ye tüm satırları vermek, %21 varsaymak, 'Pre-test' satırlarını malzeme saymak, metin akışlarını ayrıştırmamak, boş sütunlardan etiket üretmek hepsi yakalandı
 - [ ] **A2** Metinden zarf çıkarımı (tablosu olmayanlar için, LLM)
   - Yap: Parquet tablosu olmayan investigation'lar için (00/D4 `table_map`'te `coverage='none'`, bugün 9 investigation) amaç, yaklaşım ve etkiler metninden O2, basınç, seyreltici, yakıt/malzeme sınıfı, yerçekimi ve olgu etiketlerini LLM ile çıkar (`src/discovery/llm.py`, aşağıdaki LLM kuralları).
     Her değer için `source=text` olsun ve kaynak metinden **birebir alıntı** (`source_span`) saklansın.
