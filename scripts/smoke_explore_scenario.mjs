@@ -13,7 +13,7 @@ function load(withSite) {
   win.window = win;
   const ctx = vm.createContext(win);
   ctx.document = win.document;
-  const files = (withSite ? ['data/site_data.js'] : []).concat(['config.js', 'i18n.js', 'core/data.js', 'ui/components.js', 'views/kesif.js', 'views/senaryo.js']);
+  const files = (withSite ? ['data/site_data.js'] : []).concat(['config.js', 'i18n.js', 'core/physics.js', 'core/data.js', 'ui/components.js', 'ui/charts.js', 'views/kesif.js', 'views/senaryo.js']);
   for (const f of files) vm.runInContext(fs.readFileSync(path.join(APP, f), 'utf8'), ctx, { filename: f });
   return win.FF;
 }
@@ -102,6 +102,33 @@ ok(s.innerHTML.includes('min="' + m.p_atm.min + '"') && s.innerHTML.includes('ma
   FF.site.model = saved;
   ok(sn.innerHTML.includes("outside the model's valid range") || sn.innerHTML.includes('outside the model&#39;s valid range') || sn.innerHTML.includes('outside the model&#039;s valid range'), 'negative prediction shows "outside the model\'s valid range"');
   ok(!/-\d[\d.,]*\s*mm²\/s/.test(sn.innerHTML) && !/−\d[\d.,]*\s*mm²\/s/.test(sn.innerHTML), 'negative burn rate never shown as number');
+}
+
+// --- Charts on real data
+{
+  const pick = (psi) => { let h; const rr = { innerHTML: '', querySelector() { return null; },
+    querySelectorAll(sel) { return sel === '[data-psi]' ? [{ getAttribute: () => psi, addEventListener(e, f) { h = f; } }] : []; } };
+    FF.views.kesif.render(rr); h(); return rr.innerHTML; };
+  const ser = J.series;
+  ok(Object.keys(ser).length >= 3, 'site_data has measured series (' + Object.keys(ser).join(', ') + ')');
+  for (const [psi, sr] of Object.entries(ser)) {
+    ok(sr.points.every(p => p.slice(0, 2).every(v => typeof v === 'number' && isFinite(v))) && sr.n_plotted === sr.points.length && sr.n_plotted <= sr.n_total, 'series ' + psi + ' has only finite measured points (' + sr.n_plotted + ' of ' + sr.n_total + ')');
+    const html = pick(psi);
+    const dots = (html.match(/class="lit-fill"/g) || []).length;
+    ok(dots === sr.n_plotted, 'explore chart ' + psi + ' draws one dot per measured point (' + dots + ')');
+    ok(html.includes('not zero-filled') && html.includes(sr.source_files[0].split('/').pop()), 'explore chart ' + psi + ' states source and missing-value rule');
+  }
+  const noSer = invs.find(i => !ser[i.psi_id]);
+  ok(pick(noSer.psi_id).includes('No plottable series in the data layer'), 'investigation without series shows "no plottable series" note');
+  ok(!/class="lit-fill"/.test(pick(noSer.psi_id)), 'no invented curve without a series');
+  ok(ser['PSI-25'].reference && pick('PSI-25').includes('reference: no O2 change'), 'reference line is labelled as reference');
+  const sc = root(); FF.views.senaryo.render(sc);
+  ok(/<svg class="chart"/.test(sc.innerHTML) && sc.innerHTML.includes('class="lit"'), 'scenario draws the FLEX response curve');
+  ok(sc.innerHTML.includes('Ridge model, group-CV R² ' + FF.num(cv.fuel_diluent.r2, 3)), 'scenario chart note shows group-CV R2');
+  ok(sc.innerHTML.includes('Predicted burn rate K, mm²/s') && sc.innerHTML.includes('Oxygen, %'), 'scenario chart has axis labels with units');
+  const mod = JSON.parse(JSON.stringify(FF.site.model)); mod.coef.intercept = -1e6;
+  const saved = FF.site.model; FF.site.model = mod; const sn2 = root(); FF.views.senaryo.render(sn2); FF.site.model = saved;
+  ok(!sn2.innerHTML.includes('class="lit"'), 'all-negative curve draws no line (negative region not drawn)');
 }
 
 // --- No data: must not crash

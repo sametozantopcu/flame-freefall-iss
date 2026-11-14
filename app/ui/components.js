@@ -58,10 +58,14 @@
 
   /** Grafik plakası: köşe işaretli alan. ar (en/boy) verilirse sahnede kalan alanı doldurur
    *  ve grafik bu oranı koruyarak sığabildiği en büyük boyuta gelir. */
-  function plate(html, ar) {
+  function plate(html, ar, sized) {
+    if (sized) return '<div class="plate sized">' + html + '</div>';
     if (!ar) return '<div class="plate">' + html + '</div>';
     return '<div class="plate-fit"><div class="plate fill" style="--ar:' + ar.toFixed(4) + '">' + html + '</div></div>';
   }
+
+  /** Kaydırılabilir bölge: uzun satır listeleri kendi içinde kaydırılır, altındaki banda taşmaz. */
+  function scroll(html, cls) { return '<div class="scroll' + (cls ? ' ' + cls : '') + '">' + html + '</div>'; }
 
   /** İki sütunlu satır ızgarası. down: sütun sütun akar (önce sol sütun dolar). */
   function grid2(html, count, down) {
@@ -82,6 +86,6 @@
   FF.ui = FF.ui || {};
   FF.ui.components = {
     esc: esc, row: row, rowButton: rowButton, text: text, rule: rule, eyebrow: eyebrow,
-    options: options, note: note, plate: plate, grid2: grid2, screen: screen
+    options: options, note: note, plate: plate, scroll: scroll, grid2: grid2, screen: screen
   };
 })(window.FF = window.FF || {});

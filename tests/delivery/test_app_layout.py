@@ -10,12 +10,12 @@ APP = REPO / "app"
 
 
 def test_layout():
-    assert (APP / "index.html").is_file() and not (REPO / "design").exists() and not (REPO / ".streamlit").exists()
+    assert (APP / "index.html").is_file() and not (REPO / ".streamlit").exists()
     # plans/mvp S8 places the local server at app/server.py; only it and the logo helper are allowed
-    allowed = {APP / "server.py", APP / "assets" / "logo_uyarla.py"}
+    allowed = {APP / "server.py", APP / "assets" / "logo_uyarla.py", APP / "assets" / "flamesense_box" / "oled_live.py"}
     assert all(p in allowed for p in APP.rglob("*.py")), [p for p in APP.rglob("*.py") if p not in allowed]
     box = APP / "assets" / "flamesense_box"
-    assert (box / "flamesense.blend").is_file() and len(list(box.glob("render_*.png"))) == 4
+    assert (box / "flamesense.blend").is_file() and len(list(box.glob("render_*.png"))) == 5
 
 
 def test_no_streamlit_plotly_no_lang_switch():

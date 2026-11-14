@@ -14,6 +14,8 @@ Contract (consumed by S6/S7/S8):
                     materials[], gravity[], phenomena[], n_rows|null}}
   model            fit_flex() dict (target, doi, n, features, coef, impute, cv, known_combos, ranges, fuels, diluents)
   cards[]          4 insight cards (id,title,finding,value,unit,n,psi_id,doi,source_file,caveat,equipment_implication,values)
+  series           {psi_id: {table, x{col,label,unit}, y{...}, n_total, n_plotted, source_files[], points[[x,y,source_row,file_idx]],
+                    reference|null}} measured points only (rows with x or y missing are omitted, not zero-filled)
   flamesense       {concept: true, built: false, dimensions_mm, mcu, sensors[], images[]}
 """
 from __future__ import annotations
@@ -29,7 +31,7 @@ import pandas as pd
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from src.data_layer import metadata  # noqa: E402
+from src.data_layer import metadata, store  # noqa: E402
 from src.discovery import ranking  # noqa: E402
 from src.discovery.envelope import envelope_from_tables  # noqa: E402
 from src.insight.cards import load_cards  # noqa: E402
@@ -105,6 +107,38 @@ def _summary(title, objective) -> str | None:
     return s if len(s) <= SUMMARY_CHARS else s[:SUMMARY_CHARS].rsplit(" ", 1)[0] + "..."
 
 
+# Measured (x, y) series for the Explore chart, read from the Feature Store only. One pair per investigation that has a
+# table with a meaningful pair; others get no chart. `clean_nonpos`: values <= 0 in that column are treated as missing
+# (same rule as flex_model._clean for p_atm). Rows where x or y is missing are left out (never filled with 0).
+SERIES = {
+    "PSI-25": {"table": "bass2", "x": ("o2_init_pct", "Initial O2", "% vol"), "y": ("o2_final_pct", "Final O2", "% vol"),
+               "reference": {"kind": "identity", "label": "reference: no O2 change"}},
+    "PSI-69": {"table": "flex", "x": ("x_o2_pct", "Oxygen in ambient gas", "%"),
+               "y": ("burn_rate_K_mm2_s", "Burn rate K", "mm2/s (assumed)")},
+    "PSI-101": {"table": "smoke", "x": ("inlet_velocity_cm_s", "Inlet velocity", "cm/s"),
+                "y": ("amd_um", "Aerosol mean diameter (AMD)", "um")},
+    "PSI-39": {"table": "cfi", "x": ("x_o2_pct", "Oxygen in ambient gas", "%"),
+               "y": ("k_hot_mm2_s", "Hot-flame burn rate K", "mm2/s")},
+}
+
+
+def _series() -> dict:
+    con = store.connect()
+    out = {}
+    for psi, c in SERIES.items():
+        xc, yc = c["x"][0], c["y"][0]
+        df = con.execute(f"SELECT psi_id, source_file, source_row, {xc} AS x, {yc} AS y FROM {c['table']} "
+                         "WHERE psi_id = ? ORDER BY source_row", [psi]).df()
+        n_total = int(len(df))
+        ok = df.dropna(subset=["x", "y"])
+        files = sorted(ok["source_file"].astype(str).unique().tolist())
+        pts = [[float(r.x), float(r.y), int(r.source_row), files.index(str(r.source_file))] for r in ok.itertuples()]
+        out[psi] = {"table": c["table"], "psi_id": psi, "x": {"col": xc, "label": c["x"][1], "unit": c["x"][2]},
+                    "y": {"col": yc, "label": c["y"][1], "unit": c["y"][2]}, "n_total": n_total, "n_plotted": len(pts),
+                    "source_files": files, "points": pts, "reference": c.get("reference")}
+    return out
+
+
 def build() -> dict:
     inv = pd.read_parquet(metadata.META_DIR / "investigations.parquet")
     text = pd.read_parquet(metadata.META_DIR / "inv_envelope_text.parquet")
@@ -139,7 +173,7 @@ def build() -> dict:
             "notes": ["No partial-gravity (Moon/Mars) data exists in the datasets; scores are habitat-condition overlap only.",
                       "Valid only for fuel/diluent combinations present in FLEX data."],
         },
-        "investigations": rows, "model": model, "cards": cards, "flamesense": FLAMESENSE,
+        "investigations": rows, "model": model, "cards": cards, "flamesense": FLAMESENSE, "series": _series(),
     }
     return clean(site)
 

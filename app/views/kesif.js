@@ -30,13 +30,22 @@
       rows += U.rowButton(String(e.rank).padStart(2, '0') + '  ' + e.name, label,
         { selected: e.psi_id === state.psi, dataKey: 'psi', dataValue: e.psi_id, bar: scored ? e.score / 100 : undefined });
     });
-    return U.row(t('explore.count', { n: invs.length }), t('explore.score')) + U.rule() + rows;
+    return U.row(t('explore.count', { n: invs.length }), t('explore.score')) + U.rule() + U.scroll(rows);
+  }
+
+  /** Measured points from the data layer (site.series), or an explicit note when none exist. Never an illustrative curve. */
+  function chartHtml(e) {
+    var U = FF.ui.components, ser = FF.site.series && FF.site.series[e.psi_id];
+    if (!ser || !ser.points || !ser.points.length) return U.text(t('explore.no_series'), { dim: true });
+    var svg = FF.ui.charts.measured(ser, t('explore.chart_aria', { name: e.name, n: ser.n_plotted }));
+    return svg + '<div class="chart-cap">' + esc(t('explore.chart_cap', { n: ser.n_plotted, total: ser.n_total })) + '</div>';
   }
 
   function stageHtml(e, m) {
     var U = FF.ui.components, env = e.envelope || {};
     var scored = isNum(e.score);
-    var h = U.row(e.name, e.psi_id) + U.text(e.title, { dim: true }) + U.rule();
+    var head = U.row(e.name, e.psi_id) + U.text(e.title || t('explore.na'), { dim: true }) + U.rule();
+    var h = '';
     if (scored) {
       var contrib = FF.data.contributions(e, m.score_assumptions.weights);
       h += U.row(t('explore.score_label'), num(e.score, 1) + ' / 100', { valueInk: true })
@@ -77,7 +86,11 @@
         + '" target="_blank" rel="noopener">' + esc(e.doi) + '</a></span></div>'
       : U.row(t('explore.doi'), t('explore.na'), { dim: true });
     h += U.text(e.summary || t('explore.na'), { dim: true });
-    return '<div class="list" style="overflow:auto;max-height:100%">' + h + '</div>';
+    var ser = FF.site.series && FF.site.series[e.psi_id];
+    if (ser && ser.points && ser.points.length) {
+      h += U.rule() + U.text(t('explore.chart_src', { table: ser.table, files: ser.source_files.map(function (f) { return f.split('/').pop(); }).join(', ') }), { dim: true });
+    }
+    return '<div class="list">' + head + '</div>' + chartHtml(e) + U.scroll(h, 'detail');
   }
 
   function render(root) {
@@ -90,11 +103,14 @@
     var invs = FF.data.investigations(), m = s.meta;
     if (!state.psi || !invs.some(function (x) { return x.psi_id === state.psi; })) state.psi = invs[0].psi_id;
     var e = invs.filter(function (x) { return x.psi_id === state.psi; })[0];
+    var prev = root.querySelector('.list.wide .scroll'), top = prev ? prev.scrollTop : 0;
     root.innerHTML = U.screen({
       listLabel: t('explore.eyebrow_list'), list: listHtml(invs, m), listClass: 'wide',
       stageLabel: t('explore.eyebrow_detail'), stage: stageHtml(e, m),
       note: assumptionsText(m)
     });
+    var sc = root.querySelector('.list.wide .scroll');
+    if (sc) sc.scrollTop = top;
     Array.prototype.forEach.call(root.querySelectorAll('[data-psi]'), function (b) {
       b.addEventListener('click', function () { state.psi = b.getAttribute('data-psi'); render(root); });
     });

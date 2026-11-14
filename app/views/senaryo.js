@@ -9,7 +9,7 @@
 
   function init(model) {
     var c0 = model.known_combos[0], imp = model.impute;
-    state = { fuel: c0.fuel, diluent: c0.diluent, x_o2: imp.x_o2, p_atm: imp.p_atm, d0_mm: imp.d0_mm, frac: null };
+    state = { fuel: c0.fuel, diluent: c0.diluent, x_o2: imp.x_o2, p_atm: imp.p_atm, d0_mm: imp.d0_mm, frac: null, xvar: 'x_o2' };
   }
 
   function combos(model) { return model.known_combos; }
@@ -38,17 +38,59 @@
       + '<div class="row dim"><span>' + esc(t('scenario.range', { lo: num(lo, digits), hi: num(hi, digits) })) + '</span></div>';
   }
 
-  function outputHtml(model) {
+  function headHtml(model) {
     var U = FF.ui.components;
     var y = FF.model.predict(model, inputRow(model));
-    var parts = FF.model.explain(model, inputRow(model));
-    var h = U.row(t('scenario.output'), y < 0 ? t('scenario.negative') : num(y, 3) + ' mm²/s', { valueInk: true, dot: true })
+    return U.row(t('scenario.output'), y < 0 ? t('scenario.negative') : num(y, 3) + ' mm²/s', { valueInk: true, dot: true })
       + U.row(t('scenario.target'), model.target, { dim: true });
-    h += U.rule() + U.row(t('scenario.intercept'), num(model.coef.intercept, 3), { dim: true });
+  }
+
+  function breakdownHtml(model) {
+    var U = FF.ui.components;
+    var parts = FF.model.explain(model, inputRow(model));
+    var h = U.row(t('scenario.intercept'), num(model.coef.intercept, 3), { dim: true });
     parts.forEach(function (p) {
       h += U.row(p.column, (p.value >= 0 ? '+' : '−') + num(Math.abs(p.value), 3), { dim: true });
     });
     return h;
+  }
+
+  /** Chart x-variables: model feature, display scale, axis label key, unit. */
+  var XVARS = [
+    { id: 'x_o2', scale: 100, label: 'scenario.o2', unit: '%' },
+    { id: 'p_atm', scale: 1, label: 'scenario.pressure', unit: 'atm' },
+    { id: 'd0_mm', scale: 1, label: 'scenario.d0', unit: 'mm' }
+  ];
+  function xvar() { return XVARS.filter(function (v) { return v.id === state.xvar; })[0] || XVARS[0]; }
+
+  /** FLEX response curve: K from FF.model.predict over the training range of one input, others held at the current
+   *  scenario. Nothing outside the training range; negative predictions are not drawn (chart splits there). */
+  function chartHtml(model) {
+    var xv = xvar(), r = model.ranges[xv.id], row = inputRow(model), curve = [], i, n = 80;
+    for (i = 0; i <= n; i++) {
+      var x = r.min + (r.max - r.min) * i / n, rr = {};
+      Object.keys(row).forEach(function (k) { rr[k] = row[k]; });
+      rr[xv.id] = x;
+      curve.push([x * xv.scale, FF.model.predict(model, rr)]);
+    }
+    var y = FF.model.predict(model, row);
+    return FF.ui.charts.response({
+      curve: curve, xr: [r.min * xv.scale, r.max * xv.scale], cur: { x: row[xv.id] * xv.scale, y: y },
+      xLabel: t(xv.label) + ', ' + xv.unit, yLabel: t('scenario.chart_y'),
+      aria: t('scenario.chart_aria', { x: t(xv.label), fuel: state.fuel, diluent: state.diluent })
+    }) + '<div class="chart-cap">' + esc(t('scenario.chart_cap', { r2: num(model.cv.fuel_diluent.r2, 3), g: model.cv.fuel_diluent.n_groups })) + '</div>';
+  }
+
+  function xOptions() {
+    return FF.ui.components.options(t('scenario.chart_x'), 'xvar', XVARS.map(function (v) { return { label: t(v.label), value: v.id, on: v.id === state.xvar }; }));
+  }
+
+  function stageHtml(model) {
+    var U = FF.ui.components;
+    return '<div class="list" id="sc-head">' + headHtml(model) + '</div>'
+      + '<div id="sc-chart">' + chartHtml(model) + '</div>'
+      + '<div class="list">' + U.row(t('scenario.chart_x'), '', { dim: true }) + xOptions() + '</div>'
+      + U.scroll('<div id="sc-out">' + U.rule() + breakdownHtml(model) + '</div>', 'detail');
   }
 
   function noteText(model) {
@@ -85,7 +127,7 @@
       + '.row label{color:inherit}</style>'
       + U.screen({
         listLabel: t('scenario.eyebrow_list'), list: list,
-        stageLabel: t('scenario.eyebrow_stage'), stage: '<div class="list" id="sc-out">' + outputHtml(model) + '</div>',
+        stageLabel: t('scenario.eyebrow_stage'), stage: stageHtml(model),
         note: noteText(model)
       });
     Array.prototype.forEach.call(root.querySelectorAll('[data-fuel]'), function (b) {
@@ -98,6 +140,9 @@
     Array.prototype.forEach.call(root.querySelectorAll('[data-diluent]'), function (b) {
       b.addEventListener('click', function () { state.diluent = b.getAttribute('data-diluent'); state.frac = null; render(root); });
     });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-xvar]'), function (b) {
+      b.addEventListener('click', function () { state.xvar = b.getAttribute('data-xvar'); render(root); });
+    });
     Array.prototype.forEach.call(root.querySelectorAll('[data-slider]'), function (el) {
       el.addEventListener('input', function () {
         var id = el.getAttribute('data-slider'), val = parseFloat(el.value);
@@ -106,7 +151,9 @@
         var unit = id === 'p_atm' ? ' atm' : id === 'd0_mm' ? ' mm' : '%';
         var lab = root.querySelector('#v-' + id);
         if (lab) lab.textContent = num(val, id === 'p_atm' || id === 'd0_mm' ? 2 : 1) + unit;
-        root.querySelector('#sc-out').innerHTML = outputHtml(model);
+        root.querySelector('#sc-head').innerHTML = headHtml(model);
+        root.querySelector('#sc-out').innerHTML = FF.ui.components.rule() + breakdownHtml(model);
+        root.querySelector('#sc-chart').innerHTML = chartHtml(model);
       });
     });
   }
