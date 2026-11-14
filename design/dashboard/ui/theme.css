@@ -1,0 +1,333 @@
+/* Halo tasarım dili: tokenlar ve temel sınıflar.
+ * Kaynak: Claude hesabındaki "Halo" design system artifact'ı (tokens.json, sürüm 2).
+ * Halo yalnızca koyu; açık tema eklenmez. Marka rengi yok: vurgu parlaklıkla verilir.
+ *
+ * Sürüm 2 süslemeleri (hepsi ışıktan, renk yok):
+ *   - ortam: köşelerden gelen yumuşak ışık ve soluk yıldız dokusu
+ *   - üst bar: marka işareti, numaralı bölümler, seçilinin altında ışıklı nokta
+ *   - üst etiketler (eyebrow), uçlara doğru solan çizgiler
+ *   - grafik plakası: köşe işaretleri; seçeneklerde ışıklı noktalı ray
+ *   - giriş animasyonu yalnızca bölüm değişince oynar (.enter)
+ *
+ * Kaydırmasız düzen (masaüstü, genişlik >= 900px): sayfa tam ekran yüksekliğidir.
+ * Yazı ve boşluklar ekran yüksekliğine (vh) göre ölçeklenir; 1000px yükseklikte Halo'nun
+ * özgün ölçüleri (20/26, 17/22) çıkar. Grafikler kalan alanı doldurur (container query).
+ */
+:root {
+  --ground: #000000;
+  --ground-lift: #0a0a0b;
+  --ink: #ffffff;
+  --ink-soft: rgba(255, 255, 255, 0.7);
+  --ink-muted: rgba(255, 255, 255, 0.55);
+  --ink-faint: rgba(255, 255, 255, 0.4);
+  --ink-ghost: rgba(255, 255, 255, 0.22);
+  --rule: rgba(255, 255, 255, 0.4);
+  --light: #f5f5f7;
+  --light-dim: rgba(255, 255, 255, 0.1);
+  --light-trace: rgba(255, 255, 255, 0.025);
+  --hairline: rgba(255, 255, 255, 0.13);
+  --hairline-soft: rgba(255, 255, 255, 0.08);
+  --halo: rgba(255, 255, 255, 0.07);
+  --halo-edge: rgba(255, 255, 255, 0.02);
+  --highlight: rgba(255, 255, 255, 0.1);
+  --glow: 0 0 6px 1px rgba(255, 255, 255, 0.55), 0 0 18px 5px rgba(255, 255, 255, 0.14);
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+
+  /* Ekran yüksekliğine bağlı ölçüler (1000px'te Halo'nun özgün değerleri). */
+  --fs: clamp(14px, 2vh, 20px);
+  --lh: calc(var(--fs) * 1.3);
+  --fs-label: clamp(12px, 1.7vh, 17px);
+  --lh-label: calc(var(--fs-label) * 1.3);
+  --space-hair: clamp(1px, 0.3vh, 3px);
+  --space-rule: clamp(6px, 1.3vh, 14px);
+  --space-eyebrow: clamp(8px, 1.8vh, 18px);
+  --gap-main: clamp(14px, 2.8vh, 40px);
+
+  --space-inset: 6px;
+  --space-item: 16px;
+  --space-gutter: 24px;
+  --radius-row: 8px;
+  --size-content: 520px;
+  --size-hero: min(320px, 44vh);
+  --size-touch: 44px;
+  --opacity-alt: 0.55;
+  --opacity-halo-low: 0.55;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+html, body { margin: 0; }
+body {
+  background:
+    radial-gradient(1000px 560px at 78% 12%, rgba(255, 255, 255, 0.055), transparent 65%),
+    radial-gradient(760px 520px at -5% 105%, rgba(255, 255, 255, 0.03), transparent 70%),
+    var(--ground);
+  background-attachment: fixed;
+}
+
+/* Yıldız dokusu: iki katmanlı, çok soluk; sağ üstte görünür, aşağı doğru kaybolur. */
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 23px 41px, rgba(255, 255, 255, 0.55), transparent 100%),
+    radial-gradient(1px 1px at 141px 87px, rgba(255, 255, 255, 0.35), transparent 100%),
+    radial-gradient(1.5px 1.5px at 211px 19px, rgba(255, 255, 255, 0.5), transparent 100%),
+    radial-gradient(1px 1px at 77px 163px, rgba(255, 255, 255, 0.3), transparent 100%),
+    radial-gradient(1px 1px at 251px 201px, rgba(255, 255, 255, 0.4), transparent 100%),
+    radial-gradient(1px 1px at 173px 243px, rgba(255, 255, 255, 0.25), transparent 100%),
+    radial-gradient(1px 1px at 59px 271px, rgba(255, 255, 255, 0.35), transparent 100%);
+  background-size: 290px 290px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 80% 10%, #000 0%, transparent 75%);
+          mask-image: radial-gradient(ellipse 70% 60% at 80% 10%, #000 0%, transparent 75%);
+  opacity: 0.7;
+}
+
+/* Sayfa: üst bar, ekran, dürüstlük bandı. Masaüstünde tam ekran yüksekliği. */
+.app {
+  position: relative; z-index: 1;
+  box-sizing: border-box;
+  height: 100vh; height: 100dvh;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: clamp(10px, 1.8vh, 20px) var(--space-gutter) clamp(12px, 2.2vh, 26px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-main);
+  color: var(--ink);
+  font: 450 var(--fs)/var(--lh) var(--font-sans);
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+}
+/* Tabular rakamlar yalnızca sayı sütunlarında: Inter'de tnum tireyi de genişletiyor ("BASS-II"). */
+.row .v, .row .val, .row.dim > span:last-child:not(:first-child), .options, .chart text, .nav .n, .row .idx { font-variant-numeric: tabular-nums; }
+
+button { font: inherit; color: inherit; letter-spacing: inherit; background: none; border: 0; margin: 0; padding: 0; cursor: pointer; text-align: left; }
+button:focus-visible, a:focus-visible { outline: 1px solid var(--ink-soft); outline-offset: 4px; border-radius: var(--radius-row); }
+
+/* Üst bar: solda marka, sağda bölümler; altında uçlara doğru solan çizgi. */
+.top {
+  position: relative; flex: none;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 8px var(--space-gutter);
+  padding-bottom: clamp(6px, 1.2vh, 14px);
+}
+.top::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16) 20%, rgba(255, 255, 255, 0.16) 80%, transparent);
+}
+/* Marka: NASA Space Apps Challenge logosu (açık ışık rengine çevrilmiş), ince çizgi, proje adı. */
+.brand { display: flex; align-items: center; gap: clamp(14px, 1.6vw, 22px); }
+.brand .logo { display: block; height: clamp(34px, 5.4vh, 54px); width: auto; flex: none; filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.22)); }
+.brand .title {
+  display: flex; flex-direction: column; gap: 2px; padding-left: clamp(14px, 1.6vw, 22px);
+  border-left: 1px solid var(--hairline); font-size: 15px; line-height: 19px;
+}
+.brand .name { font-weight: 600; letter-spacing: -0.005em; }
+.brand .sub { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+
+/* Bölümler: sekme çubuğu yok. Seçili olan ink ve altında ışıklı nokta; diğerleri ink-faint. */
+.nav { display: flex; flex-wrap: wrap; gap: 0 28px; font-size: 16px; line-height: 22px; }
+.nav a { position: relative; display: inline-flex; gap: 8px; align-items: baseline; padding: clamp(6px, 1.1vh, 11px) 0; color: var(--ink-faint); text-decoration: none; transition: color 0.2s; }
+.nav a .n { font-size: 11px; letter-spacing: 0.08em; color: var(--ink-ghost); transition: color 0.2s; }
+.nav a:hover { color: var(--ink-soft); }
+.nav a[aria-current="page"] { color: var(--ink); }
+.nav a[aria-current="page"] .n { color: var(--ink-muted); }
+.nav a::after {
+  content: ""; position: absolute; left: 50%; bottom: -1px; width: 5px; height: 5px; margin-left: -2.5px;
+  border-radius: 50%; background: var(--light); box-shadow: var(--glow);
+  opacity: 0; transform: scale(0.4); transition: opacity 0.25s, transform 0.25s var(--ease);
+}
+.nav a[aria-current="page"]::after { opacity: 1; transform: none; }
+
+/* Ekran: solda satırlar, sağda sahne. Kalan yüksekliği doldurur, taşmaz. */
+.cols { flex: 1 1 auto; min-height: 0; display: flex; gap: 0 clamp(40px, 5vw, 80px); align-items: stretch; }
+.list { flex: 0 1 var(--size-content); max-width: var(--size-content); min-width: 0; display: flex; flex-direction: column; }
+.cols > .list { min-width: 340px; }
+.list.wide { flex-basis: 600px; max-width: 600px; }
+.stage { flex: 1 1 0; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: clamp(10px, 2.2vh, 28px); }
+.stage .list { flex: none; width: 100%; max-width: 760px; }
+.stage.center { align-items: center; }
+.stage.center > .eyebrow { align-self: stretch; }
+.stage.center > .ring-wrap { margin: auto 0; }
+
+/* Üst etiket: küçük, aralıklı büyük harf, önünde kısa çizgi. */
+.eyebrow {
+  flex: none; display: flex; align-items: center; gap: 10px; margin-bottom: var(--space-eyebrow);
+  font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.eyebrow::before { content: ""; width: 18px; height: 1px; background: currentColor; flex: none; }
+.stage > .eyebrow { margin-bottom: calc(var(--space-eyebrow) - clamp(10px, 2.2vh, 28px)); }
+
+/* ListRow: başlık solda, değer sağda. Grubun ilk satırı ink, ayrıntı satırları ink-muted. */
+.row { position: relative; display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-item); padding: var(--space-hair) 0; }
+.row > span:last-child:not(:first-child) { text-align: right; white-space: nowrap; }
+.row .v, .row.dim { color: var(--ink-muted); }
+.row .idx { display: inline-block; width: 30px; font-size: 12px; letter-spacing: 0.08em; color: var(--ink-ghost); }
+button.row { align-items: center; width: calc(100% + 16px); margin: 0 -8px; padding: var(--space-hair) 8px; border-radius: var(--radius-row); transition: background 0.2s, color 0.2s; }
+button.row:hover { color: var(--ink); background: rgba(255, 255, 255, 0.035); }
+button.row > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row.hl {
+  margin: 0 -8px; padding: var(--space-hair) 8px; border-radius: var(--radius-row); color: var(--ink);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.04));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+button.row.hl:hover { background: linear-gradient(90deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05)); }
+.row.hl::before {
+  content: ""; position: absolute; left: 0; top: 25%; bottom: 25%; width: 2px; border-radius: 2px;
+  background: var(--light); box-shadow: var(--glow);
+}
+.row.gap { margin-top: var(--space-rule); }
+
+/* İki sütunlu satır ızgarası. .cols-down: sütun sütun akar (Keşif deney listesi). */
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(20px, 3vw, 40px); }
+.grid2 > .row > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grid2.cols-down { grid-auto-flow: column; grid-template-rows: repeat(var(--rows), auto); column-gap: 32px; }
+
+/* Değerin solundaki ince oran çizgisi (Keşif: tablo satırı, log ölçek). */
+.row .val { display: inline-flex; align-items: center; gap: 10px; }
+.row .bar { display: inline-block; height: 2px; width: calc(var(--w) * 52px); border-radius: 2px; background: rgba(255, 255, 255, 0.18); }
+.row.hl .bar { background: var(--light); box-shadow: 0 0 6px rgba(255, 255, 255, 0.5); }
+
+/* Durum noktası (Canlı). */
+.row .dot {
+  display: inline-block; width: 7px; height: 7px; margin-right: 12px; border-radius: 50%; vertical-align: 0.15em;
+  background: var(--light); box-shadow: var(--glow); animation: beat 2.4s ease-in-out infinite;
+}
+
+/* Çizgi: sol uçta parlak, sağa doğru solar. */
+.rule { flex: none; height: 1px; margin: var(--space-rule) 0; background: linear-gradient(90deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.12) 70%, transparent); }
+
+/* Satır içi seçenekler: ince bir ray üzerinde noktalar. Seçili olan ink ve ışıklı nokta. */
+.options { display: flex; flex-wrap: wrap; margin-top: 2px; font-size: var(--fs-label); line-height: var(--lh-label); }
+.options button { position: relative; min-width: var(--size-touch); padding: clamp(3px, 0.7vh, 8px) 22px 20px 0; color: var(--ink-faint); transition: color 0.2s; }
+.options button:last-child { padding-right: 0; }
+.options button::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 9px; height: 1px; background: rgba(255, 255, 255, 0.12);
+}
+.options button:last-child::before { right: auto; width: 100%; background: linear-gradient(90deg, rgba(255, 255, 255, 0.12), transparent); }
+.options button span { position: relative; display: inline-block; }
+.options button span::after {
+  content: ""; position: absolute; left: 50%; top: calc(100% + 8px); width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3); transition: transform 0.25s var(--ease), background 0.2s, box-shadow 0.2s;
+}
+.options button:hover { color: var(--ink-soft); }
+.options button[aria-pressed="true"] { color: var(--ink); }
+.options button[aria-pressed="true"] span::after { background: var(--light); box-shadow: var(--glow); transform: scale(1.5); }
+
+/* Dürüstlük ve Sınırlar bandı: her ekranın altında tek blok; etiket solda, metin sağda. */
+.note {
+  position: relative; flex: none; display: flex; align-items: baseline; gap: 8px 28px;
+  padding-top: clamp(10px, 1.8vh, 20px); font-size: clamp(13px, 1.55vh, 16px); line-height: 1.45; color: var(--ink-muted);
+}
+.note::before { content: ""; position: absolute; left: 0; top: 0; width: min(100%, 1100px); height: 1px; background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent); }
+.note .eyebrow { margin: 0; white-space: nowrap; }
+.note .text { max-width: 980px; }
+
+/* Grafik plakası: dört köşe işareti ve arkada yumuşak ışık. Kart değil; kenar çizgisi yok. */
+.plate {
+  --c: rgba(255, 255, 255, 0.28); --l: 14px; --pad-x: 30px; --pad-y: clamp(14px, 2.4vh, 24px);
+  position: relative; box-sizing: border-box; max-width: 100%; padding: var(--pad-y) var(--pad-x);
+  background:
+    linear-gradient(var(--c), var(--c)) left top / var(--l) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) left top / 1px var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) right top / var(--l) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) right top / 1px var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) left bottom / var(--l) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) left bottom / 1px var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) right bottom / var(--l) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) right bottom / 1px var(--l) no-repeat,
+    radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.04), transparent 70%);
+}
+.plate:not(.fill) { max-width: 820px; }
+/* Dolduran plaka: sahnede kalan alanı alır; grafik en-boy oranını (--ar) koruyarak en büyük haline gelir. */
+.plate-fit { flex: 1 1 0; min-height: 0; container-type: size; }
+.plate-fit > .plate { width: min(100cqw, (100cqh - 2 * var(--pad-y)) * var(--ar) + 2 * var(--pad-x)); }
+.plate-fit .chart { max-width: none; }
+
+/* Grafikler: SVG. Metin label ölçüsünde; tek ışıklı öğe .lit. */
+.chart { display: block; width: 100%; max-width: 760px; height: auto; overflow: visible; font-size: 17px; font-weight: 450; }
+.chart text { fill: var(--ink-muted); }
+.chart text.ink { fill: var(--ink); }
+.chart text.small { font-size: 13px; letter-spacing: 0.1em; fill: var(--ink-faint); }
+.chart .end { text-anchor: end; }
+.chart .mid { text-anchor: middle; }
+.chart .axis { stroke: var(--hairline); stroke-width: 1; }
+.chart .grid { stroke: var(--hairline-soft); stroke-width: 1; stroke-dasharray: 2 6; }
+.chart .guide { stroke: rgba(255, 255, 255, 0.28); stroke-width: 1; stroke-dasharray: 3 5; }
+.chart .tick { stroke: var(--hairline); stroke-width: 1; }
+.chart .marks { fill: none; stroke: rgba(255, 255, 255, 0.34); stroke-width: 2.5; stroke-linecap: round; }
+.chart .ref { fill: none; stroke: var(--rule); stroke-width: 2; stroke-linejoin: round; }
+.chart .drop { stroke: var(--rule); stroke-width: 1; }
+.chart .dim { fill: none; stroke: var(--light-dim); }
+.chart .trace { fill: none; stroke: var(--light-trace); }
+.chart .edge { fill: none; stroke: var(--hairline); stroke-width: 1; }
+.chart .edge-soft { fill: none; stroke: var(--hairline-soft); stroke-width: 1; }
+.chart .lit { fill: none; stroke: var(--light); stroke-linejoin: round; stroke-linecap: round; }
+.chart .lit-fill { fill: var(--light); }
+.chart .alt { opacity: var(--opacity-alt); }
+.chart .pulse { fill: none; stroke: var(--light); stroke-width: 1.5; transform-box: fill-box; transform-origin: center; animation: pulse 2.8s ease-out infinite; }
+
+/* Ekipman: ana çıkarım, solda ince ışık çizgisiyle biraz daha büyük. */
+.takeaway .row { display: block; max-width: 560px; padding-left: 18px; font-size: clamp(16px, 2.3vh, 22px); line-height: 1.38; font-weight: 400; }
+.takeaway .row::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 1px; background: linear-gradient(var(--light), rgba(255, 255, 255, 0.1)); }
+
+/* Canlı: halka. Kuyruklu ışık conic-gradient ile, işaretler ve yazı SVG ile. Boyut ekran yüksekliğine bağlı. */
+.ring-wrap { position: relative; width: var(--size-hero); max-width: 100%; aspect-ratio: 1; }
+.ring-wrap .chart { position: relative; font-size: 20px; }
+.ring-wrap .arc {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(rgba(255, 255, 255, 0.07) 0deg var(--s), rgba(255, 255, 255, 0.1) var(--s), var(--light) 360deg);
+  -webkit-mask: radial-gradient(closest-side, transparent 89.9%, #000 90.3%);
+          mask: radial-gradient(closest-side, transparent 89.9%, #000 90.3%);
+}
+.ring-wrap .arc.glow { filter: blur(10px); opacity: 0.55; }
+.ring-wrap .arc.off { background: rgba(255, 255, 255, 0.07); }
+.halo {
+  position: absolute; inset: -22%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, var(--halo) 0%, var(--halo-edge) 45%, transparent 70%);
+  animation: breathe 6s ease-in-out infinite;
+}
+
+/* Giriş: yalnızca bölüm değişince (.enter, app.js). */
+.enter .list, .enter .stage, .enter .note { animation: rise 0.6s var(--ease) both; }
+.enter .stage { animation-delay: 0.08s; }
+.enter .note { animation-delay: 0.16s; }
+.enter .draw { stroke-dasharray: 1; animation: draw 1.6s var(--ease) 0.15s both; }
+.enter .ring-wrap .arc { animation: spin-in 1.2s var(--ease) 0.1s both; }
+.ring-wrap .arc.glow { animation-name: spin-in-glow; }
+
+@keyframes breathe { 0%, 100% { opacity: var(--opacity-halo-low); } 50% { opacity: 1; } }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes pulse { 0% { transform: scale(1); opacity: 0.55; } 80%, 100% { transform: scale(4.2); opacity: 0; } }
+@keyframes beat { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes spin-in { from { opacity: 0; transform: rotate(-40deg); } to { opacity: 1; transform: none; } }
+@keyframes spin-in-glow { from { opacity: 0; transform: rotate(-40deg); } to { opacity: 0.55; transform: none; } }
+
+/* Dar ekran (tablet dikey, telefon): tek sütun, normal kaydırma. Tek ekrana sığdırmak burada mümkün değil. */
+@media (max-width: 899px) {
+  :root { --fs: 18px; --fs-label: 16px; --space-hair: 3px; --space-rule: 14px; --space-eyebrow: 16px; --gap-main: 32px; --size-hero: 300px; }
+  .app { height: auto; min-height: 100vh; padding: 16px 16px 28px; }
+  .cols { flex-direction: column; gap: 40px; }
+  .cols > .list, .list.wide { min-width: 0; max-width: none; flex: none; }
+  .stage { flex: none; }
+  .stage.center { min-height: 420px; }
+  .plate-fit { flex: none; container-type: normal; }
+  .plate-fit > .plate { width: 100%; }
+  .note { flex-direction: column; gap: 8px; }
+  .plate { --pad-x: 14px; }
+}
+@media (max-width: 640px) {
+  .brand .sub { display: none; }
+  .nav { gap: 0 22px; }
+  .nav a .n { display: none; }
+  .grid2 { grid-template-columns: 1fr; }
+  .grid2.cols-down { grid-auto-flow: row; grid-template-rows: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .halo, .row .dot, .chart .pulse { animation: none; }
+  .chart .pulse { display: none; }
+  .enter .list, .enter .stage, .enter .note, .enter .draw, .enter .ring-wrap .arc { animation: none; }
+}
