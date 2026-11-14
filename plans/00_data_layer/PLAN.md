@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 14 / 27
+- **İlerleme:** 15 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** D1 (veya B4; ikisi de `raw/`/`csv/` ister). Faz C tamam.
+- **Sıradaki adım:** D1 (`raw/` ister). Faz B ve C tamam.
 - **Açık sorunlar:**
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
     D2 adımında üretilen dosya commit edilince ekibin geri kalanının bu klasörlere ihtiyacı kalmaz.
@@ -51,10 +51,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
   - Kabul: 19 hedef bulunuyor; feature ∩ leakage = ∅.
   ✔ 2026-11-14 · `python -m pytest tests/data_layer/test_catalog.py -q` · 39 passed (19 hedef role=target; hiçbir leakage sütunu feature değil)
 
-- [ ] **B4** İdempotentlik
+- [x] **B4** İdempotentlik
   - Yap: `01_load_core.py` iki kez çalıştırılınca parquet dosyalarının içerik hash'i aynı kalmalı.
   - Test: `pytest tests/data_layer/test_idempotent.py -m needs_raw`
-  - Kabul: Hash'ler eşit. (`csv/` yoksa test skip olur; kutu ancak `csv/` olan bir makinede geçince işaretlenir.)
+  - Kabul: Hash'ler eşit. (`csv/` yoksa test skip olur; kutu ancak `csv/` olan bir makinede geçince işaretlenir.) Not: test script'leri geçici ağaçlarda çalıştırır (`csv/` yalnızca okunan sembolik bağ), repoya ve `csv/`'ye dokunamaz; `csv/` olmayan makinede 4 test nedeniyle birlikte skip olur. Plandan ileri: yeniden üretilen tablolar repodaki commit'lenmiş parquet'lerle de karşılaştırılır (içerik hash'i, bayt değil).
+  ✔ 2026-11-14 · `python -m pytest tests/data_layer/test_idempotent.py -q -rs` · 6 passed, 0 skipped (csv/ mevcut); tüm set 215 passed. İki çalıştırmada 11 parquet bayt ve içerik olarak aynı, yeniden üretilen = commit'lenmiş, `csv/` ve repo `analysis/data` anlık görüntüleri değişmedi. Negatif kontrol: rastgele sütunlu script 2, bozulmuş commit'li parquet 1 test düşürdü; csv/ yokken 4 test nedeniyle skip oldu
 - [x] **B5** Fizik sağlık testleri: EDA bulgularının regresyonu
   - Yap: Şunları test et:
     - FLEX Completion d² eğiminin %95 GA'sı 2'yi içermeli.
