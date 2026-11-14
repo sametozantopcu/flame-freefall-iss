@@ -4,9 +4,9 @@ Mimari: [Architecture.md §1](../../Architecture.md) · Kod: `src/data_layer/` �
 
 ## Durum
 
-- **İlerleme:** 19 / 27
+- **İlerleme:** 20 / 27
 - **Son güncelleme:** 2026-11-14
-- **Sıradaki adım:** E1 (video listesi). Faz B, C ve D tamam.
+- **Sıradaki adım:** E2 (test-ID regex'leri). Faz B, C ve D tamam.
 - **Açık sorunlar:**
   - D1'in `files` tablosu yalnızca `added`/`removed` listelerini alıyor; `detail.json`'daki ayrı `experimentalTable` (22 dosya) ve `images` listeleri `files`'a girmedi. Videolar `added`'de olduğu için Faz E etkilenmiyor. Eklemek D1/D2'nin sabit sayılarını (27.076) değiştirir; ayrı küçük bir adım olarak karar verilecek.
   - `raw/` ve `csv/` git'te yok. B4 ve D1 adımları yalnızca bu klasörlerin bulunduğu makinede çalışır.
@@ -128,10 +128,11 @@ Hiçbir modül `raw/` veya `csv/` klasörünü doğrudan okumaz.
 
 ## Faz E — Video indeksi (`test_video_map`)
 
-- [ ] **E1** Video listesi
+- [x] **E1** Video listesi
   - Yap: `files` tablosundan `.mp4/.avi/.mov/.zip` dosyalarını al. Ad ve boyut yeterli; **hiçbir video indirilmez**.
   - Test: `pytest tests/data_layer/test_video_index.py::test_list`
-  - Kabul: Fixture'daki videolar listeleniyor; test sırasında ağ çağrısı yapılmıyor (mock ile doğrulanır).
+  - Kabul: Fixture'daki videolar listeleniyor; test sırasında ağ çağrısı yapılmıyor (mock ile doğrulanır). Not (plandan sapmalar, gerçek veriye göre): `.ts` dahil (773 ACME videosu; planın listesinde yoktu), `.zip` yalnızca adında `video`/`movie` geçiyorsa `video_archive` (141 arşiv; 5.186 zip'in çoğu veri, 588'i görüntü dizisi; 'avi' aranmaz: `avionics_package.zip` tuzağı), yalnızca `status='added'` (735 removed video dışarıda), `kind` sütunu eklendi. Videolar yalnızca 9 investigation'da; FLEX (PSI-69), PSI-68, PSI-99'da `added` dosya hiç yok, SAFFIRE (PSI-98/100) yalnızca zip/pdf/xlsx → E2'de FLEX/SAFFIRE regex'leri gerçek video adıyla doğrulanamaz. `.ts` tarayıcıda oynatılamaz (02/G4 ffmpeg gerekir). Arşiv kuralı sezgisel; kaçırdıkları E4'te elle bakılacak.
+  ✔ 2026-11-14 · `python -m pytest tests -q -rs` · 314 passed, 0 skipped (test_video_index.py: 27). Gerçek veri (commit'li meta/, raw/ gerekmez): 1.629 video (855 .mp4, 773 .ts, 1 .avi) + 141 video_archive = 1.770 satır, 9 investigation, toplam 341,7 + 39,1 GB, remote_path benzersiz, removed yok. Ağ yok: soketler engellenip çalıştırıldı + modülde ağ import'u yok (ast). Negatif kontrol (8, baz çizgisi yeşil): .ts çıkarma, tüm zip'ler, 'avi' gevşetmesi, removed dahil, image zip, ağ import'u, sıralamasız, alfabetik sıralama; ilk turda sıralamasız kontrol GEÇİYORDU (zayıf karıştırma testi), çok satırlı testle düzeltildi
 - [ ] **E2** Aileye özel test-ID regex'leri
   - Yap: Kalıplar:
     - ACME: `\d{5}[A-Z]\d` (ör. 19115B1)
