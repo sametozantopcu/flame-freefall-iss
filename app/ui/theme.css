@@ -9,9 +9,11 @@
  *   - grafik plakası: köşe işaretleri; seçeneklerde ışıklı noktalı ray
  *   - giriş animasyonu yalnızca bölüm değişince oynar (.enter)
  *
- * Kaydırmasız düzen (masaüstü, genişlik >= 900px): sayfa tam ekran yüksekliğidir.
+ * Tek sayfa düzeni: karşılama (hero) ve dört bölüm yukarıdan aşağıya akar; üst bar yapışkandır.
+ * Masaüstünde (genişlik >= 900px) Explore ve FLEX birer ekran yüksekliğinde paneldir: grafikler kalan
+ * alanı doldurur (container query). Diğer bölümler doğal yükseklikte akar.
  * Yazı ve boşluklar ekran yüksekliğine (vh) göre ölçeklenir; 1000px yükseklikte Halo'nun
- * özgün ölçüleri (20/26, 17/22) çıkar. Grafikler kalan alanı doldurur (container query).
+ * özgün ölçüleri (20/26, 17/22) çıkar.
  */
 :root {
   --ground: #000000;
@@ -54,6 +56,7 @@
   --opacity-alt: 0.55;
   --opacity-halo-low: 0.55;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --top-h: 84px; /* üst bar yüksekliği; app.js ölçüp günceller */
 }
 
 html, body { margin: 0; }
@@ -82,17 +85,13 @@ body::before {
   opacity: 0.7;
 }
 
-/* Sayfa: üst bar, ekran, dürüstlük bandı. Masaüstünde tam ekran yüksekliği. */
+/* Sayfa: yapışkan üst bar, altında karşılama ve bölümler. */
 .app {
   position: relative; z-index: 1;
   box-sizing: border-box;
-  height: 100vh; height: 100dvh;
   max-width: 1600px;
   margin: 0 auto;
-  padding: clamp(10px, 1.8vh, 20px) var(--space-gutter) clamp(12px, 2.2vh, 26px);
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-main);
+  padding: 0 var(--space-gutter) clamp(12px, 2.2vh, 26px);
   color: var(--ink);
   font: 450 var(--fs)/var(--lh) var(--font-sans);
   letter-spacing: -0.011em;
@@ -106,17 +105,20 @@ button:focus-visible, a:focus-visible { outline: 1px solid var(--ink-soft); outl
 
 /* Üst bar: solda marka, sağda bölümler; altında uçlara doğru solan çizgi. */
 .top {
-  position: relative; flex: none;
+  position: sticky; top: 0; z-index: 20;
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: 8px var(--space-gutter);
-  padding-bottom: clamp(6px, 1.2vh, 14px);
+  margin: 0 calc(-1 * var(--space-gutter));
+  padding: clamp(10px, 1.8vh, 20px) var(--space-gutter) clamp(6px, 1.2vh, 14px);
+  background: rgba(0, 0, 0, 0.72);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
 }
 .top::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16) 20%, rgba(255, 255, 255, 0.16) 80%, transparent);
 }
 /* Marka: NASA Space Apps Challenge logosu (açık ışık rengine çevrilmiş), ince çizgi, proje adı. */
-.brand { display: flex; align-items: center; gap: clamp(14px, 1.6vw, 22px); }
+.brand { display: flex; align-items: center; gap: clamp(14px, 1.6vw, 22px); color: inherit; text-decoration: none; }
 .brand .logo { display: block; height: clamp(34px, 5.4vh, 54px); width: auto; flex: none; filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.22)); }
 .brand .title {
   display: flex; flex-direction: column; gap: 2px; padding-left: clamp(14px, 1.6vw, 22px);
@@ -134,14 +136,73 @@ button:focus-visible, a:focus-visible { outline: 1px solid var(--ink-soft); outl
 .nav a { position: relative; display: inline-flex; gap: 8px; align-items: baseline; padding: clamp(6px, 1.1vh, 11px) 0; color: var(--ink-faint); text-decoration: none; transition: color 0.2s; }
 .nav a .n { font-size: 11px; letter-spacing: 0.08em; color: var(--ink-ghost); transition: color 0.2s; }
 .nav a:hover { color: var(--ink-soft); }
-.nav a[aria-current="page"] { color: var(--ink); }
-.nav a[aria-current="page"] .n { color: var(--ink-muted); }
+.nav a[aria-current] { color: var(--ink); }
+.nav a[aria-current] .n { color: var(--ink-muted); }
 .nav a::after {
   content: ""; position: absolute; left: 50%; bottom: -1px; width: 5px; height: 5px; margin-left: -2.5px;
   border-radius: 50%; background: var(--light); box-shadow: var(--glow);
   opacity: 0; transform: scale(0.4); transition: opacity 0.25s, transform 0.25s var(--ease);
 }
-.nav a[aria-current="page"]::after { opacity: 1; transform: none; }
+.nav a[aria-current]::after { opacity: 1; transform: none; }
+
+/* ---- Tek sayfa: atlama bağlantısı, bölümler, karşılama ---- */
+.skip { position: absolute; left: 16px; top: -60px; z-index: 40; padding: 10px 16px; border-radius: var(--radius-row); background: var(--light); color: var(--ground); font: 600 14px/20px var(--font-sans); text-decoration: none; }
+.skip:focus { top: 12px; }
+main { display: block; overflow-x: clip; }
+main section { scroll-margin-top: var(--top-h); outline: none; }
+main:focus { outline: none; }
+.noscript { color: var(--ink-muted); }
+
+/* Bölüm: başlık satırı (numara, ad, tek cümle) ve görünümün çizildiği kutu. */
+.sec { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--gap-main); padding: clamp(28px, 6vh, 72px) 0; }
+.sec-head { flex: none; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; }
+.sec-head h2 { margin: 0; font-size: clamp(22px, 3.2vh, 32px); line-height: 1.15; font-weight: 600; letter-spacing: -0.02em; }
+.sec-head .sec-n { font-size: 12px; letter-spacing: 0.08em; color: var(--ink-ghost); font-variant-numeric: tabular-nums; }
+.sec-head p { margin: 0; color: var(--ink-muted); font-size: var(--fs-label); line-height: var(--lh-label); }
+.view { display: flex; flex-direction: column; gap: var(--gap-main); min-width: 0; }
+@media (min-width: 900px) {
+  /* Panel: bir ekran yüksekliği; içindeki grafik kalan alanı doldurur, liste kendi içinde kayar. */
+  .sec.panel { height: calc(100vh - var(--top-h)); height: calc(100dvh - var(--top-h)); min-height: 600px; padding: clamp(14px, 2.6vh, 30px) 0; }
+  .sec.panel > .view { flex: 1 1 auto; min-height: 0; }
+}
+
+/* Karşılama: solda metin, sağda tek ışıklı öğe (halka). */
+.hero {
+  position: relative; box-sizing: border-box;
+  min-height: calc(100vh - var(--top-h)); min-height: calc(100dvh - var(--top-h));
+  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: center;
+  gap: clamp(24px, 5vw, 80px); padding: clamp(32px, 7vh, 88px) 0 clamp(64px, 11vh, 120px);
+}
+.hero-text { min-width: 0; }
+.hero h1 { margin: 0; font-size: clamp(40px, 7.4vw, 104px); line-height: 0.98; font-weight: 600; letter-spacing: -0.04em; }
+.hero-lead { margin: clamp(16px, 2.6vh, 28px) 0 0; max-width: 26ch; font-size: clamp(20px, 2.5vw, 34px); line-height: 1.22; font-weight: 400; letter-spacing: -0.02em; color: var(--ink); }
+.hero-sub { margin: clamp(10px, 1.6vh, 18px) 0 0; max-width: 52ch; color: var(--ink-muted); }
+.hero-stats { display: flex; flex-wrap: wrap; gap: 18px clamp(28px, 4vw, 64px); margin-top: clamp(24px, 4.4vh, 48px); }
+.hero-stats[hidden] { display: none; }
+.cta[hidden] { display: none; }
+.hero-stat { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.hero-num { font-size: clamp(34px, 5.4vh, 56px); line-height: 1; font-weight: 300; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.hero-lab { max-width: 20ch; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 12px 14px; margin-top: clamp(24px, 4.4vh, 48px); }
+.cta {
+  display: inline-flex; align-items: center; min-height: var(--size-touch); box-sizing: border-box; padding: 0 22px;
+  border: 1px solid var(--rule); border-radius: 999px; color: var(--ink); text-decoration: none;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.3s, transform 0.3s var(--ease);
+}
+.cta:hover { border-color: var(--ink); background: rgba(255, 255, 255, 0.06); transform: translateY(-1px); }
+.cta.primary { background: var(--light); border-color: var(--light); color: var(--ground); }
+.cta.primary:hover { background: var(--ink); box-shadow: var(--glow); }
+.cta:focus-visible { border-radius: 999px; }
+.hero-orb { justify-self: center; width: min(100%, 440px); display: grid; place-items: center; pointer-events: none; }
+.hero-orb .ring-wrap { width: min(100%, 52vh, 440px); }
+.hero-cue {
+  position: absolute; left: 0; bottom: clamp(18px, 3.4vh, 36px); display: inline-flex; align-items: center; gap: 12px;
+  color: var(--ink-faint); text-decoration: none; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  transition: color 0.2s;
+}
+.hero-cue:hover { color: var(--ink-soft); }
+.hero-cue .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-soft); animation: beat 2.4s ease-in-out infinite; }
 
 /* Ekran: solda satırlar, sağda sahne. Kalan yüksekliği doldurur, taşmaz. */
 .cols { flex: 1 1 auto; min-height: 0; display: flex; gap: 0 clamp(40px, 5vw, 80px); align-items: stretch; }
@@ -470,9 +531,63 @@ body.chat-open .chat { opacity: 1; visibility: visible; transform: translate(-50
 .chat-foot { flex: none; display: flex; justify-content: space-between; gap: 12px; padding: 0 8px; font-size: 10.5px; line-height: 14px; color: var(--ink-ghost); }
 
 /* Dar ekran (tablet dikey, telefon): tek sütun, normal kaydırma. Tek ekrana sığdırmak burada mümkün değil. */
+/* ---- Hareket (ui/motion.js): kaydırınca bir kez belirme. Gizli başlangıç yalnız JS varken ve
+ * kullanıcı hareket azaltma istemediyse geçerli; aksi halde içerik hemen görünür. ---- */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+  .js [data-reveal] { opacity: 0; transform: translateY(14px); }
+  .js [data-reveal].in {
+    opacity: 1; transform: none;
+    transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+    transition-delay: calc(min(var(--i, 0), 5) * 90ms);
+  }
+  /* The two tall view boxes stay hidden until .in, then show instantly while their own .enter animation
+   * (children fade in from 0) plays: one smooth entrance, no visible-then-hidden flash. The box itself does not slide or fade. */
+  .js .view[data-enter][data-reveal] { transform: none; }
+  .js .view[data-enter][data-reveal].in { transition: none; }
+}
+/* Kaydırmaya bağlı süsler: ilerleme çizgisi ve halkanın hafif kayması. Desteklemeyen tarayıcıda yoktur. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .top::before {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; z-index: 1;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), var(--light)); transform-origin: 0 50%;
+      animation: progress linear both; animation-timeline: scroll(root);
+    }
+    .hero-orb { animation: drift linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+  }
+}
+/* Hover only where hovering exists (no sticky hover on touch). Brightness/opacity and a 1px lift; no new colour. */
+@media (hover: hover) {
+  .xs-card { transition: background 0.3s, border-color 0.3s, transform 0.3s var(--ease); }
+  .xs-card:hover { border-top-color: var(--rule); transform: translateY(-1px); }
+}
+@keyframes progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes drift { to { transform: translateY(40px); opacity: 0.35; } }
+
+/* Short desktop screens: tighten the hero so the content and the "Scroll" cue both fit on the first screen;
+ * where even that cannot fit, the cue is hidden. */
+@media (min-width: 900px) and (max-height: 820px) {
+  .hero { padding: 16px 0 52px; }
+  .hero-lead { margin-top: 14px; }
+  .hero-sub { margin-top: 8px; }
+  .hero-stats { margin-top: 18px; }
+  .hero-cta { margin-top: 18px; }
+  .hero-cue { bottom: 14px; }
+}
+@media (min-width: 900px) and (max-height: 640px) { .hero-cue { display: none; } }
+
 @media (max-width: 899px) {
   :root { --fs: 18px; --fs-label: 16px; --space-hair: 3px; --space-rule: 14px; --space-eyebrow: 16px; --gap-main: 32px; --size-hero: 300px; }
-  .app { height: auto; min-height: 100vh; padding: 16px 16px 28px; }
+  .app { padding: 0 16px 28px; }
+  .top { margin: 0 -16px; padding: 12px 16px 8px; }
+  .hero { grid-template-columns: 1fr; padding-top: 28px; }
+  /* Narrow screens: the ring is decorative, so it is dropped to keep the text and the primary CTA on the first screen. */
+  .hero-orb { display: none; }
+  .hero-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+  .hero-num { font-size: 32px; }
+  .hero-lab { font-size: 11px; line-height: 14px; letter-spacing: 0.1em; }
+  .hero-cta { margin-top: 20px; }
   .cols { flex-direction: column; gap: 40px; }
   .cols > .list, .list.wide { min-width: 0; max-width: none; flex: none; }
   .stage { flex: none; }
@@ -490,7 +605,9 @@ body.chat-open .chat { opacity: 1; visibility: visible; transform: translate(-50
 @media (max-width: 640px) {
   .brand .sub { display: none; }
   .brand .team { display: none; }
-  .nav { gap: 0 22px; }
+  .brand .logo { height: 30px; }
+  .nav { font-size: 14px; gap: 0 16px; }
+  .nav a { padding: 4px 0 8px; }
   .nav a .n { display: none; }
   .chat { right: 8px; left: 8px; bottom: 8px; width: auto; max-height: 72vh; transform: translateY(16px) scale(0.96); }
   body.chat-open .chat { transform: none; }
@@ -505,4 +622,7 @@ body.chat-open .chat { opacity: 1; visibility: visible; transform: translate(-50
   .chat, body.chat-open .chat, .chat-fab { transition: none; }
   .chart .pulse { display: none; }
   .enter .list, .enter .stage, .enter .note, .enter .draw, .enter .ring-wrap .arc { animation: none; }
+  .hero-cue .dot { animation: none; }
+  .cta { transition: none; }
+  .xs-card { transition: none; }
 }

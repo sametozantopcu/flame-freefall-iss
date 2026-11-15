@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>Flame in Freefall</title>
+<!-- Hareket yalnızca JS çalışıyorsa gizli başlangıç durumunu kullanır (theme.css içinde .js öneki). -->
+<script>document.documentElement.classList.add('js');</script>
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <!-- Inter yüklenemezse (çevrimdışı) sistem yazı tipine düşer; düzen bozulmaz. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,17 +15,59 @@
 <link rel="stylesheet" href="ui/theme.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="app">
   <header class="top">
-    <div class="brand">
+    <a class="brand" href="#top" aria-label="Flame in Freefall, back to top">
       <!-- NASA Space Apps Challenge logosu; Halo için açık ışık rengine (#f5f5f7) çevrildi (bkz. README.md). -->
       <img class="logo" src="assets/logo.png" alt="NASA Space Apps Challenge" width="580" height="227">
-      <span class="title"><span class="name" id="brand-name"></span><span class="sub" id="brand-sub"></span></span>
-      <span class="team" id="brand-team"></span>
-    </div>
-    <nav class="nav" id="nav"></nav>
+      <span class="title"><span class="name" id="brand-name">Flame in Freefall</span><span class="sub" id="brand-sub">Challenge 2026</span></span>
+      <span class="team" id="brand-team">Prometheus 6</span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
   </header>
-  <main id="view" style="display: contents"></main>
+
+  <!-- Tek sayfa: önce karşılama, sonra dört bölüm. Görünümler (views/*.js) kendi bölümündeki .view içine çizilir. -->
+  <main id="main" tabindex="-1">
+    <section id="top" class="hero" aria-labelledby="hero-title" tabindex="-1">
+      <div class="hero-text">
+        <div class="eyebrow" data-reveal style="--i:0" data-t="hero.eyebrow">NASA Space Apps Challenge 2026 · Prometheus 6</div>
+        <h1 id="hero-title" data-reveal style="--i:1" data-t="hero.title">Flame in Freefall</h1>
+        <p class="hero-lead" data-reveal style="--i:2" data-t="hero.lead">How fire behaves when gravity is gone, and what that means for the next habitat.</p>
+        <p class="hero-sub" data-reveal style="--i:3" data-t="hero.sub">24 NASA microgravity combustion investigations, ranked, modelled and turned into equipment guidance.</p>
+        <div class="hero-stats" id="hero-stats" data-reveal style="--i:4"></div>
+        <div class="hero-cta" data-reveal style="--i:5">
+          <a class="cta primary" href="#explore" data-t="hero.cta_explore">Explore the data</a>
+          <button type="button" class="cta" id="hero-ask" data-t="hero.cta_ask" hidden>Ask a question</button>
+        </div>
+      </div>
+      <div class="hero-orb" aria-hidden="true">
+        <div class="ring-wrap"><div class="halo"></div><div class="arc glow" style="--s:150deg"></div><div class="arc" style="--s:150deg"></div></div>
+      </div>
+      <a class="hero-cue" href="#explore"><i class="dot" aria-hidden="true"></i><span data-t="hero.cue">Scroll</span></a>
+    </section>
+
+    <section id="explore" class="sec panel" data-view="kesif" aria-labelledby="h-explore" tabindex="-1">
+      <header class="sec-head" data-reveal><span class="sec-n" aria-hidden="true">01</span><h2 id="h-explore" data-t="nav.kesif">Explore</h2><p data-t="sec.kesif">24 NASA microgravity combustion investigations, ranked by relevance to a habitat.</p></header>
+      <div class="view" data-reveal data-enter></div>
+    </section>
+
+    <section id="scenario" class="sec" data-view="senaryo" aria-labelledby="h-scenario" tabindex="-1">
+      <header class="sec-head" data-reveal><span class="sec-n" aria-hidden="true">02</span><h2 id="h-scenario" data-t="nav.senaryo">Scenario</h2><p data-t="sec.senaryo">Set the conditions and read the predicted burn rate and the material risk.</p></header>
+      <div class="view" data-reveal data-enter></div>
+    </section>
+
+    <section id="equipment" class="sec" data-view="ekipman" aria-labelledby="h-equipment" tabindex="-1">
+      <header class="sec-head" data-reveal><span class="sec-n" aria-hidden="true">03</span><h2 id="h-equipment" data-t="nav.ekipman">Equipment</h2><p data-t="sec.ekipman">Four findings from the data and what they mean for habitat hardware.</p></header>
+      <div class="view"></div>
+    </section>
+
+    <section id="live" class="sec" data-view="canli" aria-labelledby="h-live" tabindex="-1">
+      <header class="sec-head" data-reveal><span class="sec-n" aria-hidden="true">04</span><h2 id="h-live" data-t="nav.canli">FlameSense</h2><p data-t="sec.canli">A sensor concept designed around those findings.</p></header>
+      <div class="view"></div>
+    </section>
+  </main>
+  <noscript><p class="noscript">The data sections need JavaScript to render.</p></noscript>
 </div>
 
 <!-- Sıra önemli: sabitler, metinler, çekirdek, arayüz, görünümler, giriş. -->
@@ -41,6 +85,7 @@
 <script src="views/canli.js"></script>
 <!-- ui/ask.js (S8) is optional and sets window.FF.mountAsk. -->
 <script src="ui/ask.js"></script>
+<script src="ui/motion.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

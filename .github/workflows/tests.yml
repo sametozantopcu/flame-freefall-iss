@@ -36,3 +36,4 @@ jobs:
         run: |
           node scripts/smoke_explore_scenario.mjs
           node scripts/smoke_equipment.mjs
+          node scripts/smoke_landing.mjs

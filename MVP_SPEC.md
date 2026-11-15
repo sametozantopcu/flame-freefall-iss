@@ -17,6 +17,8 @@ Flame in Freefall, NASA Physical Sciences Informatics (PSI) yanma deneylerini (2
 | 2:15–2:40 | Ask (LLM) | Ziyaretçi "Which fuel should a Mars habitat worry about?" gibi soru sorar; cevap kartlardan beslenir. (Anahtar yoksa arayüz kartlara düşer.) |
 | 2:40–3:00 | Live (FlameSense) | "Concept / not built" etiketli konsept sayfası: render görselleri ve ne planlandığı. |
 
+Arayüz tek sayfadır: hero ve dört bölüm (Explore, Scenario, Equipment, FlameSense) yukarıdan aşağıya akar; üst bardaki bağlantılar çapa gezinmesidir (`#explore`, `#scenario`, `#equipment`, `#live`). Tablodaki "ekran" adları bu bölümlerdir; ekran değiştirme yerine bölüme kaydırılır ya da üst bardan seçilir.
+
 ## 3. MVP kapsamı
 
 | Modül | İçinde | Dışında |

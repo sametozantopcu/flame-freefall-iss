@@ -32,8 +32,8 @@
       + U.eyebrow(t('equipment.eyebrow')) + body + '</div>' + U.note(t('equipment.note'));
   }
 
-  var STYLE = '.xs-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:8px}'
-    + '.xs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:var(--space-gutter)}'
+  var STYLE = '.xs-scroll{min-width:0}'
+    + '.xs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:var(--space-gutter)}'
     + '.xs-card{display:flex;flex-direction:column;gap:10px;padding:18px 20px;border-top:1px solid var(--hairline);background:linear-gradient(180deg,var(--halo),var(--halo-edge));border-radius:var(--radius-row)}'
     + '.xs-card h3{margin:0;font:inherit;font-weight:600;color:var(--ink)}'
     + '.xs-head{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.08em;color:var(--ink-ghost)}'
