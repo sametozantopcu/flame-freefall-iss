@@ -4,9 +4,9 @@ Kapsam: `app/` altındaki statik site. Dört ayrı ekran (hash ile değişen) te
 
 ## Durum
 
-- İlerleme: 6/7
-- Son güncelleme: 2026-11-15
-- Sıradaki adım: LP6
+- İlerleme: 7/7
+- Son güncelleme: 2026-11-15 (LP0–LP6 tamam, commit b802199)
+- Sıradaki adım: yok — `dev` → `main` PR (insan incelemesi)
 - Açık sorunlar (bilinen sınırlar):
   - İlerleme çizgisi ve parallax Firefox'ta varsayılan olarak görünmez (süs, işlev etkilenmez).
   - JS kapalıyken hero sayıları ve veri bölümleri çizilmez (başlık, mesaj ve CTA görünür).
@@ -82,7 +82,8 @@ Kapsam: `app/` altındaki statik site. Dört ayrı ekran (hash ile değişen) te
   - Kabul testi: `node scripts/smoke_landing.mjs` içindeki `@supports` denetimi (animation-timeline blok dışında geçmez) + `$PY scripts/check_landing_layout.py` yeniden geçer.
   - Bağımlılıklar: LP4.
 
-- [ ] **LP6 · Uçtan uca denetim ve belgeler**
+- [x] **LP6 · Uçtan uca denetim ve belgeler**
+  - ✔ 2026-11-15 · pytest tests -m "not needs_raw and not slow and not live" + 4 duman testi + python scripts/check_landing_layout.py --motion · 741 passed, 6 deselected; ALL PASSED; dev CI yeşil (b802199, koşu 43703946003)
   - Amaç: `app/README.md` (kaydırmasız düzen bölümü yerine tek sayfa akışı), `MVP_SPEC.md` ve `Architecture.md` arayüz satırları güncel; yeni duman testi CI'da.
   - Dosyalar: `app/README.md`, `MVP_SPEC.md`, `Architecture.md`, `.github/workflows/tests.yml`, `plans/landing/PLAN.md`, `plans/README.md`.
   - Kabul testi: `$PY -m pytest tests -q -m "not needs_raw and not slow and not live"` + dört duman testi + `$PY scripts/check_landing_layout.py --motion`; `dev` dalında CI yeşil.
