@@ -63,7 +63,9 @@ def _cv(df: pd.DataFrame, groups: pd.Series) -> dict:
         m = _pipeline().fit(df.iloc[tr][FEATURES], df.iloc[tr][TARGET])
         pred[te] = m.predict(df.iloc[te][FEATURES])
     y = df[TARGET].to_numpy()
-    return dict(r2=_f(r2_score(y, pred)), mae=_f(mean_absolute_error(y, pred)), n=int(len(df)),
+    # Keep generated site data stable across tiny floating-point differences between
+    # supported NumPy/scikit-learn versions.
+    return dict(r2=round(_f(r2_score(y, pred)), 12), mae=round(_f(mean_absolute_error(y, pred)), 12), n=int(len(df)),
                 n_groups=int(groups.nunique()), groups=sorted(map(str, groups.unique())))
 
 

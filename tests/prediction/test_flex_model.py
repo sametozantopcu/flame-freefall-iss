@@ -45,6 +45,13 @@ def test_cv_scores(model):
     print("CV", model["cv"]["fuel_diluent"]["r2"], model["cv"]["year"]["r2"])
 
 
+def test_cv_metrics_are_stable_serialization_values(model):
+    for split in ("fuel_diluent", "year"):
+        for metric in ("r2", "mae"):
+            value = model["cv"][split][metric]
+            assert value == round(value, 12)
+
+
 def test_export_predict_matches_pipeline(model):
     df = fm._clean(get_modeling_frame("flex", fm.TARGET))
     pipe = fm._pipeline().fit(df[fm.FEATURES], df[fm.TARGET])
