@@ -1,0 +1,26 @@
+{
+  "title": "Flame in Freefall — Prometheus 6",
+  "order": [
+    "cover",
+    "challenge",
+    "explore",
+    "scenario",
+    "equipment",
+    "flamesense",
+    "data"
+  ],
+  "sections": {
+    "s1": {
+      "description": "Who we are and the challenge we answer",
+      "start": "cover"
+    },
+    "s2": {
+      "description": "The dashboard: explore, scenario, equipment",
+      "start": "explore"
+    },
+    "s3": {
+      "description": "From insight to a hardware concept, then thanks",
+      "start": "flamesense"
+    }
+  }
+}

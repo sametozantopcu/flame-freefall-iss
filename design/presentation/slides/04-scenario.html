@@ -1,0 +1,16 @@
+<section id="scenario" class="slide" data-transition="fade">
+<p class="eyebrow in" style="--i:0">— 02 · Scenario</p>
+<h2 class="title in" style="--i:1">Ask “what if?” before anything burns</h2>
+<div class="split">
+<div class="col in" style="--i:2; width:804px;">
+<img class="shot" src="assets/scenario-burn-rate.png" alt="Scenario screen: fuel, diluent, oxygen, pressure and droplet size controls beside the predicted burn rate chart" style="width:804px; height:360px;">
+<p class="body"><b>Burn-rate what-if.</b> Set fuel, diluent, O₂, pressure and droplet size; a Ridge model trained on FLEX data predicts burn rate K at once. Tested across fuel × diluent groups: R² 0.37, n = 258.</p>
+</div>
+<div class="col in" style="--i:3; width:804px;">
+<img class="shot" src="assets/scenario-risk-index.png" alt="Material risk index panel: material and preset choices, a risk index of 0 for PMMA at ISS cabin air, and the index curve against oxygen" style="width:804px; height:360px;">
+<p class="body"><b>Material risk index.</b> 11 materials on a relative 0–100 scale, six parts each tagged data, literature or assumption with its DOI, plus a separate “Flammable here?” check.</p>
+</div>
+</div>
+<div class="footer"><p>Flame in Freefall · Prometheus 6</p><p>4 / 7</p></div>
+<aside>Scenario answers the second goal. On the left, a burn-rate model for FLEX droplets updates instantly as you move the sliders. We validate with GroupKFold, so the score shows how well it does on a fuel and diluent pair it has not seen: R squared 0.37. The model only claims known pairs. On the right, the material risk index compares 11 cabin materials at presets such as ISS air or an exploration atmosphere of 34 % oxygen at 56.5 kPa. Every part of the index says where it comes from: data, literature or an assumption.</aside>
+</section>
