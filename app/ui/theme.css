@@ -123,6 +123,10 @@ button:focus-visible, a:focus-visible { outline: 1px solid var(--ink-soft); outl
   border-left: 1px solid var(--hairline); font-size: 15px; line-height: 19px;
 }
 .brand .name { font-weight: 600; letter-spacing: -0.005em; }
+.brand .team {
+  display: flex; align-items: center; min-height: 35px; padding-left: clamp(14px, 1.6vw, 22px);
+  border-left: 1px solid var(--hairline); font-size: 15px; line-height: 19px; font-weight: 600; letter-spacing: -0.005em;
+}
 .brand .sub { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
 
 /* Bölümler: sekme çubuğu yok. Seçili olan ink ve altında ışıklı nokta; diğerleri ink-faint. */
@@ -485,6 +489,7 @@ body.chat-open .chat { opacity: 1; visibility: visible; transform: translate(-50
 }
 @media (max-width: 640px) {
   .brand .sub { display: none; }
+  .brand .team { display: none; }
   .nav { gap: 0 22px; }
   .nav a .n { display: none; }
   .chat { right: 8px; left: 8px; bottom: 8px; width: auto; max-height: 72vh; transform: translateY(16px) scale(0.96); }
