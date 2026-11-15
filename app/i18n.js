@@ -7,6 +7,7 @@
     en: {
       'app.title': 'Flame in Freefall',
       'app.event': 'Challenge 2026',
+      'app.team': 'Prometheus 6',
       'note.label': 'Honesty and limits',
       'nav.label': 'Sections',
       'nav.kesif': 'Explore',
