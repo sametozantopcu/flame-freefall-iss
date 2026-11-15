@@ -39,7 +39,6 @@
   document.getElementById('nav').setAttribute('aria-label', FF.t('nav.label'));
   document.getElementById('brand-name').textContent = FF.t('app.title');
   document.getElementById('brand-sub').textContent = FF.t('app.event');
-  document.getElementById('brand-team').textContent = FF.t('app.team');
   render();
   // Connection point for the assistant panel (S8): ui/ask.js sets FF.mountAsk; absent file is harmless.
   if (typeof FF.mountAsk === 'function') FF.mountAsk(document.getElementById('ask') || document.body);
