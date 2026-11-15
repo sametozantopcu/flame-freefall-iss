@@ -314,7 +314,7 @@
 
   /** Scoped styles for the risk panel and the scrolling page wrapper (Halo tokens; no colour, meaning by shape). */
   var RISK_CSS = '.sc-page{display:flex;flex-direction:column;gap:clamp(28px,5vh,56px);outline:none}'
-    + '@media(min-width:900px){.sc-page>.cols{flex:none;height:clamp(460px,64vh,720px)}}'
+    + '.scroll.sc-page{flex:none;overflow:visible;padding-right:0}@media(min-width:900px){.sc-page>.cols{flex:none;height:max(520px,calc(100vh - var(--top-h) - 150px))}}'
     + '.sc-risk{flex:none;position:relative;padding-top:clamp(16px,2.6vh,28px)}'
     + '.sc-risk::before{content:"";position:absolute;left:0;top:0;width:min(100%,1100px);height:1px;background:linear-gradient(90deg,rgba(255,255,255,.2),transparent)}'
     + '.sc-risk>.eyebrow{margin-bottom:6px}.sc-sub{font-size:clamp(13px,1.55vh,16px);color:var(--ink-faint);letter-spacing:.02em}'

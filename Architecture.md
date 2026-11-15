@@ -37,12 +37,14 @@ Modüller veriyi yalnızca Feature Store veya Metadata katmanından okur; veri o
 | `src/insight/` | ekipman bulgu kartları |
 | `src/risk/` | malzeme risk motoru (PR #7'den taşındı) ve dayanak (provenance) tablosu |
 | `scripts/` | `build_site_data.py`, JS smoke testleri (`smoke_*.mjs`) |
-| `app/` | `index.html`, `app.js`, `i18n.js`, `core/`, `views/`, `ui/`, `data/`, `assets/`, `server.py` |
+| `app/` | `index.html` (tek sayfa: hero + dört bölüm), `app.js`, `i18n.js`, `core/`, `views/`, `ui/` (`motion.js` dahil), `data/`, `assets/`, `server.py` |
 | `tests/` | pytest (data_layer, discovery, prediction, insight, delivery) |
 | `docs/` | veri seti kartları, kanıt dosyaları |
 | `data_analysis/Nasa_data/` | ham veri (git dışı), indirme betikleri, EDA |
 
 ## Modül – ekran eşlemesi
+
+Arayüz tek sayfadır: hero ve dört bölüm (`#explore`, `#scenario`, `#equipment`, `#live`) yukarıdan aşağıya akar; üst bar çapa gezinmesi yapar (eski `#kesif` gibi adresler de çalışır). Aşağıdaki "ekran" bir bölümdür.
 
 | Modül | Ekran | Kaynak |
 |---|---|---|

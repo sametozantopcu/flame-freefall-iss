@@ -1,12 +1,14 @@
 # Dashboard (Halo)
 
-Flame in Freefall dashboard'unun Halo tasarım diliyle yapılmış statik web sürümü. Dört ekran var:
-Explore (Keşif), Scenario (Senaryo), Equipment (Ekipman), Live (Canlı). Kurulum ya da sunucu gerektirmez.
+Flame in Freefall dashboard'unun Halo tasarım diliyle yapılmış statik web sürümü. Sayfa tektir: bir karşılama (hero) ve
+yukarıdan aşağıya akan dört bölüm var: Explore (Keşif), Scenario (Senaryo), Equipment (Ekipman), Live (Canlı).
+Kurulum ya da sunucu gerektirmez.
 
 ## Çalıştırma
 
-`index.html` dosyasını tarayıcıda aç. Belirli bir ekran için adresin sonuna `#explore`, `#scenario`,
-`#equipment` ya da `#live` ekle. Eski Türkçe adresler (`#kesif` gibi) de çalışır.
+`index.html` dosyasını tarayıcıda aç. Sayfa tek sayfadır; belirli bir bölüme inmek için adresin sonuna
+`#explore`, `#scenario`, `#equipment` ya da `#live` ekle (`#top` hero'ya döner). Üst bardaki bağlantılar aynı
+çapalardır. Eski Türkçe adresler (`#kesif` gibi) de çalışır.
 
 ## Dil
 
@@ -20,12 +22,13 @@ sabitler tek dosyadadır, metinler ayrı tutulur.
 
 | Dosya | Repodaki karşılığı | İçerik |
 |---|---|---|
-| `index.html`, `app.js` | (eski giriş dosyası) | Giriş noktası; bölümleri çizer, `#bölüm` değerine göre görünümü çalıştırır |
+| `index.html`, `app.js` | (eski giriş dosyası) | Tek sayfa: hero ve dört bölüm iskeleti (`index.html`); `app.js` görünümleri kendi bölümüne çizer, üst bar çapalarını ve etkin bölümü yönetir, hero sayılarını veriden okur |
 | `config.js` | `app/config.py` | Tüm sabitler: Olson katsayıları, bulgu değerleri, seçenekler, örnek sensör değerleri |
 | `i18n.js` | `app/i18n.py` | Arayüz metinleri (`FF.t`) ve sayı biçimi (`FF.num`); yalnız İngilizce |
 | `core/physics.js` | `app/core/physics.py` | Olson U-eğrisi. Metin üretmez; `regime()` kod döndürür |
 | `core/data.js` | `app/core/data.py` | 24 deneyin listesi ve BASS-II'nin 129 testi. `veriseti/` klasöründen üretildi |
 | `ui/theme.css` | `app/ui/theme.py` | Halo tokenları ve temel sınıflar |
+| `ui/motion.js` | (yeni) | Kaydırınca belirme (`[data-reveal]`), sayarak gelen sayılar; `app.js`'ten önce yüklenir |
 | `ui/components.js` | `app/ui/components.py` | Satır, çizgi, seçenek, dürüstlük bandı |
 | `ui/charts.js` | `app/ui/charts.py` | SVG grafikler: sınır eğrisi, senaryo noktası, sınır çizgileri, halka |
 | `views/*.js` | `app/views/*.py` | Her ekran için bir dosya |
@@ -38,7 +41,7 @@ sunucu olmadan açılıyor. Yükleme sırası `index.html` içinde.
 Tasarım dili Claude hesabındaki "Halo" design system artifact'ında tanımlı. Bu klasörde uyulan kurallar:
 
 - Zemin siyah, marka rengi yok. Vurgu parlaklıkla, durumlar opaklıkla verilir.
-- Her ekranda tek ışıklı öğe var: Keşif'te eğri, Senaryo'da nokta, Ekipman'da alt çizgi, Canlı'da halka.
+- Her bölümde tek ışıklı öğe var: Keşif'te eğri, Senaryo'da nokta, Ekipman'da alt çizgi, Canlı'da halka.
 - Veri düz satırdır: başlık solda, değer sağda, gruplar arasında ince çizgi. Kart, rozet, ikon yok.
 - Sekme çubuğu yok. Bölümler düz metin: seçili olan parlak, diğerleri soluk.
 - "Dürüstlük ve Sınırlar" bandı her ekranın altında soluk bir paragraftır.
@@ -66,8 +69,11 @@ ana öğeden daha soluk:
 - **Canlı:** Halkadaki ışık kuyruklu (conic-gradient) ve ucunda ışıklı bir nokta var. Kadranda işaretler var,
   "Sakin" durumu nabız atan bir noktayla gösteriliyor.
 - **Grafik plakası:** Grafiklerin çevresinde dört köşe işareti var; kenar çizgisi yok.
-- **Hareket:** Giriş animasyonu yalnızca bölüm değişince oynar (`app.js` içinde `.enter`). `prefers-reduced-motion`
-  açıksa tüm hareketler kapanır.
+- **Hareket:** Bölümler ve kartlar görünür alana girince bir kez belirir (`ui/motion.js`, `[data-reveal]`; fade ve
+  hafif yukarı kayma, kademeli); sayılar sayarak gelir. Explore ve Scenario'daki `.enter` animasyonu bölüm ilk
+  görününce oynar. `prefers-reduced-motion` açıksa ya da JS yoksa içerik anında görünür (gizli başlangıç durumu
+  yalnız `.js` ve `no-preference` altında). Üst bardaki ilerleme çizgisi ve hero halkasının parallax'ı yalnız
+  `animation-timeline` destekleyen tarayıcıda görünür (`@supports`).
 
 ### Logo (2026-11-14)
 
@@ -84,23 +90,21 @@ olmadığı için logonun siyah ve kırmızı kısımları açık ışık rengin
 Logo değişirse bu klasörden, Pillow kurulu bir Python ile:
 `python assets/logo_uyarla.py assets/logo_orijinal.png assets`
 
-### Kaydırmasız düzen (2026-11-14)
+### Tek sayfa düzeni (2026-11-15)
 
-Genişliği 900 px ve üstü olan ekranlarda sayfa tam ekran yüksekliğindedir; kaydırma gerekmez.
+Sayfa bir hero ve dört bölümden oluşur; üst bar yapışkandır ve çapa bağlantılarıyla bölümlere götürür.
 
 - **Ölçüler ekran yüksekliğine bağlı:** Yazı ve boşluklar `vh` ile ölçeklenir (`theme.css` içindeki `--fs`,
-  `--space-rule` gibi tokenlar). 1000 px yükseklikte Halo'nun özgün ölçüleri (20/26, 17/22) kullanılır;
-  daha alçak ekranlarda en fazla 14 px'e kadar küçülür.
-- **Grafikler kalan alanı doldurur:** `plate(svg, en/boy)` grafiği `.plate-fit` içine koyar. Bu kutu container
-  query ile ölçülür ve grafik en-boy oranını koruyarak sığabildiği en büyük boyuta gelir. Canlı'daki halka
-  ekran yüksekliğinin %44'ü kadardır (en fazla 320 px).
-- **Keşif:** 24 deney iki sütuna akar (önce sol sütun dolar). Deney ayrıntıları grafiğin altında iki sütunlu bir
-  ızgaradadır.
-- **Ekipman:** FlameSense satırları sol sütundan sahneye, ana çıkarımın altına taşındı.
-- **Dürüstlük bandı:** Etiket solda, metin sağda, tek blok halinde.
-- **Denetim:** 1920×1080, 1680×1050, 1440×900, 1366×768, 1280×720 ve 1024×700 boyutlarında dört ekranın da
-  taşmadığı ölçüldü.
-- 900 px'ten dar ekranlarda (dikey tablet, telefon) düzen tek sütuna döner ve sayfa normal şekilde kayar.
+  `--space-rule` gibi tokenlar). 1000 px yükseklikte Halo'nun özgün ölçüleri (20/26, 17/22) kullanılır.
+- **Masaüstü (genişlik >= 900 px):** Explore ve FLEX (Scenario'nun ilk kısmı) birer ekran yüksekliğinde paneldir.
+  Grafikler kalan alanı doldurur (`plate(svg, en/boy)`, container query); Explore deney listesi ve FLEX katsayı
+  listesi kendi içinde kayar (FLEX listesi bilinçli bir istisna). Risk paneli, Equipment ve FlameSense doğal
+  yükseklikte, sayfa akışında durur.
+- **Dar ekran (< 900 px):** Tek sütun; hero halkası gizlenir; sayfa normal şekilde kayar.
+- **Denetim:** `python scripts/check_landing_layout.py` (yerel headless tarayıcı denetimi; CI'da çalışmaz)
+  1920×1080, 1440×900, 1366×768, 1280×720, 1024×700 ve 390×844 boyutlarında yatay taşma olmadığını, panellerin
+  ekran yüksekliğini aşmadığını ve bölümlerin dolu olduğunu ölçer; `--motion` ile hareket azaltma ve JS kapalı
+  durumda gizli öğe kalmadığını da ölçer. Duman testleri (`node scripts/smoke_landing.mjs` dahil) CI'da çalışır.
 
 ## Veri ve sınırlar
 

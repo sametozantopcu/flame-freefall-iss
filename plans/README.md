@@ -1,12 +1,13 @@
 # Planlar
 
-Tek aktif plan: [mvp/PLAN.md](mvp/PLAN.md). Kapsam ve kabul ölçütleri: [../MVP_SPEC.md](../MVP_SPEC.md). Kısa mimari: [../Architecture.md](../Architecture.md). Eski derin planlar (00–06) kaldırıldı; git geçmişinde durur.
+Planlar: [mvp/PLAN.md](mvp/PLAN.md) (tamamlandı) ve [landing/PLAN.md](landing/PLAN.md) (aktif). Kapsam ve kabul ölçütleri: [../MVP_SPEC.md](../MVP_SPEC.md). Kısa mimari: [../Architecture.md](../Architecture.md). Eski derin planlar (00–06) kaldırıldı; git geçmişinde durur.
 
 ## Genel durum
 
 | Plan | Dosya | İlerleme |
 |---|---|---|
 | MVP | [mvp](mvp/PLAN.md) | PLAN.md **Durum** bölümüne bakın (17/17 tamam; Faz 2: L1, L2, R1–R6 tamam, PR hazır) |
+| Landing (tek sayfa arayüz) | [landing](landing/PLAN.md) | 6/7 (LP0–LP6) |
 
 ## Kurallar
 
