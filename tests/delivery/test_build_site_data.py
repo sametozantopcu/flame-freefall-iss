@@ -142,15 +142,41 @@ def test_risk_numbers_finite_and_unfilled(built):
     assert prov["spread"]["embedded"]["n"] == 74 and prov["spread"]["refit_differs"] is True
 
 
+def _same(a, b, path=""):
+    """Recursive equality; floats may differ in the last bits (BLAS/CPU differ between machines)."""
+    if isinstance(a, float) or isinstance(b, float):
+        ok = isinstance(a, (int, float)) and isinstance(b, (int, float)) and not isinstance(a, bool) \
+            and not isinstance(b, bool) and a == pytest.approx(b, rel=1e-9, abs=1e-12)
+        assert ok, f"{path}: {a!r} != {b!r}"
+    elif isinstance(a, dict) and isinstance(b, dict):
+        assert set(a) == set(b), f"{path}: keys {sorted(set(a) ^ set(b))}"
+        for k in a:
+            _same(a[k], b[k], f"{path}.{k}")
+    elif isinstance(a, list) and isinstance(b, list):
+        assert len(a) == len(b), f"{path}: length {len(a)} != {len(b)}"
+        for i, (x, y) in enumerate(zip(a, b)):
+            _same(x, y, f"{path}[{i}]")
+    else:
+        assert type(a) is type(b) and a == b, f"{path}: {a!r} != {b!r}"
+
+
+def test_same_helper_is_strict_beyond_float_noise():
+    _same({"r2": 0.3728400677249778, "g": ["a"]}, {"r2": 0.3728400677249779, "g": ["a"]})
+    for a, b in (({"r2": 0.3728}, {"r2": 0.3729}), ({"n": 1}, {"n": 2}), ({"g": ["a"]}, {"g": ["a", "b"]}),
+                 ({"a": 1}, {"b": 1}), ({"v": None}, {"v": 0.0}), ({"v": "1"}, {"v": 1})):
+        with pytest.raises(AssertionError):
+            _same(a, b)
+
+
 def test_existing_site_keys_unchanged(built):
     import subprocess as sp
     old = json.loads(sp.check_output(["git", "show", "HEAD:app/data/site_data.json"], cwd=REPO))
-    old.pop("risk", None)  # present once R3 is committed; every other key must stay byte-for-value identical
+    old.pop("risk", None)  # present once R3 is committed; every other key must keep its value
     for k in ("generated", "meta", "model", "cards", "flamesense", "series"):
-        assert built[k] == old[k], k
+        _same(built[k], old[k], k)
     # L2 adds only the Q&A-only `qa_text` field to investigations; every pre-existing field stays identical
     strip = lambda rows: [{k: v for k, v in r.items() if k != "qa_text"} for r in rows]  # noqa: E731
-    assert strip(built["investigations"]) == strip(old["investigations"])
+    _same(strip(built["investigations"]), strip(old["investigations"]), "investigations")
     assert set(old) <= set(built)
 
 
